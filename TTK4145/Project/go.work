@@ -1,0 +1,11 @@
+go 1.21.7
+
+use (
+	./init
+	./messagehandler
+	./network
+	./elevator
+	./logger
+	./processpair
+	./filehandler
+)
