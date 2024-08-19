@@ -16,3 +16,13 @@ func initelevator() Elevator {
 		},
 	}
 }
+
+/*
+func init() {
+	elevator = elev.ElevatorInit()
+	nodeIP, _ = local.GetIP()
+	SetAllLights()
+	elevio.OutputDevice.DoorLight(false)
+	elevio.OutputDevice.StopButtonLight(false)
+}
+*/

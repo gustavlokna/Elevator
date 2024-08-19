@@ -26,6 +26,14 @@ const (
 	BCab
 )
 
+type HWMotorDirection int
+
+const (
+	MDDown HWMotorDirection = iota - 1
+	MDStop
+	MDUp
+)
+
 type ButtonEvent struct {
 	Floor  int
 	Button Button
