@@ -7,7 +7,10 @@ import (
 
 	"github.com/sirupsen/logrus"
 )
+
+/*
 "hei"
+*/
 func WriteToFile(data []byte, filename string) error {
 	osFile, err := lockFile(filename)
 	if err != nil {

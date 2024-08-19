@@ -1,4 +1,4 @@
-package elevio
+package dataenums
 
 const (
 	NFloors    int = 4
@@ -45,4 +45,40 @@ type outputDevice struct {
 	DoorLight          func(v bool)
 	StopButtonLight    func(v bool)
 	MotorDirection     func(d ElevDir)
+}
+
+
+const (
+	ClearRequestVariantConfig = CRVInDirn
+	DoorOpenDurationSConfig   = 3
+	InputPollRateMsConfig     = 25
+	MotorTimeoutS             = 3
+)
+
+type ElevatorBehaviour int
+
+const (
+	EBIdle ElevatorBehaviour = iota
+	EBDoorOpen
+	EBMoving
+)
+
+type ClearRequestVarient int
+
+const (
+	CRVAll ClearRequestVarient = iota
+	CRVInDirn
+)
+
+type ElevatorConfig struct {
+	ClearRequestVariant ClearRequestVarient
+	DoorOpenDurationS   float64
+}
+
+type Elevator struct {
+	CurrentFloor     int
+	Dirn             ElevDir
+	Requests         [NFloors][NButtons]bool
+	CurrentBehaviour ElevatorBehaviour
+	Config           ElevatorConfig
 }
