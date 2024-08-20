@@ -3,7 +3,7 @@ package elevatordriver
 import (
 	. "Project/dataenums"
 	"Project/hwelevio"
-	//"time"
+	"time"
 )
 
 func ElevatorDriver(
@@ -15,9 +15,9 @@ func ElevatorDriver(
 	print("Elevator module initiated with name: ", nodeID)
 
 	var (
-		elevator = initelevator()
+		elevator     = initelevator()
 		prevelevator = elevator
-		obstruction = false
+		obstruction  = false
 	)
 
 	drv_floors := make(chan int)
@@ -29,10 +29,14 @@ func ElevatorDriver(
 	go hwelevio.PollObstructionSwitch(drv_obstr)
 	go hwelevio.PollStopButton(drv_stop)
 
- 
+	hwelevio.SetMotorDirection(elevator.Dirn)
+	elevator.CurrentFloor = <-drv_floors
+	elevator.Dirn = MDStop
+	hwelevio.SetMotorDirection(elevator.Dirn)
 
 	//go hwelevio.MontitorMotorActivity(drv_motorActivity, 3.0)
 	for {
+		print("hei")
 		prevelevator = elevator
 		select {
 		case obstruction = <-drv_obstr:
@@ -40,59 +44,65 @@ func ElevatorDriver(
 			// else set false
 			print("obst: ", obstruction)
 		case elevator.CurrentFloor = <-drv_floors:
-			print("etasje: ",  elevator.CurrentFloor)
+			print("etasje: ", elevator.CurrentFloor)
 			hwelevio.SetFloorIndicator(elevator.CurrentFloor)
 			ElevatorPrint(elevator)
 		case elevator.Requests = <-fromOrderAssignerChannel:
 			ElevatorPrint(elevator)
-		}			
-
-
+		}
+		print(elevator.CurrentBehaviour)
 		switch elevator.CurrentBehaviour {
 		case EBIdle:
 			elevator = ChooseDirection(elevator)
 			hwelevio.SetMotorDirection(elevator.Dirn)
 			ElevatorPrint(elevator)
+
+		case EBMoving:
+			//ElevatorPrint(elevator)
+			if ShouldStop(elevator) {
+				print("HALLO DU MÅ STOPPE")
+				elevator.CurrentBehaviour = EBDoorOpen
+				hwelevio.SetMotorDirection(MDStop)
+				
+				ElevatorPrint(elevator)
+
+			}
+			print("trengte ikke stoppe")
 		case EBDoorOpen:
-			outputDevice.DoorLight(true)
-			// Todo set doorlight 
+			print("døren er åpen (EBDoorOpen case)")
+			//outputDevice.DoorLight(true)
+			// Todo set doorlight
 			//startTimer(elevator.Config.DoorOpenDurationS)
 			elevator = ClearAtCurrentFloor(elevator)
 			if obstruction {
 				print("hello we have a obst")
 				//stop motor
-				//restart timer 
-			}else{
+				//restart timer
+			} else {
 				//stop motor
-				// start timer 
-				print("wihuu")
-			}
-		case EBMoving:
-			ElevatorPrint(elevator)
-			if ShouldStop(elevator){
-				print("HALLO DU MÅ STOPPE")
-				hwelevio.SetMotorDirection(MDStop)
+				// start timer
+				time.Sleep(3 * time.Second)
+				//hwelevio.SetDoorLight(false)
 				elevator.CurrentBehaviour = EBIdle
-				
+				print("wihuu")
+				print("Switching back to EBIdle from EBDoorOpen")
 			}
-			print("trengte ikke stoppe")
-		/*
 		default:
 			// Prevent busy loop
 			time.Sleep(10 * time.Millisecond)
 
-				// set elev.behavior = stop 
-		*/
+			// set elev.behavior = stop
+
 		}
-		/*
-		default:
-			if timer.TimedOut() 
-				//stop timer 
-				// set state as idle
-			time.Sleep(10 * time.Millisecond)
+		/*		/*
+				default:
+					if timer.TimedOut()
+						//stop timer
+						// set state as idle
+					time.Sleep(10 * time.Millisecond)
 		*/
 		if prevelevator != elevator {
 			toOrderAssignerChannel <- elevator
-			}
+		}
 	}
 }
