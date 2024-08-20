@@ -20,8 +20,8 @@ func main() {
     print("Initialization of hwelevio completed.")
 
 	var (
-		assignerToElevatorChannel = make(chan bool, 10)
-		elevatorToAssignerChannel = make(chan bool, 10)
+		assignerToElevatorChannel = make(chan [NFloors][NButtons]bool, 10)
+		elevatorToAssignerChannel = make(chan Elevator, 10)
 		elevatorLifelineChannel   = make(chan bool)
 	)
 	print("hei jeg starter go")

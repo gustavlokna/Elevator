@@ -50,3 +50,21 @@ func EBToString(behaviour ElevatorBehaviour) string {
 		return "Unknown"
 	}
 }
+
+func shouldClearImmediately(e Elevator, btnEvent ButtonEvent) bool {
+	btn_floor  := btnEvent.Floor
+	btn_type := btnEvent.Button
+	switch e.Config.ClearRequestVariant {
+	case CRVAll:
+		return e.CurrentFloor == btn_floor
+
+	case CRVInDirn:
+		return e.CurrentFloor == btn_floor &&
+			((e.Dirn == DirUp && btn_type == BHallUp) ||
+				(e.Dirn == DirDown && btn_type == BHallDown) ||
+				e.Dirn == DirStop ||
+				btn_type == BCab)
+	default:
+		return false
+	}
+}
