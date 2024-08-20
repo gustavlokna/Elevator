@@ -13,11 +13,11 @@ func ElevatorDriver(
 	nodeID int,
 ) {
 	print("Elevator module initiated with name: ", nodeID)
-	
+
 	var (
-		_ = initelevator()
+		elevator = initelevator()
 	)
-	
+	print("hei")
 	drv_buttons := make(chan ButtonEvent)
 	drv_floors := make(chan int)
 	drv_obstr := make(chan bool)
@@ -29,20 +29,20 @@ func ElevatorDriver(
 	go hwelevio.PollObstructionSwitch(drv_obstr)
 	go hwelevio.PollStopButton(drv_stop)
 	//go hwelevio.MontitorMotorActivity(drv_motorActivity, 3.0)
-	//go fsm.CreateCheckpoint()
-	print("jeg er inne i driver")
-
+	print("hei")
 	for {
 		select {
 		case <-drv_obstr:
 			print("obst")
-		case  <-drv_buttons:
+		case <-drv_buttons:
+			ElevatorPrint(elevator)
+			toOrderAssignerChannel <- true
 			print("buttonevent")
 		case <-drv_floors:
 			print("floor")
-		
+
 		default:
-			time.Sleep(50 * time.Millisecond)
+			time.Sleep(10 * time.Millisecond) // Prevent busy loop
 		}
 	}
 }

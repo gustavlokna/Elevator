@@ -71,6 +71,8 @@ const (
 	EBMoving
 )
 
+//TODO find out what ClearRequestVarient is!
+//this is copied code from last project 
 type ClearRequestVarient int
 
 const (

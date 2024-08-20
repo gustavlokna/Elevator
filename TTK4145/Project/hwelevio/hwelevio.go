@@ -3,18 +3,17 @@ package hwelevio
 import (
 	. "Project/dataenums"
 	"fmt"
-	"time"
 	"net"
 	"sync"
+	"time"
 )
 
 var initialised bool = false
 var mtx sync.Mutex
 var conn net.Conn
 
-
-
 func Init(addr string) {
+	print("initialised", initialised)
 	if initialised {
 		fmt.Println("Driver already initialised!")
 		return
@@ -116,7 +115,6 @@ func toBool(a byte) bool {
 	return b
 }
 
-
 func PollButtons(receiver chan<- ButtonEvent) {
 	prev := make([][3]bool, NFloors)
 	for {
@@ -125,7 +123,7 @@ func PollButtons(receiver chan<- ButtonEvent) {
 			for b := BHallUp; b <= BCab; b++ {
 				v := GetButton(b, f)
 				if v != prev[f][b] && v {
-					receiver <- ButtonEvent{f, b}
+					receiver <- ButtonEvent{f, Button(b)}
 				}
 				prev[f][b] = v
 			}
@@ -194,4 +192,3 @@ func ElevDirToString(d ElevDir) string {
 		return "DirUnknown"
 	}
 }
-

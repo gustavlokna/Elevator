@@ -1,8 +1,9 @@
 package main
 
 import (
-	"Project/elevatordriver"
 	. "Project/dataenums"
+	"Project/elevatordriver"
+	"Project/orderassigner"
 	"Project/hwelevio"
 	"flag"
 	//"time"
@@ -12,25 +13,35 @@ func main() {
 	nodeID := parseArgs()
 	print("hei: ", nodeID)
 
-	//INITILIZE DRIVER 
+	//INITILIZE DRIVER
 	hwelevio.Init(Addr)
 
+    // Ensure that hwelevio.Init() has completed successfully before continuing
+    print("Initialization of hwelevio completed.")
+
 	var (
-		assignerToElevatorChannel = make(chan bool)
-		elevatorToAssignerChannel = make(chan bool)
+		assignerToElevatorChannel = make(chan bool, 10)
+		elevatorToAssignerChannel = make(chan bool, 10)
 		elevatorLifelineChannel   = make(chan bool)
 	)
+	print("hei jeg starter go")
 	go elevatordriver.ElevatorDriver(
 		assignerToElevatorChannel,
 		elevatorToAssignerChannel,
 		elevatorLifelineChannel,
 		nodeID,
 	)
+
+	go orderassigner.OrderAssigner(
+		assignerToElevatorChannel,
+		elevatorToAssignerChannel,
+		elevatorLifelineChannel,
+		nodeID,
+	)
 	// Sleep for a while to allow the goroutine to print the message
-		// Hold main function indefinitely
+	// Hold main function indefinitely
 	select {}
 	//time.Sleep(1 * time.Second)
-
 
 }
 
