@@ -85,10 +85,31 @@ type ElevatorConfig struct {
 	DoorOpenDurationS   float64
 }
 
+type DirnBehaviourPair struct {
+	Dirn      ElevDir
+	Behaviour ElevatorBehaviour
+}
+
 type Elevator struct {
 	CurrentFloor     int
 	Dirn             ElevDir
 	Requests         [NFloors][NButtons]bool
 	CurrentBehaviour ElevatorBehaviour
 	Config           ElevatorConfig
+}
+
+type ElevInputDevice struct {
+	FloorSensor   func() int
+	RequestButton func(f int, btn Button) bool
+	StopButton    func() bool
+	Obstruction   func() bool
+}
+
+type ElevOutputDevice struct {
+	FloorIndicator     func(f int)
+	RequestButton      func(f int, btn Button) bool
+	RequestButtonLight func(f int, btn Button, v bool)
+	DoorLight          func(v bool)
+	StopButtonLight    func(v bool)
+	MotorDirection     func(d ElevDir)
 }
