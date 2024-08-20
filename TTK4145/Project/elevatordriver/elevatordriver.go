@@ -36,7 +36,6 @@ func ElevatorDriver(
 
 	//go hwelevio.MontitorMotorActivity(drv_motorActivity, 3.0)
 	for {
-		print("hei")
 		prevelevator = elevator
 		select {
 		case obstruction = <-drv_obstr:
@@ -49,25 +48,34 @@ func ElevatorDriver(
 			ElevatorPrint(elevator)
 		case elevator.Requests = <-fromOrderAssignerChannel:
 			ElevatorPrint(elevator)
+		default:
+			// Prevent busy loop
+			time.Sleep(10 * time.Millisecond)
 		}
 		print(elevator.CurrentBehaviour)
 		switch elevator.CurrentBehaviour {
 		case EBIdle:
+			print("Switching to EBIdle")
 			elevator = ChooseDirection(elevator)
 			hwelevio.SetMotorDirection(elevator.Dirn)
 			ElevatorPrint(elevator)
-
+		
 		case EBMoving:
+			print("Switching to EBMoving")
 			//ElevatorPrint(elevator)
 			if ShouldStop(elevator) {
 				print("HALLO DU MÅ STOPPE")
-				elevator.CurrentBehaviour = EBDoorOpen
 				hwelevio.SetMotorDirection(MDStop)
-				
+				elevator.CurrentBehaviour = EBDoorOpen
+				print(elevator.CurrentBehaviour)
+				//print("Set elevator.CurrentBehaviour to EBDoorOpen")
 				ElevatorPrint(elevator)
-
+				continue
 			}
+			
 			print("trengte ikke stoppe")
+			print("elevator.CurrentBehaviour", EBToString(elevator.CurrentBehaviour))
+		
 		case EBDoorOpen:
 			print("døren er åpen (EBDoorOpen case)")
 			//outputDevice.DoorLight(true)
@@ -76,24 +84,16 @@ func ElevatorDriver(
 			elevator = ClearAtCurrentFloor(elevator)
 			if obstruction {
 				print("hello we have a obst")
-				//stop motor
-				//restart timer
+				// Handle obstruction
 			} else {
-				//stop motor
-				// start timer
-				time.Sleep(3 * time.Second)
-				//hwelevio.SetDoorLight(false)
-				elevator.CurrentBehaviour = EBIdle
 				print("wihuu")
+				time.Sleep(3 * time.Second) // Simulerer dørens åpningstid
+				elevator.CurrentBehaviour = EBIdle
+				//hwelevio.SetDoorLight(false)
 				print("Switching back to EBIdle from EBDoorOpen")
 			}
-		default:
-			// Prevent busy loop
-			time.Sleep(10 * time.Millisecond)
-
-			// set elev.behavior = stop
-
 		}
+		
 		/*		/*
 				default:
 					if timer.TimedOut()
