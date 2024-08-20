@@ -3,8 +3,8 @@ package main
 import (
 	. "Project/dataenums"
 	"Project/elevatordriver"
-	"Project/orderassigner"
 	"Project/hwelevio"
+	"Project/orderassigner"
 	"flag"
 	//"time"
 )
@@ -16,8 +16,8 @@ func main() {
 	//INITILIZE DRIVER
 	hwelevio.Init(Addr)
 
-    // Ensure that hwelevio.Init() has completed successfully before continuing
-    print("Initialization of hwelevio completed.")
+	// Ensure that hwelevio.Init() has completed successfully before continuing
+	print("Initialization of hwelevio completed.")
 
 	var (
 		assignerToElevatorChannel = make(chan [NFloors][NButtons]bool, 10)

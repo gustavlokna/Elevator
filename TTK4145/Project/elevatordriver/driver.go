@@ -6,31 +6,21 @@ import (
 
 var outputDevice ElevOutputDevice
 
-func buttonPressed(elevator Elevator, btnEvent ButtonEvent) Elevator{
-	if shouldClearImmediately(elevator, btnEvent) && (elevator.CurrentBehaviour == EBDoorOpen) {
-		startTimer(elevator.Config.DoorOpenDurationS)
-	} else {
-		elevator.Requests[btnEvent.Floor][btnEvent.Button] = true
-	}
-	return elevator
-}
 
-func MoveOnActiveOrders(el Elevator) {
-	switch el.CurrentBehaviour {
-	case EBIdle:
-		pair := ChooseDirection(el)
-		el.Dirn = pair.Dirn
-		el.CurrentBehaviour = pair.Behaviour
-		switch pair.Behaviour {
-		case EBDoorOpen:
-			outputDevice.DoorLight(true)
-			startTimer(el.Config.DoorOpenDurationS)
-			el = ClearAtCurrentFloor(el)
-		case EBMoving:
-			outputDevice.MotorDirection(el.Dirn)
-		}
+func ShouldStop(e Elevator) bool {
+	print("checker")
+	switch e.Dirn {
+	case DirDown:
+		return e.Requests[e.CurrentFloor][BHallDown] ||
+			e.Requests[e.CurrentFloor][BCab] ||
+			!requestsBelow(e)
+	case DirUp:
+		return e.Requests[e.CurrentFloor][BHallUp] ||
+			e.Requests[e.CurrentFloor][BCab] ||
+			!requestsAbove(e)
+	default:
+		return true
 	}
-	//SetAllLights()
 }
 
 func ClearAtCurrentFloor(e Elevator) Elevator {
@@ -64,12 +54,6 @@ func ClearAtCurrentFloor(e Elevator) Elevator {
 			e.Requests[e.CurrentFloor][BHallUp]   = false
 			e.Requests[e.CurrentFloor][BHallDown] = false
 
-		}
-	}
-	//Todo find out what this is for 
-	for btn, wasPressed := range beforeClear {
-		if wasPressed && !e.Requests[e.CurrentFloor][btn] {
-			statehandler.UpdateStateOnCompletedHallOrder(e, elevatorName, e.CurrentFloor, btn)
 		}
 	}
 	return e
