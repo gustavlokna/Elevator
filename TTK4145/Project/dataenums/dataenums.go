@@ -10,13 +10,6 @@ const (
 */
 const Addr string = "localhost:15657"
 
-type ElevDir int
-
-const (
-	DirDown ElevDir = iota - 1
-	DirStop
-	DirUp
-)
 
 type Button int
 
@@ -26,7 +19,7 @@ const (
 	BCab
 )
 
-type HWMotorDirection int
+type HWMotorDirection int 
 
 const (
 	MDDown HWMotorDirection = iota - 1
@@ -52,7 +45,7 @@ type outputDevice struct {
 	RequestButtonLight func(f int, btn Button, v bool)
 	DoorLight          func(v bool)
 	StopButtonLight    func(v bool)
-	MotorDirection     func(d ElevDir)
+	MotorDirection     func(d HWMotorDirection)
 }
 
 
@@ -86,13 +79,13 @@ type ElevatorConfig struct {
 }
 
 type DirnBehaviourPair struct {
-	Dirn      ElevDir
+	Dirn      HWMotorDirection
 	Behaviour ElevatorBehaviour
 }
 
 type Elevator struct {
 	CurrentFloor     int
-	Dirn             ElevDir
+	Dirn             HWMotorDirection
 	Requests         [NFloors][NButtons]bool
 	CurrentBehaviour ElevatorBehaviour
 	Config           ElevatorConfig
@@ -111,5 +104,5 @@ type ElevOutputDevice struct {
 	RequestButtonLight func(f int, btn Button, v bool)
 	DoorLight          func(v bool)
 	StopButtonLight    func(v bool)
-	MotorDirection     func(d ElevDir)
+	MotorDirection     func(d HWMotorDirection)
 }

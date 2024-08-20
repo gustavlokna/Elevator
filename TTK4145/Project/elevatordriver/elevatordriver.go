@@ -3,7 +3,7 @@ package elevatordriver
 import (
 	. "Project/dataenums"
 	"Project/hwelevio"
-	"time"
+	//"time"
 )
 
 func ElevatorDriver(
@@ -28,6 +28,9 @@ func ElevatorDriver(
 	go hwelevio.PollFloorSensor(drv_floors)
 	go hwelevio.PollObstructionSwitch(drv_obstr)
 	go hwelevio.PollStopButton(drv_stop)
+
+ 
+
 	//go hwelevio.MontitorMotorActivity(drv_motorActivity, 3.0)
 	for {
 		prevelevator = elevator
@@ -37,19 +40,24 @@ func ElevatorDriver(
 			// else set false
 			print("obst: ", obstruction)
 		case elevator.CurrentFloor = <-drv_floors:
+			print("etasje: ",  elevator.CurrentFloor)
 			hwelevio.SetFloorIndicator(elevator.CurrentFloor)
+			ElevatorPrint(elevator)
 		case elevator.Requests = <-fromOrderAssignerChannel:
 			ElevatorPrint(elevator)
-			
-		default:
-			// Prevent busy loop
-			time.Sleep(10 * time.Millisecond)
-		}
+		}			
+
 
 		switch elevator.CurrentBehaviour {
 		case EBIdle:
-			//move on assigned orders
+			elevator = ChooseDirection(elevator)
+			hwelevio.SetMotorDirection(elevator.Dirn)
+			ElevatorPrint(elevator)
 		case EBDoorOpen:
+			outputDevice.DoorLight(true)
+			// Todo set doorlight 
+			//startTimer(elevator.Config.DoorOpenDurationS)
+			elevator = ClearAtCurrentFloor(elevator)
 			if obstruction {
 				print("hello we have a obst")
 				//stop motor
@@ -64,9 +72,17 @@ func ElevatorDriver(
 			if ShouldStop(elevator){
 				print("HALLO DU MÅ STOPPE")
 				hwelevio.SetMotorDirection(MDStop)
+				elevator.CurrentBehaviour = EBIdle
+				
 			}
-				// set elev.behavior = stop 
+			print("trengte ikke stoppe")
+		/*
+		default:
+			// Prevent busy loop
+			time.Sleep(10 * time.Millisecond)
 
+				// set elev.behavior = stop 
+		*/
 		}
 		/*
 		default:

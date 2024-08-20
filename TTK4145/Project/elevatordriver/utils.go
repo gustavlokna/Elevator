@@ -2,7 +2,6 @@ package elevatordriver
 
 import (
 	. "Project/dataenums"
-	"Project/hwelevio"
 	"fmt"
 )
 
@@ -14,7 +13,7 @@ func ElevatorPrint(e Elevator) {
 			"  |dirn  = %-12s|\n"+
 			"  |behav = %-12s|\n",
 		e.CurrentFloor,
-		hwelevio.ElevDirToString(e.Dirn),
+		ElevDirToString(e.Dirn),
 		EBToString(e.CurrentBehaviour),
 	)
 	fmt.Println("  +--------------------+")
@@ -50,21 +49,15 @@ func EBToString(behaviour ElevatorBehaviour) string {
 		return "Unknown"
 	}
 }
-
-func shouldClearImmediately(e Elevator, btnEvent ButtonEvent) bool {
-	btn_floor  := btnEvent.Floor
-	btn_type := btnEvent.Button
-	switch e.Config.ClearRequestVariant {
-	case CRVAll:
-		return e.CurrentFloor == btn_floor
-
-	case CRVInDirn:
-		return e.CurrentFloor == btn_floor &&
-			((e.Dirn == DirUp && btn_type == BHallUp) ||
-				(e.Dirn == DirDown && btn_type == BHallDown) ||
-				e.Dirn == DirStop ||
-				btn_type == BCab)
+func ElevDirToString(d HWMotorDirection) string {
+	switch d {
+	case MDDown:
+		return "down"
+	case MDStop:
+		return "stop"
+	case MDUp:
+		return "up"
 	default:
-		return false
+		return "DirUnknown"
 	}
 }

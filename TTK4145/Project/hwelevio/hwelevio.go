@@ -166,29 +166,3 @@ func PollObstructionSwitch(receiver chan<- bool) {
 		prev = v
 	}
 }
-
-func ButtonToString(b Button) string {
-	switch b {
-	case BHallUp:
-		return "BHallUp"
-	case BHallDown:
-		return "BHallDown"
-	case BCab:
-		return "BCab"
-	default:
-		return "Button Unknown"
-	}
-}
-
-func ElevDirToString(d ElevDir) string {
-	switch d {
-	case DirDown:
-		return "down"
-	case DirStop:
-		return "stop"
-	case DirUp:
-		return "up"
-	default:
-		return "DirUnknown"
-	}
-}

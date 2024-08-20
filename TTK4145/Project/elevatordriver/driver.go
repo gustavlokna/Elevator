@@ -10,11 +10,11 @@ var outputDevice ElevOutputDevice
 func ShouldStop(e Elevator) bool {
 	print("checker")
 	switch e.Dirn {
-	case DirDown:
+	case MDDown:
 		return e.Requests[e.CurrentFloor][BHallDown] ||
 			e.Requests[e.CurrentFloor][BCab] ||
 			!requestsBelow(e)
-	case DirUp:
+	case MDUp:
 		return e.Requests[e.CurrentFloor][BHallUp] ||
 			e.Requests[e.CurrentFloor][BCab] ||
 			!requestsAbove(e)
@@ -39,13 +39,13 @@ func ClearAtCurrentFloor(e Elevator) Elevator {
 	case CRVInDirn:
 		e.Requests[e.CurrentFloor][BCab] = false
 		switch e.Dirn {
-		case DirUp:
+		case MDUp:
 			if !requestsAbove(e) && !e.Requests[e.CurrentFloor][BHallUp] {
 				e.Requests[e.CurrentFloor][BHallDown] = false
 			}
 			e.Requests[e.CurrentFloor][BHallUp] = false
 
-		case DirDown:
+		case MDDown:
 			if !requestsBelow(e) && !e.Requests[e.CurrentFloor][BHallDown] {
 				e.Requests[e.CurrentFloor][BHallUp] = false
 			}
@@ -60,17 +60,26 @@ func ClearAtCurrentFloor(e Elevator) Elevator {
 }
 
 
-func ChooseDirection(el Elevator) DirnBehaviourPair {
+func ChooseDirection(el Elevator) Elevator {
+	dirnBehaviour := decideDirection(el)
+
+	el.Dirn = dirnBehaviour.Dirn
+	el.CurrentBehaviour = dirnBehaviour.Behaviour
+
+	return el
+}
+
+func decideDirection(el Elevator) DirnBehaviourPair {
 	switch el.Dirn {
-	case DirUp:
+	case MDUp:
 		return decideDirectionUp(el)
-	case DirDown:
+	case MDDown:
 		return decideDirectionDown(el)
-	case DirStop:
+	case MDStop:
 		return decideDirectionStop(el)
 	default:
 		return DirnBehaviourPair{
-			DirStop,
+			MDStop,
 			EBIdle,
 		}
 	}
@@ -79,35 +88,35 @@ func ChooseDirection(el Elevator) DirnBehaviourPair {
 
 func decideDirectionUp(el Elevator) DirnBehaviourPair {
 	if requestsAbove(el) {
-		return DirnBehaviourPair{DirUp, EBMoving}
+		return DirnBehaviourPair{MDUp, EBMoving}
 	} else if requestsHere(el) {
-		return DirnBehaviourPair{DirDown, EBDoorOpen}
+		return DirnBehaviourPair{MDDown, EBDoorOpen}
 	} else if requestsBelow(el) {
-		return DirnBehaviourPair{DirDown, EBMoving}
+		return DirnBehaviourPair{MDDown, EBMoving}
 	}
-	return DirnBehaviourPair{DirStop, EBIdle}
+	return DirnBehaviourPair{MDStop, EBIdle}
 }
 
 func decideDirectionDown(e Elevator) DirnBehaviourPair {
 	if requestsBelow(e) {
-		return DirnBehaviourPair{DirDown, EBMoving}
+		return DirnBehaviourPair{MDDown, EBMoving}
 	} else if requestsHere(e) {
-		return DirnBehaviourPair{DirUp, EBDoorOpen}
+		return DirnBehaviourPair{MDUp, EBDoorOpen}
 	} else if requestsAbove(e) {
-		return DirnBehaviourPair{DirUp, EBMoving}
+		return DirnBehaviourPair{MDUp, EBMoving}
 	}
-	return DirnBehaviourPair{DirStop, EBIdle}
+	return DirnBehaviourPair{MDStop, EBIdle}
 }
 
 func decideDirectionStop(e Elevator) DirnBehaviourPair {
 	if requestsHere(e) {
-		return DirnBehaviourPair{DirStop, EBDoorOpen}
+		return DirnBehaviourPair{MDStop, EBDoorOpen}
 	} else if requestsAbove(e) {
-		return DirnBehaviourPair{DirUp, EBMoving}
+		return DirnBehaviourPair{MDUp, EBMoving}
 	} else if requestsBelow(e) {
-		return DirnBehaviourPair{DirDown, EBMoving}
+		return DirnBehaviourPair{MDDown, EBMoving}
 	}
-	return DirnBehaviourPair{DirStop, EBIdle}
+	return DirnBehaviourPair{MDStop, EBIdle}
 }
 
 
