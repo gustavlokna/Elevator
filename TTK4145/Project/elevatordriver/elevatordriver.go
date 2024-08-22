@@ -49,7 +49,7 @@ func ElevatorDriver(
 			hwelevio.SetFloorIndicator(elevator.CurrentFloor)
 			//ElevatorPrint(elevator)
 		case elevator.Requests = <-newOrderChannel:
-			print("new order")
+			//print("new order")
 			//ElevatorPrint(elevator)
 		default:
 			// Prevent busy loop
@@ -59,7 +59,7 @@ func ElevatorDriver(
 		switch elevator.CurrentBehaviour {
 		case EBIdle:
 			elevator = ChooseDirection(elevator)
-			print("elevator.Dirn: ", elevator.Dirn)
+			//print("elevator.Dirn: ", elevator.Dirn)
 			hwelevio.SetMotorDirection(elevator.Dirn)
 			//ElevatorPrint(elevator)
 
@@ -77,18 +77,18 @@ func ElevatorDriver(
 			//outputDevice.DoorLight(true)
 			// Todo set doorlight
 			//startTimer(elevator.Config.DoorOpenDurationS)
-			_, clearedRequests := ClearAtCurrentFloor(elevator)
+			clearedRequests := ClearAtCurrentFloor(elevator)
 			ElevatorPrint(elevator)
 			if obstruction {
 				print("hello we have a obst")
 				// Handle obstruction
 			} else {
-				print("hei")
 				elevator.CurrentBehaviour = EBIdle
-				time.Sleep(3 * time.Second) // Simulate door open time
-				//time.Sleep(3 * time.Second) // Simulerer dørens åpningstid
+				//WE SHOUL START TIMER 
+				//time.Sleep(3 * time.Second) // Simulate door open time
+				time.Sleep(3 * time.Second) // Simulerer dørens åpningstid
 				orderDoneChannel <- clearedRequests
-				ElevatorPrint(elevator)
+				//ElevatorPrint(elevator)
 				//hwelevio.SetDoorLight(false)
 			}
 		}
@@ -100,6 +100,8 @@ func ElevatorDriver(
 						// set state as idle
 					time.Sleep(10 * time.Millisecond)
 		*/
+
+		//TODO we dont handle cab requests
 		if prevelevator != elevator {
 			newStateChanel <- elevator
 		}

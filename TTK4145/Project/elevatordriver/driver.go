@@ -21,7 +21,7 @@ func ShouldStop(e Elevator) bool {
 	}
 }
 
-func ClearAtCurrentFloor(e Elevator) (Elevator, [NFloors][NButtons]bool) {
+func ClearAtCurrentFloor(e Elevator) [NFloors][NButtons]bool{
 	clearedRequests := [NFloors][NButtons]bool{}
 
 	switch e.Config.ClearRequestVariant {
@@ -29,51 +29,43 @@ func ClearAtCurrentFloor(e Elevator) (Elevator, [NFloors][NButtons]bool) {
 		for btn := BHallUp; btn <= BCab; btn++ {
 			if e.Requests[e.CurrentFloor][btn] {
 				clearedRequests[e.CurrentFloor][btn] = true
-				e.Requests[e.CurrentFloor][btn] = false
 			}
 		}
 
 	case CRVInDirn:
 		if e.Requests[e.CurrentFloor][BCab] {
 			clearedRequests[e.CurrentFloor][BCab] = true
-			e.Requests[e.CurrentFloor][BCab] = false
 		}
 		switch e.Dirn {
 		case MDUp:
 			if !requestsAbove(e) && !e.Requests[e.CurrentFloor][BHallUp] {
 				if e.Requests[e.CurrentFloor][BHallDown] {
 					clearedRequests[e.CurrentFloor][BHallDown] = true
-					e.Requests[e.CurrentFloor][BHallDown] = false
 				}
 			}
 			if e.Requests[e.CurrentFloor][BHallUp] {
 				clearedRequests[e.CurrentFloor][BHallUp] = true
-				e.Requests[e.CurrentFloor][BHallUp] = false
 			}
 
 		case MDDown:
 			if !requestsBelow(e) && !e.Requests[e.CurrentFloor][BHallDown] {
 				if e.Requests[e.CurrentFloor][BHallUp] {
 					clearedRequests[e.CurrentFloor][BHallUp] = true
-					e.Requests[e.CurrentFloor][BHallUp] = false
 				}
 			}
 			if e.Requests[e.CurrentFloor][BHallDown] {
 				clearedRequests[e.CurrentFloor][BHallDown] = true
-				e.Requests[e.CurrentFloor][BHallDown] = false
 			}
 
 		default:
 			for btn := BHallUp; btn <= BCab; btn++ {
 				if e.Requests[e.CurrentFloor][btn] {
 					clearedRequests[e.CurrentFloor][btn] = true
-					e.Requests[e.CurrentFloor][btn] = false
 				}
 			}
 		}
 	}
-
-	return e, clearedRequests
+	return clearedRequests
 }
 
 

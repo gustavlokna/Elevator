@@ -4,6 +4,7 @@ import (
 	. "Project/dataenums"
 	"Project/elevatordriver"
 	"Project/hwelevio"
+	"Project/network"
 	"Project/orderassigner"
 	"flag"
 	"strconv"
@@ -19,12 +20,13 @@ func main() {
 
 	// Ensure that hwelevio.Init() has completed successfully before continuing
 	print("Initialization of hwelevio completed.")
-
 	var (
-		newOrderChannel = make(chan [NFloors][NButtons]bool, 10)
-		newStateChanel = make(chan Elevator, 10)
-		orderDoneChannel   = make(chan [NFloors][NButtons]bool,10)
-		toNetworkChannel = make(chan HRAInput, 10)
+		newOrderChannel    = make(chan [NFloors][NButtons]bool, 100)
+		newStateChanel     = make(chan Elevator, 100)
+		orderDoneChannel   = make(chan [NFloors][NButtons]bool, 100)
+		toNetworkChannel   = make(chan HRAInput, 100)
+		fromNetworkChannel = make(chan HRAInput, 100)
+		ipChannel          = make(chan string, 100)
 	)
 	go elevatordriver.ElevatorDriver(
 		newOrderChannel,
@@ -38,7 +40,14 @@ func main() {
 		newStateChanel,
 		orderDoneChannel,
 		toNetworkChannel,
+		fromNetworkChannel,
 		nodeID,
+	)
+	
+	go network.Network(
+		toNetworkChannel,
+		fromNetworkChannel,
+		ipChannel,
 	)
 	// Sleep for a while to allow the goroutine to print the message
 	// Hold main function indefinitely

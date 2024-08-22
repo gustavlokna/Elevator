@@ -32,23 +32,6 @@ type ButtonEvent struct {
 	Button Button
 }
 
-type inputDevice struct {
-	FloorSensor   func() int
-	RequestButton func(f int, btn Button) bool
-	StopButton    func() bool
-	Obstruction   func() bool
-}
-
-type outputDevice struct {
-	FloorIndicator     func(f int)
-	RequestButton      func(f int, btn Button) bool
-	RequestButtonLight func(f int, btn Button, v bool)
-	DoorLight          func(v bool)
-	StopButtonLight    func(v bool)
-	MotorDirection     func(d HWMotorDirection)
-}
-
-
 const (
 	ClearRequestVariantConfig = CRVInDirn
 	DoorOpenDurationSConfig   = 3
@@ -91,21 +74,6 @@ type Elevator struct {
 	Config           ElevatorConfig
 }
 
-type ElevInputDevice struct {
-	FloorSensor   func() int
-	RequestButton func(f int, btn Button) bool
-	StopButton    func() bool
-	Obstruction   func() bool
-}
-
-type ElevOutputDevice struct {
-	FloorIndicator     func(f int)
-	RequestButton      func(f int, btn Button) bool
-	RequestButtonLight func(f int, btn Button, v bool)
-	DoorLight          func(v bool)
-	StopButtonLight    func(v bool)
-	MotorDirection     func(d HWMotorDirection)
-}
 
 type HRAElevState struct {
 	Behavior    string `json:"behaviour"`
@@ -119,4 +87,10 @@ type HRAInput struct {
 	CounterHallRequests [][2]int 
 	States       map[string]HRAElevState `json:"states"`
 
+}
+
+type Message struct {
+	SenderId string // IPv4
+	Payload  HRAInput
+	OnlineStatus bool
 }

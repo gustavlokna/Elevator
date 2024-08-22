@@ -4,7 +4,6 @@ import (
 	. "Project/dataenums"
 	//"Project/elevatordriver"
 	"Project/hwelevio"
-	"reflect"
 	//"time"
 )
 
@@ -13,11 +12,11 @@ func OrderAssigner(
 	newStateChanel <-chan Elevator,
 	orderDoneChannel <-chan [NFloors][NButtons]bool,
 	toNetworkChannel chan<- HRAInput,
+	fromNetworkChannel <-chan HRAInput,
 	nodeID string,
 ) {
 	var (
 		hraInput       = InitialiseHRAInput()
-		prevHRA        = hraInput
 		onlyNodeOnline = true
 	)
 
@@ -28,7 +27,6 @@ func OrderAssigner(
 	go hwelevio.PollButtons(drv_buttons)
 
 	for {
-		prevHRA = hraInput
 		select {
 
 		case btnEvent := <-drv_buttons:
@@ -49,14 +47,15 @@ func OrderAssigner(
 			hraInput = addElevatorToHRA(hraInput, elev, nodeID)
 			//newOrderChannel <- AssignOrders(hraInput)
 			print("elevator was changed")
+			//toNetworkChannel <- hraInput
+		case hraInput = <-fromNetworkChannel:
+			print("nye meldinger incomming")
 
-			if !reflect.DeepEqual(prevHRA, hraInput) {
-				//toNetworkChannel <- hraInput
-				print("should send to network")
-			}
 		}
+		
+
 		if onlyNodeOnline {
-			print("assigns")
+			//print("assigns")
 			newOrderChannel <- assignOrders(hraInput, nodeID)
 		}
 	}

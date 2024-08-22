@@ -47,6 +47,7 @@ func ButtonPressed(hraInput HRAInput, ElevatorName string,
 		hraInput.HallRequests[btnEvent.Floor][BHallDown] = true
 		hraInput.CounterHallRequests[btnEvent.Floor][BHallDown]++
 	case BCab:
+		print("CAB BUTTON PRESSED")
 		hraInput.States[ElevatorName].CabRequests[btnEvent.Floor] = true
 	}
 	return hraInput
@@ -67,7 +68,11 @@ func OrderComplete(hraInput HRAInput, elevatorName string,
 					hraInput.HallRequests[floor][BHallDown] = false
 					hraInput.CounterHallRequests[floor][BHallDown]++
 				case BCab:
+					print("hallo du må fjerne cab")
+					print("hraInput.States[elevatorName].CabRequests[floor]: ", hraInput.States[elevatorName].CabRequests[floor])
 					hraInput.States[elevatorName].CabRequests[floor] = false
+					print("hraInput.States[elevatorName].CabRequests[floor]: ", hraInput.States[elevatorName].CabRequests[floor])
+
 				}
 			}
 		}

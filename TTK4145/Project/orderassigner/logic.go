@@ -43,8 +43,9 @@ func assignOrders(hraInput HRAInput, elevatorName string) [NFloors][NButtons]boo
 			for btn := BHallUp; btn < BCab; btn++ {
 				orderList[floor][btn] = orders[floor][btn]
 			}
+			orderList[floor][BCab] = hraInput.States[elevatorName].CabRequests[floor]
 		}
 	}
-
+	
 	return orderList
 }
