@@ -15,12 +15,12 @@ func OrderAssigner(
 	toNetworkChannel chan<- HRAInput,
 	nodeID string,
 ) {
-	var(
-		hraInput = InitialiseHRAInput()
-		prevHRA = hraInput 
+	var (
+		hraInput       = InitialiseHRAInput()
+		prevHRA        = hraInput
 		onlyNodeOnline = true
 	)
-	
+
 	elevator := <-newStateChanel
 	hraInput = addElevatorToHRA(hraInput, elevator, nodeID)
 
@@ -28,11 +28,13 @@ func OrderAssigner(
 	go hwelevio.PollButtons(drv_buttons)
 
 	for {
-		prevHRA = hraInput 
+		prevHRA = hraInput
 		select {
-			
+
 		case btnEvent := <-drv_buttons:
+			print("button pressed")
 			if !buttonAlreadyActive(hraInput, nodeID, btnEvent) {
+				print("new order")
 				hraInput = ButtonPressed(hraInput, nodeID, btnEvent)
 				//newOrderChannel <- AssignOrders(hraInput)
 				// newOrderChannel <- buttonPressed(btnEvent)
@@ -48,12 +50,14 @@ func OrderAssigner(
 			//newOrderChannel <- AssignOrders(hraInput)
 			print("elevator was changed")
 
-        if !reflect.DeepEqual(prevHRA, hraInput) {
-            toNetworkChannel <- hraInput
+			if !reflect.DeepEqual(prevHRA, hraInput) {
+				//toNetworkChannel <- hraInput
+				print("should send to network")
 			}
 		}
 		if onlyNodeOnline {
-			newOrderChannel <- AssignOrders(hraInput)
+			print("assigns")
+			newOrderChannel <- assignOrders(hraInput, nodeID)
 		}
 	}
 }

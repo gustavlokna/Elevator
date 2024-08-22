@@ -106,3 +106,17 @@ type ElevOutputDevice struct {
 	StopButtonLight    func(v bool)
 	MotorDirection     func(d HWMotorDirection)
 }
+
+type HRAElevState struct {
+	Behavior    string `json:"behaviour"`
+	Floor       int    `json:"floor"`
+	Direction   string `json:"direction"`
+	CabRequests []bool `json:"cabRequests"`
+}
+
+type HRAInput struct {
+	HallRequests [][2]bool               `json:"hallRequests"`
+	CounterHallRequests [][2]int 
+	States       map[string]HRAElevState `json:"states"`
+
+}

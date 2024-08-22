@@ -21,21 +21,23 @@ func main() {
 	print("Initialization of hwelevio completed.")
 
 	var (
-		assignerToElevatorChannel = make(chan [NFloors][NButtons]bool, 10)
-		elevatorToAssignerChannel = make(chan Elevator, 10)
-		elevatorLifelineChannel   = make(chan bool)
+		newOrderChannel = make(chan [NFloors][NButtons]bool, 10)
+		newStateChanel = make(chan Elevator, 10)
+		orderDoneChannel   = make(chan [NFloors][NButtons]bool,10)
+		toNetworkChannel = make(chan HRAInput, 10)
 	)
 	go elevatordriver.ElevatorDriver(
-		assignerToElevatorChannel,
-		elevatorToAssignerChannel,
-		elevatorLifelineChannel,
+		newOrderChannel,
+		newStateChanel,
+		orderDoneChannel,
 		nodeID,
 	)
 
 	go orderassigner.OrderAssigner(
-		assignerToElevatorChannel,
-		elevatorToAssignerChannel,
-		elevatorLifelineChannel,
+		newOrderChannel,
+		newStateChanel,
+		orderDoneChannel,
+		toNetworkChannel,
 		nodeID,
 	)
 	// Sleep for a while to allow the goroutine to print the message
