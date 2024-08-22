@@ -28,6 +28,8 @@ func main() {
 		fromNetworkChannel = make(chan HRAInput, 100)
 		ipChannel          = make(chan string, 100)
 	)
+
+	//todo set ip as id in main? 
 	go elevatordriver.ElevatorDriver(
 		newOrderChannel,
 		newStateChanel,
@@ -43,7 +45,7 @@ func main() {
 		fromNetworkChannel,
 		nodeID,
 	)
-	
+
 	go network.Network(
 		toNetworkChannel,
 		fromNetworkChannel,

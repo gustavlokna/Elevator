@@ -68,11 +68,7 @@ func OrderComplete(hraInput HRAInput, elevatorName string,
 					hraInput.HallRequests[floor][BHallDown] = false
 					hraInput.CounterHallRequests[floor][BHallDown]++
 				case BCab:
-					print("hallo du må fjerne cab")
-					print("hraInput.States[elevatorName].CabRequests[floor]: ", hraInput.States[elevatorName].CabRequests[floor])
 					hraInput.States[elevatorName].CabRequests[floor] = false
-					print("hraInput.States[elevatorName].CabRequests[floor]: ", hraInput.States[elevatorName].CabRequests[floor])
-
 				}
 			}
 		}
