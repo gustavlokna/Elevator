@@ -4,27 +4,56 @@ import (
 	. "Project/dataenums"
 	//"Project/elevatordriver"
 	"Project/hwelevio"
-	"time"
+	"reflect"
+	//"time"
 )
 
-// buttonlights must be set inside this 
 func OrderAssigner(
-	fromOrderAssignerChannel chan<- [NFloors][NButtons]bool,
-	toOrderAssignerChannel <-chan Elevator,
-	lifelineChannel chan<- bool,
-	nodeID int,
+	newOrderChannel chan<- [NFloors][NButtons]bool,
+	newStateChanel <-chan Elevator,
+	orderDoneChannel <-chan [NFloors][NButtons]bool,
+	toNetworkChannel chan<- HRAInput,
+	nodeID string,
 ) {
+	var(
+		hraInput = InitialiseHRAInput()
+		prevHRA = hraInput 
+		onlyNodeOnline = true
+	)
+	
+	elevator := <-newStateChanel
+	hraInput = addElevatorToHRA(hraInput, elevator, nodeID)
+
 	drv_buttons := make(chan ButtonEvent)
 	go hwelevio.PollButtons(drv_buttons)
+
 	for {
+		prevHRA = hraInput 
 		select {
-		case btn:= <-drv_buttons:
-			fromOrderAssignerChannel <- buttonPressed(btn)
-		case <-toOrderAssignerChannel:
+			
+		case btnEvent := <-drv_buttons:
+			if !buttonAlreadyActive(hraInput, nodeID, btnEvent) {
+				hraInput = ButtonPressed(hraInput, nodeID, btnEvent)
+				//newOrderChannel <- AssignOrders(hraInput)
+				// newOrderChannel <- buttonPressed(btnEvent)
+			}
+
+		case completedOrders := <-orderDoneChannel:
+			hraInput = OrderComplete(hraInput, nodeID, completedOrders)
+			// Optionally, update other systems with the updated hraInput
+			// newOrderChannel <- AssignOrders(hraInput)
+
+		case elev := <-newStateChanel:
+			hraInput = addElevatorToHRA(hraInput, elev, nodeID)
+			//newOrderChannel <- AssignOrders(hraInput)
 			print("elevator was changed")
-		default:
-			time.Sleep(10 * time.Millisecond) // Prevent busy loop
+
+        if !reflect.DeepEqual(prevHRA, hraInput) {
+            toNetworkChannel <- hraInput
+			}
 		}
-		
+		if onlyNodeOnline {
+			newOrderChannel <- AssignOrders(hraInput)
+		}
 	}
 }

@@ -1,5 +1,5 @@
 package orderassigner
-
+/*
 import (
 	. "Project/dataenums"
 )
@@ -81,3 +81,4 @@ func CyclicCounter(existingElevs []CyclicElevator, myId int) []CyclicElevator {
 	// Return the updated list of elevators
 	return existingElevs
 }
+*/

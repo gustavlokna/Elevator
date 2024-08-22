@@ -6,6 +6,7 @@ import (
 	"Project/hwelevio"
 	"Project/orderassigner"
 	"flag"
+	"strconv"
 	//"time"
 )
 
@@ -24,7 +25,6 @@ func main() {
 		elevatorToAssignerChannel = make(chan Elevator, 10)
 		elevatorLifelineChannel   = make(chan bool)
 	)
-	print("hei jeg starter go")
 	go elevatordriver.ElevatorDriver(
 		assignerToElevatorChannel,
 		elevatorToAssignerChannel,
@@ -45,8 +45,10 @@ func main() {
 
 }
 
-func parseArgs() (nodeID int) {
+
+func parseArgs() string {
+	var nodeID int
 	flag.IntVar(&nodeID, "id", 0, "Node ID")
 	flag.Parse()
-	return nodeID
+	return strconv.Itoa(nodeID)
 }

@@ -4,11 +4,9 @@ import (
 	. "Project/dataenums"
 )
 
-var outputDevice ElevOutputDevice
 
 
 func ShouldStop(e Elevator) bool {
-	print("checker")
 	switch e.Dirn {
 	case MDDown:
 		return e.Requests[e.CurrentFloor][BHallDown] ||
@@ -23,41 +21,61 @@ func ShouldStop(e Elevator) bool {
 	}
 }
 
-func ClearAtCurrentFloor(e Elevator) Elevator {
-
-	beforeClear := make(map[Button]bool)
-	for btn := BHallUp; btn <= BCab; btn++ {
-		beforeClear[btn] = e.Requests[e.CurrentFloor][btn]
-	}
+func ClearAtCurrentFloor(e Elevator) (Elevator, [NFloors][NButtons]bool) {
+	clearedRequests := [NFloors][NButtons]bool{}
 
 	switch e.Config.ClearRequestVariant {
 	case CRVAll:
 		for btn := BHallUp; btn <= BCab; btn++ {
-			e.Requests[e.CurrentFloor][btn] = false
+			if e.Requests[e.CurrentFloor][btn] {
+				clearedRequests[e.CurrentFloor][btn] = true
+				e.Requests[e.CurrentFloor][btn] = false
+			}
 		}
 
 	case CRVInDirn:
-		e.Requests[e.CurrentFloor][BCab] = false
+		if e.Requests[e.CurrentFloor][BCab] {
+			clearedRequests[e.CurrentFloor][BCab] = true
+			e.Requests[e.CurrentFloor][BCab] = false
+		}
 		switch e.Dirn {
 		case MDUp:
 			if !requestsAbove(e) && !e.Requests[e.CurrentFloor][BHallUp] {
-				e.Requests[e.CurrentFloor][BHallDown] = false
+				if e.Requests[e.CurrentFloor][BHallDown] {
+					clearedRequests[e.CurrentFloor][BHallDown] = true
+					e.Requests[e.CurrentFloor][BHallDown] = false
+				}
 			}
-			e.Requests[e.CurrentFloor][BHallUp] = false
+			if e.Requests[e.CurrentFloor][BHallUp] {
+				clearedRequests[e.CurrentFloor][BHallUp] = true
+				e.Requests[e.CurrentFloor][BHallUp] = false
+			}
 
 		case MDDown:
 			if !requestsBelow(e) && !e.Requests[e.CurrentFloor][BHallDown] {
-				e.Requests[e.CurrentFloor][BHallUp] = false
+				if e.Requests[e.CurrentFloor][BHallUp] {
+					clearedRequests[e.CurrentFloor][BHallUp] = true
+					e.Requests[e.CurrentFloor][BHallUp] = false
+				}
 			}
-			e.Requests[e.CurrentFloor][BHallDown] = false
-		default:
-			e.Requests[e.CurrentFloor][BHallUp]   = false
-			e.Requests[e.CurrentFloor][BHallDown] = false
+			if e.Requests[e.CurrentFloor][BHallDown] {
+				clearedRequests[e.CurrentFloor][BHallDown] = true
+				e.Requests[e.CurrentFloor][BHallDown] = false
+			}
 
+		default:
+			for btn := BHallUp; btn <= BCab; btn++ {
+				if e.Requests[e.CurrentFloor][btn] {
+					clearedRequests[e.CurrentFloor][btn] = true
+					e.Requests[e.CurrentFloor][btn] = false
+				}
+			}
 		}
 	}
-	return e
+
+	return e, clearedRequests
 }
+
 
 
 func ChooseDirection(el Elevator) Elevator {
