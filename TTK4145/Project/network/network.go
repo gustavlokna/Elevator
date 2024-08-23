@@ -65,9 +65,8 @@ func Network(messagefromOrderAssigner <-chan HRAInput,
 				fmt.Println("Node connected:", nodeUid)
 				onlineStatus = true
 			}
+			//if offline send to orderassigner! 
 
-			//if offline remove yourself from hra
-			//send hra to assigner
 
 		case msg := <-broadcastReceiverChannel:
 			//we cant just set equal
@@ -79,7 +78,7 @@ func Network(messagefromOrderAssigner <-chan HRAInput,
 
 		case payload := <-messagefromOrderAssigner:
 			fmt.Println("msg from assigmer")
-			Message.SenderId = nodeIP
+			Message.SenderId = nodeID
 			Message.Payload = payload
 			Message.OnlineStatus = onlineStatus
 			fmt.Println("Broadcast transmitted to network")
