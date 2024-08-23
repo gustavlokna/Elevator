@@ -86,4 +86,3 @@ func convertElevatorState(e Elevator) (string, string, []bool) {
 	}
 	return behavior, direction, cabRequests
 }
-

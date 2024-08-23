@@ -38,7 +38,7 @@ func OrderAssigner(
 			toNetworkChannel <- hraInput
 
 		case incomingmsg := <-fromNetworkChannel:
-			hraInput = mergeHRA(hraInput, incomingmsg.Payload, nodeID, incomingmsg.SenderId)
+			hraInput = mergeHRA(hraInput, incomingmsg.Payload, incomingmsg.SenderId)
 			newOrderChannel <- assignOrders(hraInput, nodeID)
 			fmt.Println("nye meldinger incomming")
 		}
