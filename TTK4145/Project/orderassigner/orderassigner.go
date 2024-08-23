@@ -47,7 +47,7 @@ func OrderAssigner(
 			hraInput = addElevatorToHRA(hraInput, elev, nodeID)
 			//newOrderChannel <- AssignOrders(hraInput)
 			print("elevator was changed")
-			//toNetworkChannel <- hraInput
+			toNetworkChannel <- hraInput
 		case hraInput = <-fromNetworkChannel:
 			print("nye meldinger incomming")
 

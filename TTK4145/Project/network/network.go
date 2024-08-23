@@ -7,7 +7,7 @@ import (
 	"Project/network/nodes"
 	"fmt"
 	"os"
-	"time"
+	//"time"
 )
 
 const lifelinePort int = 1337
@@ -40,10 +40,11 @@ func Network(messagefromOrderAssigner <-chan HRAInput,
 
 	var (
 		onlineStatus = true
-		lastMessage  Message
+		//lastMessage  Message
 	)
 	// Periodic broadcast of the last updated message
 	// Periodic broadcast of the last updated message
+	/*
 	go func() {
 		for {
 			if !isEmptyHRAInput(lastMessage.Payload) { // Check if lastMessage.Payload is not empty
@@ -53,6 +54,7 @@ func Network(messagefromOrderAssigner <-chan HRAInput,
 			time.Sleep(500 * time.Millisecond)
 		}
 	}()
+	*/
 	for {
 		select {
 		case reg := <-nodeRegistryChannel:
@@ -77,6 +79,7 @@ func Network(messagefromOrderAssigner <-chan HRAInput,
 
 
 		case payload := <-messagefromOrderAssigner:
+
 			var msg Message
 			msg.SenderId = nodeIP
 			msg.Payload = payload
