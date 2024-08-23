@@ -4,59 +4,43 @@ import (
 	. "Project/dataenums"
 	//"Project/elevatordriver"
 	"Project/hwelevio"
+	"fmt"
 	//"time"
 )
 
 func OrderAssigner(
 	newOrderChannel chan<- [NFloors][NButtons]bool,
-	newStateChanel <-chan Elevator,
-	orderDoneChannel <-chan [NFloors][NButtons]bool,
+	payloadFromElevator <-chan PayloadFromElevator,
 	toNetworkChannel chan<- HRAInput,
 	fromNetworkChannel <-chan HRAInput,
 	nodeID string,
 ) {
 	var (
-		hraInput       = InitialiseHRAInput()
-		onlyNodeOnline = true
+		hraInput = InitialiseHRAInput()
 	)
-
-	elevator := <-newStateChanel
-	hraInput = addElevatorToHRA(hraInput, elevator, nodeID)
+	payload := <-payloadFromElevator
+	hraInput = handlePayloadFromElevator(hraInput, payload.Elevator, nodeID)
 
 	drv_buttons := make(chan ButtonEvent)
 	go hwelevio.PollButtons(drv_buttons)
 
 	for {
 		select {
-
 		case btnEvent := <-drv_buttons:
-			print("button pressed")
-			if !buttonAlreadyActive(hraInput, nodeID, btnEvent) {
-				print("new order")
-				hraInput = ButtonPressed(hraInput, nodeID, btnEvent)
-				//newOrderChannel <- AssignOrders(hraInput)
-				// newOrderChannel <- buttonPressed(btnEvent)
-			}
-
-		case completedOrders := <-orderDoneChannel:
-			hraInput = OrderComplete(hraInput, nodeID, completedOrders)
-			// Optionally, update other systems with the updated hraInput
-			// newOrderChannel <- AssignOrders(hraInput)
-
-		case elev := <-newStateChanel:
-			hraInput = addElevatorToHRA(hraInput, elev, nodeID)
-			//newOrderChannel <- AssignOrders(hraInput)
-			print("elevator was changed")
+			fmt.Println("button pressed")
+			hraInput = ButtonPressed(hraInput, nodeID, btnEvent)
 			toNetworkChannel <- hraInput
-		case hraInput = <-fromNetworkChannel:
-			print("nye meldinger incomming")
 
-		}
-		
+		case payload := <-payloadFromElevator:
+			hraInput = handlePayloadFromElevator(hraInput, payload.Elevator, nodeID)
+			hraInput = orderComplete(hraInput, nodeID, payload.CompletedOrders)
+			fmt.Println("elevator was changed")
+			toNetworkChannel <- hraInput
 
-		if onlyNodeOnline {
-			//print("assigns")
+		case hraInput := <-fromNetworkChannel:
+			//hraInput = mergeHRA(hraInput, incommingHRA)
 			newOrderChannel <- assignOrders(hraInput, nodeID)
+			fmt.Println("nye meldinger incomming")
 		}
 	}
 }

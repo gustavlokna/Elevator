@@ -13,7 +13,7 @@ func InitialiseHRAInput() HRAInput {
 	}
 	return hraInput
 }
-func addElevatorToHRA(hraInput HRAInput, e Elevator,
+func handlePayloadFromElevator(hraInput HRAInput, e Elevator,
 	elevatorName string) HRAInput{
 	behavior, direction, cabRequests := convertElevatorState(e)
 	hraInput.States[elevatorName] = HRAElevState{
@@ -23,6 +23,10 @@ func addElevatorToHRA(hraInput HRAInput, e Elevator,
 		CabRequests: cabRequests,
 	}
 	return hraInput
+}
+
+func handlePayloadFromNetwork(localHRA HRAInput, Incoming HRAInput)HRAInput{
+	return Incoming
 }
 
 func convertElevatorState(e Elevator) (string, string, []bool) {
@@ -41,11 +45,15 @@ func ButtonPressed(hraInput HRAInput, ElevatorName string,
 					btnEvent ButtonEvent) HRAInput {
 	switch btnEvent.Button {
 	case BHallUp:
-		hraInput.HallRequests[btnEvent.Floor][BHallUp] = true
-		hraInput.CounterHallRequests[btnEvent.Floor][BHallUp]++
+		if !hraInput.HallRequests[btnEvent.Floor][BHallUp]{
+			hraInput.HallRequests[btnEvent.Floor][BHallUp] = true
+			hraInput.CounterHallRequests[btnEvent.Floor][BHallUp]++
+		}
 	case BHallDown:
-		hraInput.HallRequests[btnEvent.Floor][BHallDown] = true
-		hraInput.CounterHallRequests[btnEvent.Floor][BHallDown]++
+		if !hraInput.HallRequests[btnEvent.Floor][BHallDown]{
+			hraInput.HallRequests[btnEvent.Floor][BHallDown] = true
+			hraInput.CounterHallRequests[btnEvent.Floor][BHallDown]++
+		}
 	case BCab:
 		print("CAB BUTTON PRESSED")
 		hraInput.States[ElevatorName].CabRequests[btnEvent.Floor] = true
@@ -55,7 +63,7 @@ func ButtonPressed(hraInput HRAInput, ElevatorName string,
 
 
 
-func OrderComplete(hraInput HRAInput, elevatorName string,
+func orderComplete(hraInput HRAInput, elevatorName string,
 	completedOrders [NFloors][NButtons]bool) HRAInput {
 	for floor := 0; floor < NFloors; floor++ {
 		for btn := BHallUp; btn <= BCab; btn++ {
