@@ -49,14 +49,17 @@ elevatordriver
 - obstruction
 - motorinactivity 
 
+Add activ channel on PayloadFromElevator
+ if obst or motorinactivity we set value = false
+
+In orderassigner have list of active nodes, only assign to elevs that are active in that list :-)
+
+
 Project Pairs 
 
-
-cant clear cabs when only one elev online, as state gets overwritten to fast
-use some smart when one should assign in orderassigner. 
-ex have channel for should assign bool, that gets called if only node onlie when new button pressed or if incoming ww align 
 
 
 Network 
 We are yet not able to preprosses incoming data
 - sol copy from old way
+- if we should use argpass we need to overwrite curret checking 

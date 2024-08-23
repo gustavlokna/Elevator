@@ -14,14 +14,12 @@ const lifelinePort int = 1337
 const messagePort int = lifelinePort + 1
 
 func Network(messagefromOrderAssigner <-chan HRAInput,
-	messagetoOrderAssignerChannel chan<- HRAInput,
-	ipChannel chan<- string,
+	messagetoOrderAssignerChannel chan<- Message,
 	nodeID string) {
 	nodeIP, err := local.GetIP()
 	if err != nil {
 		print("Unable to get the IP address")
 	}
-	ipChannel <- nodeIP // pass the IP address to main process
 
 	nodeUid := fmt.Sprintf("peer-%s-%d", nodeIP, os.Getpid())
 
@@ -74,7 +72,8 @@ func Network(messagefromOrderAssigner <-chan HRAInput,
 		case msg := <-broadcastReceiverChannel:
 			//we cant just set equal
 			fmt.Println("hallo vi er på nettet")
-			messagetoOrderAssignerChannel <- msg.Payload
+			fmt.Println("msg id: ", msg.SenderId)
+			messagetoOrderAssignerChannel <- msg
 			//handle incoming msg
 			//send msg to assigner
 
@@ -86,7 +85,7 @@ func Network(messagefromOrderAssigner <-chan HRAInput,
 			fmt.Println("Broadcast transmitted to network")
 			if !onlineStatusTest {
 				print("sending msg back")
-				messagetoOrderAssignerChannel <- Message.Payload
+				messagetoOrderAssignerChannel <- Message
 			}
 			broadcastTransmissionChannel <- Message
 		}

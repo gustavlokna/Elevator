@@ -12,7 +12,7 @@ func OrderAssigner(
 	newOrderChannel chan<- [NFloors][NButtons]bool,
 	payloadFromElevator <-chan PayloadFromElevator,
 	toNetworkChannel chan<- HRAInput,
-	fromNetworkChannel <-chan HRAInput,
+	fromNetworkChannel <-chan Message,
 	nodeID string,
 ) {
 	var (
@@ -37,8 +37,8 @@ func OrderAssigner(
 			fmt.Println("elevator was changed")
 			toNetworkChannel <- hraInput
 
-		case hraInput := <-fromNetworkChannel:
-			//hraInput = mergeHRA(hraInput, incommingHRA)
+		case incomingmsg := <-fromNetworkChannel:
+			hraInput = mergeHRA(hraInput, incomingmsg.Payload, nodeID, incomingmsg.SenderId)
 			newOrderChannel <- assignOrders(hraInput, nodeID)
 			fmt.Println("nye meldinger incomming")
 		}

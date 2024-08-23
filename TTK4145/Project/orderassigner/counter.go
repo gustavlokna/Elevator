@@ -5,41 +5,6 @@ import (
 
 
 
-func InitialiseHRAInput() HRAInput {
-	hraInput := HRAInput{
-		HallRequests: make([][2]bool, NFloors),
-		States:       make(map[string]HRAElevState),
-		CounterHallRequests : make([][2]int, NFloors),
-	}
-	return hraInput
-}
-func handlePayloadFromElevator(hraInput HRAInput, e Elevator,
-	elevatorName string) HRAInput{
-	behavior, direction, cabRequests := convertElevatorState(e)
-	hraInput.States[elevatorName] = HRAElevState{
-		Behavior:    behavior,
-		Floor:       e.CurrentFloor,
-		Direction:   direction,
-		CabRequests: cabRequests,
-	}
-	return hraInput
-}
-
-func handlePayloadFromNetwork(localHRA HRAInput, Incoming HRAInput)HRAInput{
-	return Incoming
-}
-
-func convertElevatorState(e Elevator) (string, string, []bool) {
-	behavior := EBToString(e.CurrentBehaviour)
-	direction := ElevDirToString(e.Dirn)
-
-	// Convert cab requests
-	cabRequests := make([]bool, NFloors)
-	for f := 0; f < NFloors; f++ {
-		cabRequests[f] = e.Requests[f][BCab]
-	}
-	return behavior, direction, cabRequests
-}
 
 func ButtonPressed(hraInput HRAInput, ElevatorName string,
 					btnEvent ButtonEvent) HRAInput {
