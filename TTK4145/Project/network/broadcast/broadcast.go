@@ -4,24 +4,24 @@ import (
 	"encoding/json"
 	"fmt"
 	"net"
-	"network/conn"
-	"network/local"
+	"Project/network/local"
+	"Project/network/conn"
 	"reflect"
-
-	"github.com/sirupsen/logrus"
 )
 
 const bufferSize = 4 * 1024
 
+// Encodes received values from `chans` into type-tagged JSON, then broadcasts
+// it on `port`
+// TODO integrate in sender that sends every 500*
 func Sender(port int, chans ...interface{}) {
 	checkArgs(chans...)
-	typeNames 	:= make([]string, len(chans))
+	typeNames := make([]string, len(chans))
 	selectCases := make([]reflect.SelectCase, len(typeNames))
-
 
 	for i, ch := range chans {
 		selectCases[i] = reflect.SelectCase{
-			Dir	:  reflect.SelectRecv,
+			Dir:  reflect.SelectRecv,
 			Chan: reflect.ValueOf(ch),
 		}
 		typeNames[i] = reflect.TypeOf(ch).Elem().String()
@@ -31,8 +31,8 @@ func Sender(port int, chans ...interface{}) {
 	addr, _ := net.ResolveUDPAddr("udp4", fmt.Sprintf("255.255.255.255:%d", port))
 	for {
 		chosen, value, _ := reflect.Select(selectCases)
-		jsonstr, _ 	:= json.Marshal(value.Interface())
-		ttj, _ 		:= json.Marshal(typeTaggedJSON{
+		jsonstr, _ := json.Marshal(value.Interface())
+		ttj, _ := json.Marshal(typeTaggedJSON{
 			TypeId: typeNames[chosen],
 			JSON:   jsonstr,
 		})
@@ -47,10 +47,12 @@ func Sender(port int, chans ...interface{}) {
 	}
 }
 
+// Matches type-tagged JSON received on `port` to element types of `chans`, then
+// sends the decoded value on the corresponding channel
 func Receiver(ownIp string, port int, chans ...interface{}) {
 	checkArgs(chans...)
 	chansMap := make(map[string]interface{})
-	
+
 	for _, ch := range chans {
 		chansMap[reflect.TypeOf(ch).Elem().String()] = ch
 	}
@@ -58,20 +60,20 @@ func Receiver(ownIp string, port int, chans ...interface{}) {
 	var buf [bufferSize]byte
 	conn := conn.DialBroadcastUDP(port)
 	for {
-		n, addr, e 	:= conn.ReadFrom(buf[0:])
+		n, addr, e := conn.ReadFrom(buf[0:])
 		if e != nil {
 			fmt.Printf("bcast.Receiver(%d, ...):ReadFrom() failed: \"%+v\"\n", port, e)
 		}
 
 		localIP, err := local.GetIP()
 		if err != nil {
-			logrus.Warn("ERROR: Unable to get the IP address")
+			print("ERROR: Unable to get the IP address")
 			localIP = "Disconnected"
 		}
 
 		ownAddress, _ := net.ResolveUDPAddr("udp4", fmt.Sprintf("%s:%d", localIP, port))
 		if ownAddress.String() == addr.String() {
-			logrus.Debug("Ignoring broadcast message from self")
+			print("Ignoring broadcast message from self")
 			continue
 		}
 
@@ -96,6 +98,15 @@ type typeTaggedJSON struct {
 	JSON   []byte
 }
 
+// Checks that args to Tx'er/Rx'er are valid:
+//
+//	All args must be channels
+//	Element types of channels must be encodable with JSON
+//	No element types are repeated
+//
+// Implementation note:
+//   - Why there is no `isMarshalable()` function in encoding/json is a mystery,
+//     so the tests on element type are hand-copied from `encoding/json/encode.go`
 func checkArgs(chans ...interface{}) {
 	n := 0
 	for range chans {
@@ -104,6 +115,7 @@ func checkArgs(chans ...interface{}) {
 	elemTypes := make([]reflect.Type, n)
 
 	for i, ch := range chans {
+		// Must be a channel
 		if reflect.ValueOf(ch).Kind() != reflect.Chan {
 			panic(fmt.Sprintf(
 				"Argument must be a channel, got '%s' instead (arg# %d)",
@@ -112,6 +124,7 @@ func checkArgs(chans ...interface{}) {
 
 		elemType := reflect.TypeOf(ch).Elem()
 
+		// Element type must not be repeated
 		for j, e := range elemTypes {
 			if e == elemType {
 				panic(fmt.Sprintf(
@@ -121,6 +134,7 @@ func checkArgs(chans ...interface{}) {
 		}
 		elemTypes[i] = elemType
 
+		// Element type must be encodable with JSON
 		checkTypeRecursive(elemType, []int{i + 1})
 
 	}

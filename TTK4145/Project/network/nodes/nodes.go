@@ -3,7 +3,7 @@ package nodes
 import (
 	"fmt"
 	"net"
-	"network/conn"
+	"Project/network/conn"
 	"sort"
 	"time"
 )
@@ -18,9 +18,9 @@ const interval = 150 * time.Millisecond
 const timeout = 3000 * time.Millisecond
 
 func Sender(port int, id string, enableTransmit <-chan bool) {
-	conn := conn.DialBroadcastUDP(port)
+	conn 	:= conn.DialBroadcastUDP(port)
 	addr, _ := net.ResolveUDPAddr("udp", fmt.Sprintf("255.255.255.255:%d", port))
-	enable := true
+	enable 	:= true
 
 	for {
 		select {
@@ -48,6 +48,7 @@ func Receiver(port int, updateChannel chan<- NetworkNodeRegistry) {
 
 		id := string(buffer[:n])
 
+		// Adding new connection
 		reg.New = ""
 		if id != "" {
 			if _, idExists := lastSeen[id]; !idExists {
@@ -58,6 +59,7 @@ func Receiver(port int, updateChannel chan<- NetworkNodeRegistry) {
 			lastSeen[id] = time.Now()
 		}
 
+		// Removing dead connection
 		reg.Lost = make([]string, 0)
 		for k, v := range lastSeen {
 			if time.Now().Sub(v) > timeout {
@@ -67,6 +69,7 @@ func Receiver(port int, updateChannel chan<- NetworkNodeRegistry) {
 			}
 		}
 
+		// Sending update
 		if updated {
 			reg.Nodes = make([]string, 0, len(lastSeen))
 
@@ -75,6 +78,7 @@ func Receiver(port int, updateChannel chan<- NetworkNodeRegistry) {
 			}
 
 			sort.Strings(reg.Nodes)
+			//sort.Strings(reg.Lost)
 			updateChannel <- reg
 		}
 	}
