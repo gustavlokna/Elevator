@@ -5,11 +5,11 @@ const (
 	NButtons   int = 3
 	PollRateMS     = 20
 )
+
 /*
 "not necsessery"
 */
 const Addr string = "localhost:15657"
-
 
 type Button int
 
@@ -19,7 +19,7 @@ const (
 	BCab
 )
 
-type HWMotorDirection int 
+type HWMotorDirection int
 
 const (
 	MDDown HWMotorDirection = iota - 1
@@ -47,8 +47,8 @@ const (
 	EBMoving
 )
 
-//TODO find out what ClearRequestVarient is!
-//this is copied code from last project 
+// TODO find out what ClearRequestVarient is!
+// this is copied code from last project
 type ClearRequestVarient int
 
 const (
@@ -74,7 +74,6 @@ type Elevator struct {
 	Config           ElevatorConfig
 }
 
-
 type HRAElevState struct {
 	Behavior    string `json:"behaviour"`
 	Floor       int    `json:"floor"`
@@ -83,14 +82,18 @@ type HRAElevState struct {
 }
 
 type HRAInput struct {
-	HallRequests [][2]bool               `json:"hallRequests"`
-	CounterHallRequests [][2]int 
-	States       map[string]HRAElevState `json:"states"`
-
+	HallRequests        [][2]bool `json:"hallRequests"`
+	CounterHallRequests [][2]int
+	States              map[string]HRAElevState `json:"states"`
 }
 
 type Message struct {
-	SenderId string // IPv4
-	Payload  HRAInput
+	SenderId     string // IPv4
+	Payload      HRAInput
 	OnlineStatus bool
+}
+
+type PayloadFromElevator struct {
+	Elevator        Elevator
+	CompletedOrders [NFloors][NButtons]bool
 }

@@ -13,16 +13,13 @@ import (
 const lifelinePort int = 1337
 const messagePort int = lifelinePort + 1
 
-
-
-func Network(messagefromOrderAssigner <-chan HRAInput, 
-	messagetoOrderAssignerChannel chan<- HRAInput, 
-	ipChannel chan<- string) {
+func Network(messagefromOrderAssigner <-chan HRAInput,
+	messagetoOrderAssignerChannel chan<- Message,
+	nodeID string) {
 	nodeIP, err := local.GetIP()
 	if err != nil {
 		print("Unable to get the IP address")
 	}
-	ipChannel <- nodeIP // pass the IP address to main process
 
 	nodeUid := fmt.Sprintf("peer-%s-%d", nodeIP, os.Getpid())
 
@@ -39,21 +36,22 @@ func Network(messagefromOrderAssigner <-chan HRAInput,
 	go broadcast.Receiver(nodeIP, messagePort, broadcastReceiverChannel)
 
 	var (
-		onlineStatus = true
-		//lastMessage  Message
+		onlineStatus = false
+		onlineStatusTest = false
+		Message  Message
 	)
 	// Periodic broadcast of the last updated message
 	// Periodic broadcast of the last updated message
 	/*
-	go func() {
-		for {
-			if !isEmptyHRAInput(lastMessage.Payload) { // Check if lastMessage.Payload is not empty
-				broadcastTransmissionChannel <- lastMessage
-				print("Broadcasting last message to network")
+		go func() {
+			for {
+				if !isEmptyHRAInput(lastMessage.Payload) { // Check if lastMessage.Payload is not empty
+					broadcastTransmissionChannel <- lastMessage
+					print("Broadcasting last message to network")
+				}
+				time.Sleep(500 * time.Millisecond)
 			}
-			time.Sleep(500 * time.Millisecond)
-		}
-	}()
+		}()
 	*/
 	for {
 		select {
@@ -61,31 +59,35 @@ func Network(messagefromOrderAssigner <-chan HRAInput,
 
 			// on state change, pass to main process
 			if contains(reg.Lost, nodeUid) {
-				print("Node lost connection:", nodeUid)
+				fmt.Println("Node lost connection:", nodeUid)
 				onlineStatus = false
 			} else if reg.New == nodeUid {
-				print("Node connected:", nodeUid)
+				fmt.Println("Node connected:", nodeUid)
 				onlineStatus = true
 			}
 
-			//if offline remove yourself from hra 
-			//send hra to assigner 
+			//if offline remove yourself from hra
+			//send hra to assigner
 
 		case msg := <-broadcastReceiverChannel:
-			//we cant just set equal 
-			messagetoOrderAssignerChannel <- msg.Payload
+			//we cant just set equal
+			fmt.Println("hallo vi er på nettet")
+			fmt.Println("msg id: ", msg.SenderId)
+			messagetoOrderAssignerChannel <- msg
 			//handle incoming msg
-			//send msg to assigner 
-
+			//send msg to assigner
 
 		case payload := <-messagefromOrderAssigner:
-
-			var msg Message
-			msg.SenderId = nodeIP
-			msg.Payload = payload
-			msg.OnlineStatus = onlineStatus
-			print("Broadcast transmitted to network")
-			broadcastTransmissionChannel <- msg
+			fmt.Println("msg from assigmer")
+			Message.SenderId = nodeIP
+			Message.Payload = payload
+			Message.OnlineStatus = onlineStatus
+			fmt.Println("Broadcast transmitted to network")
+			if !onlineStatusTest {
+				print("sending msg back")
+				messagetoOrderAssignerChannel <- Message
+			}
+			broadcastTransmissionChannel <- Message
 		}
 	}
 }

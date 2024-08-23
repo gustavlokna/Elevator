@@ -22,25 +22,21 @@ func main() {
 	print("Initialization of hwelevio completed.")
 	var (
 		newOrderChannel    = make(chan [NFloors][NButtons]bool, 100)
-		newStateChanel     = make(chan Elevator, 100)
-		orderDoneChannel   = make(chan [NFloors][NButtons]bool, 100)
+		payloadFromElevator     = make(chan PayloadFromElevator, 100)
 		toNetworkChannel   = make(chan HRAInput, 100)
-		fromNetworkChannel = make(chan HRAInput, 100)
-		ipChannel          = make(chan string, 100)
+		fromNetworkChannel = make(chan Message, 100)
 	)
 
 	//todo set ip as id in main? 
 	go elevatordriver.ElevatorDriver(
 		newOrderChannel,
-		newStateChanel,
-		orderDoneChannel,
+		payloadFromElevator,
 		nodeID,
 	)
 
 	go orderassigner.OrderAssigner(
 		newOrderChannel,
-		newStateChanel,
-		orderDoneChannel,
+		payloadFromElevator,
 		toNetworkChannel,
 		fromNetworkChannel,
 		nodeID,
@@ -49,7 +45,7 @@ func main() {
 	go network.Network(
 		toNetworkChannel,
 		fromNetworkChannel,
-		ipChannel,
+		nodeID,
 	)
 	// Sleep for a while to allow the goroutine to print the message
 	// Hold main function indefinitely
