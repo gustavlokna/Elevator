@@ -73,7 +73,7 @@ func Receiver(ownIp string, port int, chans ...interface{}) {
 
 		ownAddress, _ := net.ResolveUDPAddr("udp4", fmt.Sprintf("%s:%d", localIP, port))
 		if ownAddress.String() == addr.String() {
-			print("Ignoring broadcast message from self")
+			//print("Ignoring broadcast message from self")
 			continue
 		}
 

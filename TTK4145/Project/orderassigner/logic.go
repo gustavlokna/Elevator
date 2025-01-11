@@ -72,6 +72,7 @@ func handlePayloadFromElevator(hraInput HRAInput, e Elevator,
 }
 
 func handlePayloadFromNetwork(localHRA HRAInput, Incoming HRAInput)HRAInput{
+	// TODO: 
 	return Incoming
 }
 

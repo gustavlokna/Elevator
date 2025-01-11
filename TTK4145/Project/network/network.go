@@ -7,7 +7,7 @@ import (
 	"Project/network/nodes"
 	"fmt"
 	"os"
-	//"time"
+	"time"
 )
 
 const lifelinePort int = 1337
@@ -37,22 +37,23 @@ func Network(messagefromOrderAssigner <-chan HRAInput,
 
 	var (
 		onlineStatus = false
-		onlineStatusTest = false
-		Message  Message
+		//onlineStatusTest = false
+		messageInstance  Message
+		lastMessage Message
 	)
 	// Periodic broadcast of the last updated message
 	// Periodic broadcast of the last updated message
-	/*
-		go func() {
-			for {
-				if !isEmptyHRAInput(lastMessage.Payload) { // Check if lastMessage.Payload is not empty
-					broadcastTransmissionChannel <- lastMessage
-					print("Broadcasting last message to network")
-				}
-				time.Sleep(500 * time.Millisecond)
+	// TODO: This is copied 
+	go func() {
+		for {
+			if !isEmptyHRAInput(lastMessage.Payload) { // Check if lastMessage.Payload is not empty
+				broadcastTransmissionChannel <- lastMessage
+				print("Broadcasting last message to network")
 			}
-		}()
-	*/
+			time.Sleep(500 * time.Millisecond)
+		}
+	}()
+	
 	for {
 		select {
 		case reg := <-nodeRegistryChannel:
@@ -72,21 +73,22 @@ func Network(messagefromOrderAssigner <-chan HRAInput,
 			//we cant just set equal
 			fmt.Println("hallo vi er på nettet")
 			fmt.Println("msg id: ", msg.SenderId)
-			messagetoOrderAssignerChannel <- msg
+			//messagetoOrderAssignerChannel <- msg
 			//handle incoming msg
 			//send msg to assigner
 
 		case payload := <-messagefromOrderAssigner:
 			fmt.Println("msg from assigmer")
-			Message.SenderId = nodeID
-			Message.Payload = payload
-			Message.OnlineStatus = onlineStatus
-			fmt.Println("Broadcast transmitted to network")
-			if !onlineStatusTest {
+			messageInstance.SenderId = nodeID
+			messageInstance.Payload = payload
+			messageInstance.OnlineStatus = onlineStatus
+			lastMessage = messageInstance
+			//fmt.Println("Broadcast transmitted to network")
+			if !messageInstance.OnlineStatus {
 				print("sending msg back")
-				messagetoOrderAssignerChannel <- Message
+				//messagetoOrderAssignerChannel <- Message
 			}
-			broadcastTransmissionChannel <- Message
+			broadcastTransmissionChannel <- messageInstance
 		}
 	}
 }
