@@ -43,12 +43,14 @@ func Network(messagefromOrderAssigner <-chan HRAInput,
 	)
 	// Periodic broadcast of the last updated message
 	// Periodic broadcast of the last updated message
-	// TODO: This is copied 
+
+	// TODO: This is copied ?
+	
 	go func() {
 		for {
 			if !isEmptyHRAInput(lastMessage.Payload) { // Check if lastMessage.Payload is not empty
 				broadcastTransmissionChannel <- lastMessage
-				print("Broadcasting last message to network")
+				//print("Broadcasting last message to network")
 			}
 			time.Sleep(500 * time.Millisecond)
 		}
@@ -67,15 +69,17 @@ func Network(messagefromOrderAssigner <-chan HRAInput,
 				onlineStatus = true
 			}
 			//if offline send to orderassigner! 
+			// send btn to ass? 
 
 
 		case msg := <-broadcastReceiverChannel:
 			//we cant just set equal
 			fmt.Println("hallo vi er på nettet")
 			fmt.Println("msg id: ", msg.SenderId)
-			//messagetoOrderAssignerChannel <- msg
+			messagetoOrderAssignerChannel <- msg
 			//handle incoming msg
-			//send msg to assigner
+			//Cyclic counter logic updates local world view
+			//send msg to assigner with function 
 
 		case payload := <-messagefromOrderAssigner:
 			fmt.Println("msg from assigmer")
@@ -86,7 +90,7 @@ func Network(messagefromOrderAssigner <-chan HRAInput,
 			//fmt.Println("Broadcast transmitted to network")
 			if !messageInstance.OnlineStatus {
 				print("sending msg back")
-				//messagetoOrderAssignerChannel <- Message
+				messagetoOrderAssignerChannel <- messageInstance
 			}
 			broadcastTransmissionChannel <- messageInstance
 		}
