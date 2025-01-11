@@ -75,7 +75,7 @@ func ElevatorDriver(
 				print("hello we have a obst")
 			} else {
 				completedOrders = ClearAtCurrentFloor(elevator)
-				time.Sleep(3 * time.Second) // Simulate door open time
+				// time.Sleep(3 * time.Second) // Simulate door open time
 				elevator.CurrentBehaviour = EBIdle
 			}
 		}
