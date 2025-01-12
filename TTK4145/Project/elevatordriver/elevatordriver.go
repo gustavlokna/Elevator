@@ -35,7 +35,7 @@ func ElevatorDriver(
 	hwelevio.SetMotorDirection(elevator.Dirn)
 	
 	// Initialize and send initial PayloadFromElevator
-// Initialize and send initial PayloadFromElevator
+	// Initialize and send initial PayloadFromElevator
 	payload := PayloadFromElevator{
 		Elevator:        elevator,
 		CompletedOrders: completedOrders,

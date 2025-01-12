@@ -20,10 +20,12 @@ func OrderAssigner(
 	)
 	payload := <-payloadFromElevator
 	hraInput = handlePayloadFromElevator(hraInput, payload.Elevator, nodeID)
+	//check if it creates error by sending to network here
+	toNetworkChannel <- hraInput
 
 	drv_buttons := make(chan ButtonEvent)
 	go hwelevio.PollButtons(drv_buttons)
-
+	print("PENIS")
 	for {
 		select {
 		case btnEvent := <-drv_buttons:
