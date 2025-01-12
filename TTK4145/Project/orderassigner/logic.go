@@ -27,6 +27,8 @@ func assignOrders(hraInput HRAInput, elevatorName string) [NFloors][NButtons]boo
 		return orderList
 	}
 
+	// TODO SOME LOGIC TO MAKE THE ButtonState to bool 
+
 	ret, err := exec.Command("hall_request_assigner", "-i", string(jsonBytes)).CombinedOutput()
 	if err != nil {
 		print("exec.Command error: %v\nOutput: %s\n", err, string(ret))
@@ -53,9 +55,8 @@ func assignOrders(hraInput HRAInput, elevatorName string) [NFloors][NButtons]boo
 
 func InitialiseHRAInput() HRAInput {
 	hraInput := HRAInput{
-		HallRequests: make([][2]bool, NFloors),
+		HallRequests: make([][2]ButtonState, NFloors),
 		States:       make(map[string]HRAElevState),
-		CounterHallRequests : make([][2]int, NFloors),
 	}
 	return hraInput
 }
@@ -87,3 +88,6 @@ func convertElevatorState(e Elevator) (string, string, []bool) {
 	}
 	return behavior, direction, cabRequests
 }
+
+
+

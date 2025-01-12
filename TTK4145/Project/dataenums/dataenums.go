@@ -19,6 +19,16 @@ const (
 	BCab
 )
 
+type ButtonState int
+
+const (
+	Idle ButtonState = iota
+	ButtonPressed
+	EventRegistered
+	OrderAssigned
+	OrderComplete
+)
+
 type HWMotorDirection int
 
 const (
@@ -82,8 +92,9 @@ type HRAElevState struct {
 }
 
 type HRAInput struct {
-	HallRequests        [][2]bool `json:"hallRequests"`
-	CounterHallRequests [][2]int
+	HallRequests        [][2]ButtonState `json:"hallRequests"` 
+	//NOTE THIS WAS BOOL AND TO USE ASSIGNER MUST BE CONVERTED TO INTEGER 
+	//Coul BE SIMPLE IN ASSIGNER IF HallRequests == OrderAssigned then 1, else 0 
 	States              map[string]HRAElevState `json:"states"`
 }
 

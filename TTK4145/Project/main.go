@@ -47,6 +47,7 @@ func main() {
 		fromNetworkChannel,
 		nodeID,
 	)
+
 	// Sleep for a while to allow the goroutine to print the message
 	// Hold main function indefinitely
 	select {}

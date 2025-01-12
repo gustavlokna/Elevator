@@ -1,6 +1,7 @@
 package orderassigner
 import (
 	. "Project/dataenums"
+	 "fmt"
 )
 
 
@@ -31,3 +32,45 @@ func ElevDirToString(d HWMotorDirection) string {
 	}
 }
 
+
+
+
+
+
+func PrintHRAInput(hraInput HRAInput) {
+    fmt.Println("HRAInput:")
+    fmt.Println("Hall Requests:")
+    for floor, requests := range hraInput.HallRequests {
+        fmt.Printf("  Floor %d: [Up: %s, Down: %s]\n",
+            floor,
+            buttonStateToString(requests[BHallUp]),
+            buttonStateToString(requests[BHallDown]),
+        )
+    }
+
+    fmt.Println("States:")
+    for elevator, state := range hraInput.States {
+        fmt.Printf("  Elevator: %s\n", elevator)
+        fmt.Printf("    Behavior: %s\n", state.Behavior)
+        fmt.Printf("    Floor: %d\n", state.Floor)
+        fmt.Printf("    Direction: %s\n", state.Direction)
+        fmt.Printf("    Cab Requests: %v\n", state.CabRequests)
+    }
+}
+
+func buttonStateToString(state ButtonState) string {
+    switch state {
+    case Idle:
+        return "Idle"
+    case ButtonPressed:
+        return "ButtonPressed"
+    case EventRegistered:
+        return "EventRegistered"
+    case OrderAssigned:
+        return "OrderAssigned"
+    case OrderComplete:
+        return "OrderComplete"
+    default:
+        return "Unknown"
+    }
+}

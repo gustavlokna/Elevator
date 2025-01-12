@@ -26,23 +26,31 @@ func OrderAssigner(
 	drv_buttons := make(chan ButtonEvent)
 	go hwelevio.PollButtons(drv_buttons)
 	print("PENIS")
+	
 	for {
 		select {
 		case btnEvent := <-drv_buttons:
+			//Note make cylick counter own module and put this there ? 
 			fmt.Println("button pressed")
-			hraInput = ButtonPressed(hraInput, nodeID, btnEvent)
-			toNetworkChannel <- hraInput
 
+			hraInput = buttonPressed(hraInput, nodeID, btnEvent)
+			PrintHRAInput(hraInput)
+			toNetworkChannel <- hraInput
+		/*
 		case payload := <-payloadFromElevator:
 			hraInput = handlePayloadFromElevator(hraInput, payload.Elevator, nodeID)
 			hraInput = orderComplete(hraInput, nodeID, payload.CompletedOrders)
 			fmt.Println("elevator was changed")
 			toNetworkChannel <- hraInput
 
-		case incomingmsg := <-fromNetworkChannel:
-			hraInput = mergeHRA(hraInput, incomingmsg.Payload, incomingmsg.SenderId)
+		case  <-fromNetworkChannel:
+			//TODO DEFINIE incomingmsg as the from NetworkChannel
+			//aInput = mergeHRA(hraInput, incomingmsg.Payload, incomingmsg.SenderId)
 			newOrderChannel <- assignOrders(hraInput, nodeID)
 			fmt.Println("nye meldinger incomming")
 		}
+		*/
+		}
 	}
+	
 }
