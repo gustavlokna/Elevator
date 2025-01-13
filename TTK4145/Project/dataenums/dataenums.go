@@ -93,13 +93,14 @@ type HRAElevState struct {
 
 type HRAInput struct {
 	//TODO:  Make variabels HallRequests        [][2]ButtonState `json:"hallRequests"` 
-	HallRequests        [][2]ButtonState `json:"hallRequests"` 
+	HallRequests        [NFloors][NButtons]ButtonState `json:"hallRequests"` 
 	//NOTE THIS WAS BOOL AND TO USE ASSIGNER MUST BE CONVERTED TO INTEGER 
 	//Coul BE SIMPLE IN ASSIGNER IF HallRequests == OrderAssigned then 1, else 0 
 	States              map[string]HRAElevState `json:"states"`
 }
 
 type Message struct {
+	//TODO: Make int
 	SenderId     string // IPv4
 	Payload      HRAInput
 	OnlineStatus bool
@@ -109,3 +110,4 @@ type PayloadFromElevator struct {
 	Elevator        Elevator
 	CompletedOrders [NFloors][NButtons]bool
 }
+

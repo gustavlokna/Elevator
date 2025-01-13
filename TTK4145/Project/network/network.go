@@ -13,7 +13,7 @@ import (
 
 const lifelinePort int = 1337
 const messagePort int = lifelinePort + 1
-const NUM_ELEVATORS int = 3
+const NUM_ELEVATORS int = 2
 
 
 func Network(messagefromOrderAssigner <-chan HRAInput,
@@ -23,8 +23,13 @@ func Network(messagefromOrderAssigner <-chan HRAInput,
 	if err != nil {
 		print("Unable to get the IP address")
 	}
-	//TODO CONVERT THIS SMARTER DO NOT USE THIS 
-	nodeIDINT, err := strconv.Atoi(nodeID)
+	//TODO: MAKE THIS BETTER 
+	nodeIPint, err := strconv.Atoi(nodeIP)
+	if err != nil {
+		fmt.Println("Error:", err)
+	} else {
+		fmt.Println("Converted number:", nodeIPint)
+	}
 
 	nodeUid := fmt.Sprintf("peer-%s-%d", nodeIP, os.Getpid())
 
@@ -43,14 +48,13 @@ func Network(messagefromOrderAssigner <-chan HRAInput,
 	var (
 		onlineStatus      = false
 		messageInstance   Message
+		//TODO: DO WE NEED THIS? 
 		lastMessage       Message
 		
 		aliveList         [NUM_ELEVATORS]bool
-		/*
-		elevatorList      [NUM_ELEVATORS]Elevator
-		cabOrderList      [NUM_ELEVATORS][NFloors]Elevator
+		//TODO THIS CAN BE A [NUM_ELEVATORS]HRAInput
+		elevatorList      [NUM_ELEVATORS]HRAElevState
 		hallOrderList     [NUM_ELEVATORS][NFloors][NButtons]ButtonState
-		*/
 	)
 	
 	// Periodic broadcast of the last updated message
@@ -71,19 +75,20 @@ func Network(messagefromOrderAssigner <-chan HRAInput,
 	for {
 		select {
 		case reg := <-nodeRegistryChannel:
-
+			// TODO: FIX BUG HERE 
+			// TODO: ISSUE 4
 			// on state change, pass to main process
 			if contains(reg.Lost, nodeUid) {
 				fmt.Println("Node lost connection:", nodeUid)
 				onlineStatus = false
 				
-				aliveList[nodeIDINT] = false
+				//aliveList[nodeID] = false
 				//if i lose connection update aliveList
 
 			} else if reg.New == nodeUid {
 				fmt.Println("Node connected:", nodeUid)
 				onlineStatus = true
-				aliveList[nodeIDINT] = true
+				//aliveList[nodeID] = true
 			}
 			//if offline send to orderassigner! 
 			// send btn to ass? 
@@ -93,11 +98,32 @@ func Network(messagefromOrderAssigner <-chan HRAInput,
 			//we cant just set equal
 			fmt.Println("hallo vi er på nettet")
 			fmt.Println("msg id: ", msg.SenderId)
-
-			messagetoOrderAssignerChannel <- msg
-
+			// Convert SenderId (string) to an integer
+			senderId, _ := strconv.Atoi(msg.SenderId)
 			//handle incoming msg
+			aliveList[senderId] = true 
+			
+			// TODO Make function 
+			// TODO Make smarter sol 
+			// Convert and assign elevator state
+			if state, ok := msg.Payload.States[msg.SenderId]; ok {
+				elevatorList[senderId] = HRAElevState{
+					Behavior:    state.Behavior,
+					Floor:       state.Floor,
+					Direction:   state.Direction,
+					CabRequests: append([]bool{}, state.CabRequests...), // Copy slice to avoid issues
+				}
+			} else {
+				fmt.Println("Error: Missing state for SenderId:", msg.SenderId)
+			}
+			hallOrderList[senderId]= msg.Payload.HallRequests
+	
 			//Cyclic counter logic updates local world view
+			
+			//messagetoOrderAssignerChannel <- msg
+
+			
+			
 			//send msg to assigner with function 
 
 		case payload := <-messagefromOrderAssigner:

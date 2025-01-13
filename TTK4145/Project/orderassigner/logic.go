@@ -55,7 +55,7 @@ func assignOrders(hraInput HRAInput, elevatorName string) [NFloors][NButtons]boo
 
 func InitialiseHRAInput() HRAInput {
 	hraInput := HRAInput{
-		HallRequests: make([][2]ButtonState, NFloors),
+		HallRequests: [NFloors][NButtons]ButtonState{},
 		States:       make(map[string]HRAElevState),
 	}
 	return hraInput

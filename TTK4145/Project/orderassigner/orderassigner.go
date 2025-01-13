@@ -42,14 +42,13 @@ func OrderAssigner(
 			hraInput = orderComplete(hraInput, nodeID, payload.CompletedOrders)
 			fmt.Println("elevator was changed")
 			toNetworkChannel <- hraInput
-
+		*/
 		case  <-fromNetworkChannel:
 			//TODO DEFINIE incomingmsg as the from NetworkChannel
 			//aInput = mergeHRA(hraInput, incomingmsg.Payload, incomingmsg.SenderId)
-			newOrderChannel <- assignOrders(hraInput, nodeID)
+			//newOrderChannel <- assignOrders(hraInput, nodeID)
 			fmt.Println("nye meldinger incomming")
-		}
-		*/
+		
 		}
 	}
 	
