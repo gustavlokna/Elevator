@@ -39,6 +39,8 @@ func cyclicLogic(myOrder ButtonState,
 		return myOrder
 	}
 	// Progress to the next state
+    // I CANNOT progress from order assigned before i get msg form assigner! 
+    
 	return (myOrder + 1) % (OrderComplete + 1)
 }
 
