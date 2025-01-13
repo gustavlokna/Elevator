@@ -8,10 +8,13 @@ import (
 	"fmt"
 	"os"
 	"time"
+	"strconv"
 )
 
 const lifelinePort int = 1337
 const messagePort int = lifelinePort + 1
+const NUM_ELEVATORS int = 3
+
 
 func Network(messagefromOrderAssigner <-chan HRAInput,
 	messagetoOrderAssignerChannel chan<- Message,
@@ -20,6 +23,8 @@ func Network(messagefromOrderAssigner <-chan HRAInput,
 	if err != nil {
 		print("Unable to get the IP address")
 	}
+	//TODO CONVERT THIS SMARTER DO NOT USE THIS 
+	nodeIDINT, err := strconv.Atoi(nodeID)
 
 	nodeUid := fmt.Sprintf("peer-%s-%d", nodeIP, os.Getpid())
 
@@ -34,13 +39,20 @@ func Network(messagefromOrderAssigner <-chan HRAInput,
 	broadcastReceiverChannel := make(chan Message)
 	go broadcast.Sender(messagePort, broadcastTransmissionChannel)
 	go broadcast.Receiver(nodeIP, messagePort, broadcastReceiverChannel)
-
+	
 	var (
-		onlineStatus = false
-		//onlineStatusTest = false
-		messageInstance  Message
-		lastMessage Message
+		onlineStatus      = false
+		messageInstance   Message
+		lastMessage       Message
+		
+		aliveList         [NUM_ELEVATORS]bool
+		/*
+		elevatorList      [NUM_ELEVATORS]Elevator
+		cabOrderList      [NUM_ELEVATORS][NFloors]Elevator
+		hallOrderList     [NUM_ELEVATORS][NFloors][NButtons]ButtonState
+		*/
 	)
+	
 	// Periodic broadcast of the last updated message
 	// Periodic broadcast of the last updated message
 
@@ -64,9 +76,14 @@ func Network(messagefromOrderAssigner <-chan HRAInput,
 			if contains(reg.Lost, nodeUid) {
 				fmt.Println("Node lost connection:", nodeUid)
 				onlineStatus = false
+				
+				aliveList[nodeIDINT] = false
+				//if i lose connection update aliveList
+
 			} else if reg.New == nodeUid {
 				fmt.Println("Node connected:", nodeUid)
 				onlineStatus = true
+				aliveList[nodeIDINT] = true
 			}
 			//if offline send to orderassigner! 
 			// send btn to ass? 
@@ -76,7 +93,9 @@ func Network(messagefromOrderAssigner <-chan HRAInput,
 			//we cant just set equal
 			fmt.Println("hallo vi er på nettet")
 			fmt.Println("msg id: ", msg.SenderId)
+
 			messagetoOrderAssignerChannel <- msg
+
 			//handle incoming msg
 			//Cyclic counter logic updates local world view
 			//send msg to assigner with function 

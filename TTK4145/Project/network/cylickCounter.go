@@ -25,14 +25,13 @@ case msg := <-broadcastReceiverChannel:
 
     // Forward the message to the order assigner
     messagetoOrderAssignerChannel <- msg
-*/
 
 
 
 
 
 
-/*
+
 
 func cyclicCounterLogic(localState int, globalStates map[string]int, button int) int {
 	// do nothing if in idle and all others in idle and order complete 
@@ -56,6 +55,5 @@ func cyclicCounterLogic(localState int, globalStates map[string]int, button int)
 	// Progress to the next state if all are synchronized or ahead
 	return (localState + 1) % (OrderComplete+1) 
 	}
-
 
 */
