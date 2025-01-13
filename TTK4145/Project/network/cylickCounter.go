@@ -28,6 +28,8 @@ func cyclicCounter(
 func cyclicLogic(myOrder ButtonState, 
     nodeOrder ButtonState,
     ) ButtonState {
+    // I want to only progress if all are equal 
+    //or i am behind unless transition from complete to idle 
 	if myOrder == Idle {
 		if nodeOrder != Idle && nodeOrder != OrderComplete {
 			// Progress to next state if another elevator is ahead
@@ -39,8 +41,9 @@ func cyclicLogic(myOrder ButtonState,
 		return myOrder
 	}
 	// Progress to the next state
+
     // I CANNOT progress from order assigned before i get msg form assigner! 
-    
+
 	return (myOrder + 1) % (OrderComplete + 1)
 }
 
