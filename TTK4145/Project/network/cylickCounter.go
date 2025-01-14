@@ -30,6 +30,70 @@ func cyclicLogic(myOrder ButtonState,
     ) ButtonState {
     // I want to only progress if all are equal 
     //or i am behind unless transition from complete to idle 
+	switch myOrder {
+	case Idle:
+		switch nodeOrder {
+		case Idle:
+			myOrder = Idle
+		case ButtonPressed:
+			myOrder = ButtonPressed
+		case OrderAssigned: 
+			// Error should not happen
+			myOrder = Idle
+		case OrderComplete: 
+			myOrder = Idle
+
+	}  
+	case ButtonPressed: 
+		switch nodeOrder {
+		case Idle:
+			myOrder = ButtonPressed 
+		case ButtonPressed:
+			myOrder = OrderAssigned
+		case OrderAssigned: 
+			myOrder = OrderAssigned
+		case OrderComplete: 
+			// Error should not happen 
+			// I have set it to ButtonPressed
+			// such that we waith for that elevator to catch up 
+			myOrder = ButtonPressed
+
+	}  
+
+	case OrderAssigned:
+		switch nodeOrder {
+		case Idle:
+			// Error Should not happen
+			myOrder = ButtonPressed
+		case ButtonPressed:
+			myOrder = OrderAssigned
+		case OrderAssigned: 
+			myOrder = OrderAssigned
+		case OrderComplete: 
+			myOrder = OrderComplete
+
+	}  
+
+	case OrderComplete:
+		switch nodeOrder {
+		case Idle:
+			myOrder = Idle
+		case ButtonPressed:
+			myOrder = ButtonPressed
+		case OrderAssigned: 
+			myOrder = OrderComplete
+		case OrderComplete: 
+			myOrder = Idle
+	}  
+	}
+	return myOrder
+
+/*
+func cyclicLogic(myOrder ButtonState, 
+    nodeOrder ButtonState,
+    ) ButtonState {
+    // I want to only progress if all are equal 
+    //or i am behind unless transition from complete to idle 
 	if myOrder == Idle {
 		if nodeOrder != Idle && nodeOrder != OrderComplete {
 			// Progress to next state if another elevator is ahead
@@ -46,7 +110,6 @@ func cyclicLogic(myOrder ButtonState,
 
 	return (myOrder + 1) % (OrderComplete + 1)
 }
-
-	
+*/
 
 

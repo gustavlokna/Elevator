@@ -64,8 +64,6 @@ func buttonStateToString(state ButtonState) string {
         return "Idle"
     case ButtonPressed:
         return "ButtonPressed"
-    case EventRegistered:
-        return "EventRegistered"
     case OrderAssigned:
         return "OrderAssigned"
     case OrderComplete:

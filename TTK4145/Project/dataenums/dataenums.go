@@ -24,7 +24,6 @@ type ButtonState int
 const (
 	Idle ButtonState = iota
 	ButtonPressed
-	EventRegistered
 	OrderAssigned
 	OrderComplete
 )
