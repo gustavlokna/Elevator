@@ -82,13 +82,13 @@ func Network(messagefromOrderAssigner <-chan HRAInput,
 				fmt.Println("Node lost connection:", nodeUid)
 				onlineStatus = false
 				
-				//aliveList[nodeID] = false
+				aliveList[nodeIDInt] = false
 				//if i lose connection update aliveList
 
 			} else if reg.New == nodeUid {
 				fmt.Println("Node connected:", nodeUid)
 				onlineStatus = true
-				//aliveList[nodeID] = true
+				aliveList[nodeIDInt] = true
 			}
 			//if offline send to orderassigner! 
 			// send btn to ass? 
@@ -100,9 +100,9 @@ func Network(messagefromOrderAssigner <-chan HRAInput,
 			// fmt.Println("msg id: ", msg.SenderId)
 			// Convert SenderId (string) to an integer
 			senderId, _ := strconv.Atoi(msg.SenderId)
+			
 			//handle incoming msg
 			aliveList[senderId] = true 
-			
 			// TODO Make function 
 			// TODO Make smarter sol 
 			// Convert and assign elevator state
@@ -117,9 +117,10 @@ func Network(messagefromOrderAssigner <-chan HRAInput,
 				fmt.Println("Error: Missing state for SenderId:", msg.SenderId)
 			}
 			hallOrderList[senderId]= msg.Payload.HallRequests
+			//printHallOrderList(hallOrderList)
 			//Cyclic counter logic updates local world view
 			hallOrderList = cyclicCounter(hallOrderList,aliveList,nodeIDInt)
-			//printHallOrderList(hallOrderList)
+			printHallOrderList(hallOrderList)
 			
 			//messagetoOrderAssignerChannel <- msg
 
@@ -134,7 +135,7 @@ func Network(messagefromOrderAssigner <-chan HRAInput,
 			messageInstance.OnlineStatus = onlineStatus
 			lastMessage = messageInstance
 			hallOrderList[nodeIDInt]= payload.HallRequests
-			printHallOrderList(hallOrderList)
+			//printHallOrderList(hallOrderList)
 			//fmt.Println("Broadcast transmitted to network")
 			if !messageInstance.OnlineStatus {
 				print("sending msg back")

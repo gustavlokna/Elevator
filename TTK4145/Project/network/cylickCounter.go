@@ -13,7 +13,8 @@ func cyclicCounter(
 		for btn := 0; btn < NButtons; btn++ {
 			myOrder := hallOrderList[myID][floor][btn]
 			for node := 0; node < NUM_ELEVATORS; node++ {
-				if !aliveList[node] {
+				if !aliveList[node] && node != myID {
+					print("hei")
 					continue
 				}
 				nodeOrder := hallOrderList[node][floor][btn]
@@ -30,12 +31,14 @@ func cyclicLogic(myOrder ButtonState,
     ) ButtonState {
     // I want to only progress if all are equal 
     //or i am behind unless transition from complete to idle 
+	
 	switch myOrder {
 	case Idle:
 		switch nodeOrder {
 		case Idle:
 			myOrder = Idle
 		case ButtonPressed:
+			print("hallo")
 			myOrder = ButtonPressed
 		case OrderAssigned: 
 			// Error should not happen
@@ -49,6 +52,7 @@ func cyclicLogic(myOrder ButtonState,
 		case Idle:
 			myOrder = ButtonPressed 
 		case ButtonPressed:
+			print()
 			myOrder = OrderAssigned
 		case OrderAssigned: 
 			myOrder = OrderAssigned
