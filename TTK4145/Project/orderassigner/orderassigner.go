@@ -32,7 +32,7 @@ func OrderAssigner(
 		case btnEvent := <-drv_buttons:
 			//Note make cylick counter own module and put this there ? 
 			fmt.Println("button pressed")
-
+			// TODO do not overwrite this is fixed when we get the fromNetworkChannel working
 			hraInput = buttonPressed(hraInput, nodeID, btnEvent)
 			//PrintHRAInput(hraInput)
 			toNetworkChannel <- hraInput

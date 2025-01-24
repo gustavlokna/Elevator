@@ -3,7 +3,6 @@ package network
 import (
 	. "Project/dataenums"
 
-	"fmt"
 )
 
 func cyclicCounter(
@@ -15,11 +14,11 @@ func cyclicCounter(
 		for btn := 0; btn < NButtons; btn++ {
 			myOrder := hallOrderList[myID][floor][btn]
 			for node := 0; node < NUM_ELEVATORS; node++ {
-				if !aliveList[node] || node != myID {
+				if !aliveList[node] || node == myID {
 					continue
 				}
-				fmt.Printf("myID %d is alive\n", myID)
-				fmt.Printf("node %d is alive\n", node)
+				//fmt.Printf("myID %d is alive\n", myID)
+				//fmt.Printf("node %d is alive\n", node)
 				nodeOrder := hallOrderList[node][floor][btn]
 				myOrder = cyclicLogic(myOrder, nodeOrder)
 			}
