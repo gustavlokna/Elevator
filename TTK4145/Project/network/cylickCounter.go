@@ -87,7 +87,7 @@ func cyclicLogic(myOrder ButtonState,
 	}  
 	}
 	return myOrder
-
+}
 /*
 func cyclicLogic(myOrder ButtonState, 
     nodeOrder ButtonState,

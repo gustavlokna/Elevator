@@ -34,7 +34,7 @@ func OrderAssigner(
 			fmt.Println("button pressed")
 
 			hraInput = buttonPressed(hraInput, nodeID, btnEvent)
-			PrintHRAInput(hraInput)
+			//PrintHRAInput(hraInput)
 			toNetworkChannel <- hraInput
 		/*
 		case payload := <-payloadFromElevator:

@@ -20,6 +20,7 @@ func Network(messagefromOrderAssigner <-chan HRAInput,
 	messagetoOrderAssignerChannel chan<- Message,
 	nodeID string) {
 	nodeIP, err := local.GetIP()
+	nodeIDInt,_ := strconv.Atoi(nodeID)
 	if err != nil {
 		print("Unable to get the IP address")
 	}
@@ -76,8 +77,7 @@ func Network(messagefromOrderAssigner <-chan HRAInput,
 		select {
 		case reg := <-nodeRegistryChannel:
 			// TODO: FIX BUG HERE 
-			// TODO: ISSUE 4
-			// on state change, pass to main process
+			// TODO: ISSUE 4 process
 			if contains(reg.Lost, nodeUid) {
 				fmt.Println("Node lost connection:", nodeUid)
 				onlineStatus = false
@@ -96,8 +96,8 @@ func Network(messagefromOrderAssigner <-chan HRAInput,
 
 		case msg := <-broadcastReceiverChannel:
 			//we cant just set equal
-			fmt.Println("hallo vi er på nettet")
-			fmt.Println("msg id: ", msg.SenderId)
+			// fmt.Println("hallo vi er på nettet")
+			// fmt.Println("msg id: ", msg.SenderId)
 			// Convert SenderId (string) to an integer
 			senderId, _ := strconv.Atoi(msg.SenderId)
 			//handle incoming msg
@@ -117,8 +117,9 @@ func Network(messagefromOrderAssigner <-chan HRAInput,
 				fmt.Println("Error: Missing state for SenderId:", msg.SenderId)
 			}
 			hallOrderList[senderId]= msg.Payload.HallRequests
-	
 			//Cyclic counter logic updates local world view
+			hallOrderList = cyclicCounter(hallOrderList,aliveList,nodeIDInt)
+			//printHallOrderList(hallOrderList)
 			
 			//messagetoOrderAssignerChannel <- msg
 
@@ -132,6 +133,8 @@ func Network(messagefromOrderAssigner <-chan HRAInput,
 			messageInstance.Payload = payload
 			messageInstance.OnlineStatus = onlineStatus
 			lastMessage = messageInstance
+			hallOrderList[nodeIDInt]= payload.HallRequests
+			printHallOrderList(hallOrderList)
 			//fmt.Println("Broadcast transmitted to network")
 			if !messageInstance.OnlineStatus {
 				print("sending msg back")
