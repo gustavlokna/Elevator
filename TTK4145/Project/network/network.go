@@ -123,6 +123,7 @@ func Network(messagefromOrderAssigner <-chan HRAInput,
 			printHallOrderList(hallOrderList)
 			// TODO THIS CAN BE STREAMLINED
 			lastMessage.Payload.HallRequests = hallOrderList[nodeIDInt]
+			//TODO SHOULD BE elevatorList and aliveList
 			//messagetoOrderAssignerChannel <- msg
 
 			
