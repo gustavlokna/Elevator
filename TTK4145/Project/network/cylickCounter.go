@@ -2,6 +2,8 @@ package network
 
 import (
 	. "Project/dataenums"
+
+	"fmt"
 )
 
 func cyclicCounter(
@@ -13,10 +15,11 @@ func cyclicCounter(
 		for btn := 0; btn < NButtons; btn++ {
 			myOrder := hallOrderList[myID][floor][btn]
 			for node := 0; node < NUM_ELEVATORS; node++ {
-				if !aliveList[node] && node != myID {
-					print("hei")
+				if !aliveList[node] || node != myID {
 					continue
 				}
+				fmt.Printf("myID %d is alive\n", myID)
+				fmt.Printf("node %d is alive\n", node)
 				nodeOrder := hallOrderList[node][floor][btn]
 				myOrder = cyclicLogic(myOrder, nodeOrder)
 			}
@@ -36,27 +39,34 @@ func cyclicLogic(myOrder ButtonState,
 	case Idle:
 		switch nodeOrder {
 		case Idle:
+			//print("penis")
 			myOrder = Idle
 		case ButtonPressed:
 			print("hallo")
 			myOrder = ButtonPressed
 		case OrderAssigned: 
+			print("kuk")
 			// Error should not happen
-			myOrder = Idle
+			// was myOrder = IDLE
+			myOrder = ButtonPressed
 		case OrderComplete: 
+			print("pikk")
 			myOrder = Idle
 
 	}  
 	case ButtonPressed: 
 		switch nodeOrder {
 		case Idle:
+			print("fack")
 			myOrder = ButtonPressed 
 		case ButtonPressed:
-			print()
+			print("tissefant")
 			myOrder = OrderAssigned
 		case OrderAssigned: 
+			print("tullbal")
 			myOrder = OrderAssigned
 		case OrderComplete: 
+			print("hva faen ButtonPressed, OrderComplete  ")
 			// Error should not happen 
 			// I have set it to ButtonPressed
 			// such that we waith for that elevator to catch up 
@@ -67,13 +77,17 @@ func cyclicLogic(myOrder ButtonState,
 	case OrderAssigned:
 		switch nodeOrder {
 		case Idle:
+			print("hva faen, OrderAssigned Idle")
 			// Error Should not happen
 			myOrder = ButtonPressed
 		case ButtonPressed:
+			print("hei, OrderAssigned ButtonPressed ")
 			myOrder = OrderAssigned
 		case OrderAssigned: 
+			print("hei, OrderAssigned OrderAssigned")
 			myOrder = OrderAssigned
 		case OrderComplete: 
+		print("hva faen, OrderAssigned OrderComplete")
 			myOrder = OrderComplete
 
 	}  
@@ -81,15 +95,20 @@ func cyclicLogic(myOrder ButtonState,
 	case OrderComplete:
 		switch nodeOrder {
 		case Idle:
+			print("hva faen, OrderComplete Idle")
 			myOrder = Idle
 		case ButtonPressed:
+			print("hva faen, OrderComplete ButtonPressed")
 			myOrder = ButtonPressed
 		case OrderAssigned: 
+			print("hva faen, OrderComplete OrderAssigned")
 			myOrder = OrderComplete
 		case OrderComplete: 
+			print("hva faen, OrderComplete OrderComplete")
 			myOrder = Idle
 	}  
 	}
+	//print("myOrder: ", myOrder)
 	return myOrder
 }
 /*

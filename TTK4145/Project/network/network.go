@@ -117,10 +117,10 @@ func Network(messagefromOrderAssigner <-chan HRAInput,
 				fmt.Println("Error: Missing state for SenderId:", msg.SenderId)
 			}
 			hallOrderList[senderId]= msg.Payload.HallRequests
-			//printHallOrderList(hallOrderList)
+			printHallOrderList(hallOrderList)
 			//Cyclic counter logic updates local world view
 			hallOrderList = cyclicCounter(hallOrderList,aliveList,nodeIDInt)
-			printHallOrderList(hallOrderList)
+			//printHallOrderList(hallOrderList)
 			
 			//messagetoOrderAssignerChannel <- msg
 
@@ -135,7 +135,7 @@ func Network(messagefromOrderAssigner <-chan HRAInput,
 			messageInstance.OnlineStatus = onlineStatus
 			lastMessage = messageInstance
 			hallOrderList[nodeIDInt]= payload.HallRequests
-			//printHallOrderList(hallOrderList)
+			printHallOrderList(hallOrderList)
 			//fmt.Println("Broadcast transmitted to network")
 			if !messageInstance.OnlineStatus {
 				print("sending msg back")
