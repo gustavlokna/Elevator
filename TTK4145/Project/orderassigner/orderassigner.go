@@ -62,8 +62,10 @@ func OrderAssigner(
 			//TODO why this. 
 			PayloadFromassignerToNetwork = handlePayloadFromNetwork(PayloadFromassignerToNetwork, 
 				PayloadFromNetwork, myID)
+			fmt.Println("Big Cock")
 			newOrderChannel <- assignOrders(PayloadFromNetwork,myID)
 			fmt.Println("nye meldinger incomming")
+			
 		
 		}
 	}

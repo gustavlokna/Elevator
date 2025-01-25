@@ -106,11 +106,13 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 			printHallOrderList(hallOrderList)
 
 			lastMessage.HallOrderList = hallOrderList
+			
 			messagetoOrderAssignerChannel <- PayloadFromNetworkToAssigner{
 				AliveList:     aliveList,
 				ElevatorList:  elevatorList,
 				HallOrderList: hallOrderList,
 			}
+			
 			
 			
 			

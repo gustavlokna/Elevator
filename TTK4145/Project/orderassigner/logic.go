@@ -24,14 +24,18 @@ func assignOrders(PayloadFromNetworkToAssigner PayloadFromNetworkToAssigner,
 		print("Failed to marshal HRAInput: %v\n", err)
 		return orderList
 	}
+	fmt.Printf("Serialized HRAInput: %s\n", string(jsonBytes))
 
+	
 	// TODO SOME LOGIC TO MAKE THE ButtonState to bool 
-
+	fmt.Println("all god here")
 	ret, err := exec.Command("hall_request_assigner", "-i", string(jsonBytes)).CombinedOutput()
 	if err != nil {
 		print("exec.Command error: %v\nOutput: %s\n", err, string(ret))
 		return orderList
 	}
+	
+	fmt.Printf("Raw output: %s\n", string(ret))
 
 	output := make(map[string][][2]bool)
 	if err := json.Unmarshal(ret, &output); err != nil {
@@ -53,8 +57,14 @@ func assignOrders(PayloadFromNetworkToAssigner PayloadFromNetworkToAssigner,
 
 
 func convertPayloadToHRAInput(payload PayloadFromNetworkToAssigner, nodeID int) HRAInput {
+	
 	hraInput := InitialiseHRAInput()
-
+	for i, alive := range payload.AliveList {
+		if alive {
+			elevatorID := fmt.Sprintf("elevator_%d", i) // Convert index to string key
+			hraInput.States[elevatorID] = payload.ElevatorList[i]
+		}
+	}
 	// Iterate over all floors and buttons
 	for floor := 0; floor < NFloors; floor++ {
 		for btn := 0; btn < NButtons; btn++ {
@@ -76,6 +86,7 @@ func convertPayloadToHRAInput(payload PayloadFromNetworkToAssigner, nodeID int) 
 			}
 		}
 	}
+	
 	return hraInput
 }
 
