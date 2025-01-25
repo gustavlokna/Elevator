@@ -28,8 +28,8 @@ func OrderAssigner(
 		return
 	}
 	payload := <-payloadFromElevator
-	PayloadFromassignerToNetwork = handlePayloadFromElevator(
-		PayloadFromassignerToNetwork, payload.Elevator, nodeID)
+	PayloadFromassignerToNetwork = handlePayloadFromElevator(payload,
+		PayloadFromassignerToNetwork, nodeID)
 	//check if it creates error by sending to network here
 	toNetworkChannel <- PayloadFromassignerToNetwork
 
@@ -47,13 +47,17 @@ func OrderAssigner(
 				nodeID, btnEvent)
 			//PrintHRAInput(hraInput)
 			toNetworkChannel <- PayloadFromassignerToNetwork
-		/*
+		
 		case payload := <-payloadFromElevator:
+			/*
 			hraInput = handlePayloadFromElevator(hraInput, payload.Elevator, nodeID)
 			hraInput = orderComplete(hraInput, nodeID, payload.CompletedOrders)
 			fmt.Println("elevator was changed")
-			toNetworkChannel <- hraInput
-		*/
+			*/
+			PayloadFromassignerToNetwork = handlePayloadFromElevator(payload,
+				PayloadFromassignerToNetwork, nodeID)
+			toNetworkChannel <- PayloadFromassignerToNetwork
+		
 		case PayloadFromNetwork := <-fromNetworkChannel:
 			//TODO why this. 
 			PayloadFromassignerToNetwork = handlePayloadFromNetwork(PayloadFromassignerToNetwork, 

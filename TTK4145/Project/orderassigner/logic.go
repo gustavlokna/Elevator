@@ -95,7 +95,7 @@ func InitialisePayloadFromassignerToNetwork() PayloadFromassignerToNetwork {
 	return payloadFromassignerToNetwork
 }
 
-
+/*
 func handlePayloadFromElevator(payloadFromassignerToNetwork PayloadFromassignerToNetwork, e Elevator,
 	elevatorName string) PayloadFromassignerToNetwork{
 	behavior, direction, cabRequests := convertElevatorState(e)
@@ -107,11 +107,46 @@ func handlePayloadFromElevator(payloadFromassignerToNetwork PayloadFromassignerT
 	}
 	return payloadFromassignerToNetwork
 }
+*/
+func handlePayloadFromElevator(fromElevator  PayloadFromElevator, 
+	toNetwork PayloadFromassignerToNetwork, nodeID string ) PayloadFromassignerToNetwork{
+	// some logic that converts the completed progresses the copleted orders to order complete
+	// toNetwork.HallRequests 
+	// Iterate over CompletedOrders and update toNetwork.HallRequests
+	for floor := 0; floor < NFloors; floor++ {
+		for btn := 0; btn < NButtons; btn++ {
+			if fromElevator.CompletedOrders[floor][btn] {
+				// Progress button state to OrderComplete
+				if toNetwork.HallRequests[floor][btn] == OrderAssigned {
+					toNetwork.HallRequests[floor][btn] = OrderComplete
+				}
+			}
+		}
+	}
+	behavior, direction, cabRequests := convertElevatorState(fromElevator.Elevator)
+	toNetwork.States[nodeID] = HRAElevState{
+		Behavior:    behavior,
+		Floor:       fromElevator.Elevator.CurrentFloor,
+		Direction:   direction,
+		CabRequests: cabRequests,
+	}
+	return toNetwork
+}
+
+
+
+
+
+
+
+
+
 
 func handlePayloadFromNetwork(payload PayloadFromassignerToNetwork, 
 	PayloadFromNetwork PayloadFromNetworkToAssigner,
 	nodeID int)PayloadFromassignerToNetwork{
 	payload.HallRequests = PayloadFromNetwork.HallOrderList[nodeID]
+	//payload.States[nodeID] = PayloadFromNetwork.ElevatorList[nodeID]
 	//payload.States = PayloadFromNetwork.ElevatorList
 	return payload
 }
