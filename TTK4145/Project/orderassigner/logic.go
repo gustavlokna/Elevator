@@ -71,7 +71,7 @@ func convertPayloadToHRAInput(payload PayloadFromNetworkToAssigner, nodeID int) 
 	//PrintHraInput(hraInput)
 	// Iterate over all floors and buttons
 	for floor := 0; floor < NFloors; floor++ {
-		for btn := 0; btn < NButtons; btn++ {
+		for btn := BHallUp; btn <= BHallDown; btn++ { 
 			allAssigned := true
 	
 			// Check all alive elevators for the specific button and floor
@@ -96,7 +96,7 @@ func convertPayloadToHRAInput(payload PayloadFromNetworkToAssigner, nodeID int) 
 
 func InitialiseHRAInput() HRAInput {
 	hraInput := HRAInput{
-		HallRequests: [NFloors][NButtons]bool{},
+		HallRequests: [NFloors][NButtons-1]bool{},
 		States:       make(map[string]HRAElevState),
 	}
 	return hraInput

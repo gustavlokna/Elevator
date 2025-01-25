@@ -64,7 +64,6 @@ func PrintHraInput(hraInput HRAInput) {
 		fmt.Printf("  Floor %d:\n", floor)
 		fmt.Printf("    Up: %s\n", boolToString(requests[BHallUp]))
 		fmt.Printf("    Down: %s\n", boolToString(requests[BHallDown]))
-		fmt.Printf("    Cab: %s\n", boolToString(requests[BCab]))
 	}
 
 	fmt.Println("States:")

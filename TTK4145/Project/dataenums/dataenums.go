@@ -96,7 +96,8 @@ type HRAElevState struct {
 
 type HRAInput struct {
 	//TODO:  Make variabels HallRequests        [][2]ButtonState `json:"hallRequests"` 
-	HallRequests        [NFloors][NButtons]bool `json:"hallRequests"` 
+	//HallRequests        [NFloors][NButtons]bool `json:"hallRequests"` 
+	HallRequests        [NFloors][2]bool `json:"hallRequests"` 
 	//NOTE THIS WAS BOOL AND TO USE ASSIGNER MUST BE CONVERTED TO INTEGER 
 	//Coul BE SIMPLE IN ASSIGNER IF HallRequests == OrderAssigned then 1, else 0 
 	States              map[string]HRAElevState `json:"states"`
