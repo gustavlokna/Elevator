@@ -37,7 +37,7 @@ func ElevDirToString(d HWMotorDirection) string {
 
 
 
-func PrintHRAInput(payload PayloadFromassignerToNetwork) {
+func PrintPayloadFromassignerToNetwork(payload PayloadFromassignerToNetwork) {
     fmt.Println("HRAInput:")
     fmt.Println("Hall Requests:")
     for floor, requests := range payload.HallRequests {
@@ -56,6 +56,33 @@ func PrintHRAInput(payload PayloadFromassignerToNetwork) {
         fmt.Printf("    Direction: %s\n", state.Direction)
         fmt.Printf("    Cab Requests: %v\n", state.CabRequests)
     }
+}
+
+func PrintHraInput(hraInput HRAInput) {
+	fmt.Println("Hall Requests:")
+	for floor, requests := range hraInput.HallRequests {
+		fmt.Printf("  Floor %d:\n", floor)
+		fmt.Printf("    Up: %s\n", boolToString(requests[BHallUp]))
+		fmt.Printf("    Down: %s\n", boolToString(requests[BHallDown]))
+		fmt.Printf("    Cab: %s\n", boolToString(requests[BCab]))
+	}
+
+	fmt.Println("States:")
+	for elevator, state := range hraInput.States {
+		fmt.Printf("  Elevator: %s\n", elevator)
+		fmt.Printf("    Behavior: %s\n", state.Behavior)
+		fmt.Printf("    Floor: %d\n", state.Floor)
+		fmt.Printf("    Direction: %s\n", state.Direction)
+		fmt.Printf("    Cab Requests: %v\n", state.CabRequests)
+	}
+}
+
+// Helper: Convert bool to string
+func boolToString(state bool) string {
+	if state {
+		return "True"
+	}
+	return "False"
 }
 
 func buttonStateToString(state ButtonState) string {

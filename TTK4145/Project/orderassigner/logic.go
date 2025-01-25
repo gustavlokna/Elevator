@@ -60,11 +60,15 @@ func convertPayloadToHRAInput(payload PayloadFromNetworkToAssigner, nodeID int) 
 	
 	hraInput := InitialiseHRAInput()
 	for i, alive := range payload.AliveList {
+
 		if alive {
+
 			elevatorID := fmt.Sprintf("elevator_%d", i) // Convert index to string key
 			hraInput.States[elevatorID] = payload.ElevatorList[i]
 		}
 	}
+	//print("printer hra")
+	//PrintHraInput(hraInput)
 	// Iterate over all floors and buttons
 	for floor := 0; floor < NFloors; floor++ {
 		for btn := 0; btn < NButtons; btn++ {

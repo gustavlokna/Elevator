@@ -56,15 +56,19 @@ func OrderAssigner(
 			*/
 			PayloadFromassignerToNetwork = handlePayloadFromElevator(payload,
 				PayloadFromassignerToNetwork, nodeID)
+			print("hallo")
 			toNetworkChannel <- PayloadFromassignerToNetwork
 		
 		case PayloadFromNetwork := <-fromNetworkChannel:
 			//TODO why this. 
+			
 			PayloadFromassignerToNetwork = handlePayloadFromNetwork(PayloadFromassignerToNetwork, 
 				PayloadFromNetwork, myID)
 			fmt.Println("Big Cock")
+			
 			newOrderChannel <- assignOrders(PayloadFromNetwork,myID)
 			fmt.Println("nye meldinger incomming")
+			
 			
 		
 		}

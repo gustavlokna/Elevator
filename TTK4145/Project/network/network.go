@@ -103,10 +103,11 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 			//printHallOrderList(hallOrderList)
 			//Cyclic counter logic updates local world view
 			hallOrderList = cyclicCounter(hallOrderList,aliveList,nodeIDInt)
-			printHallOrderList(hallOrderList)
+			//printHallOrderList(hallOrderList)
 
 			lastMessage.HallOrderList = hallOrderList
 			
+
 			messagetoOrderAssignerChannel <- PayloadFromNetworkToAssigner{
 				AliveList:     aliveList,
 				ElevatorList:  elevatorList,
@@ -127,7 +128,12 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 			messageInstance.OnlineStatus = onlineStatus
 			lastMessage = messageInstance
 			hallOrderList[nodeIDInt]= payload.HallRequests
-			printHallOrderList(hallOrderList)
+			//printHallOrderList(hallOrderList)
+			//printElevatorList(messageInstance.ElevatorList)
+
+			// TODO this should be simpler (just add everything to elevatorList
+			//  hallOrderList etc and brodcast thoe variables )
+			elevatorList[nodeIDInt] =  payload.States[nodeID]
 			//fmt.Println("Broadcast transmitted to network")
 			if !messageInstance.OnlineStatus {
 				// TODO set btn_pressed = assign and send to assigner 

@@ -47,3 +47,14 @@ func printHallOrderList(hallOrderList [NUM_ELEVATORS][NFloors][NButtons]ButtonSt
 		fmt.Println()
 	}
 }
+
+func printElevatorList(elevatorList [NUM_ELEVATORS]HRAElevState) {
+	fmt.Println("Elevator List:")
+	for i, state := range elevatorList {
+		fmt.Printf("  Elevator %d:\n", i)
+		fmt.Printf("    Behavior: %s\n", state.Behavior)
+		fmt.Printf("    Floor: %d\n", state.Floor)
+		fmt.Printf("    Direction: %s\n", state.Direction)
+		fmt.Printf("    Cab Requests: %v\n", state.CabRequests)
+	}
+}
