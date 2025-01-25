@@ -37,10 +37,10 @@ func ElevDirToString(d HWMotorDirection) string {
 
 
 
-func PrintHRAInput(hraInput HRAInput) {
+func PrintHRAInput(payload PayloadFromassignerToNetwork) {
     fmt.Println("HRAInput:")
     fmt.Println("Hall Requests:")
-    for floor, requests := range hraInput.HallRequests {
+    for floor, requests := range payload.HallRequests {
         fmt.Printf("  Floor %d: [Up: %s, Down: %s]\n",
             floor,
             buttonStateToString(requests[BHallUp]),
@@ -49,7 +49,7 @@ func PrintHRAInput(hraInput HRAInput) {
     }
 
     fmt.Println("States:")
-    for elevator, state := range hraInput.States {
+    for elevator, state := range payload.States {
         fmt.Printf("  Elevator: %s\n", elevator)
         fmt.Printf("    Behavior: %s\n", state.Behavior)
         fmt.Printf("    Floor: %d\n", state.Floor)

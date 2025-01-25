@@ -13,11 +13,11 @@ import (
 
 const lifelinePort int = 1337
 const messagePort int = lifelinePort + 1
-const NUM_ELEVATORS int = 2
 
 
-func Network(messagefromOrderAssigner <-chan HRAInput,
-	messagetoOrderAssignerChannel chan<- Message,
+
+func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
+	messagetoOrderAssignerChannel chan<- PayloadFromNetworkToAssigner,
 	nodeID string) {
 	nodeIP, err := local.GetIP()
 	nodeIDInt,_ := strconv.Atoi(nodeID)
@@ -59,16 +59,12 @@ func Network(messagefromOrderAssigner <-chan HRAInput,
 	)
 	
 	// Periodic broadcast of the last updated message
-	// Periodic broadcast of the last updated message
 
 	// TODO: This is copied ?
 	
 	go func() {
 		for {
-			if !isEmptyHRAInput(lastMessage.Payload) { // Check if lastMessage.Payload is not empty
-				broadcastTransmissionChannel <- lastMessage
-				//print("Broadcasting last message to network")
-			}
+			broadcastTransmissionChannel <- lastMessage
 			time.Sleep(500 * time.Millisecond)
 		}
 	}()
@@ -101,31 +97,21 @@ func Network(messagefromOrderAssigner <-chan HRAInput,
 			// Convert SenderId (string) to an integer
 			senderId, _ := strconv.Atoi(msg.SenderId)
 			
-			//handle incoming msg
 			aliveList[senderId] = true 
-			// TODO Make function 
-			// TODO Make smarter sol 
-			// Convert and assign elevator state
-			if state, ok := msg.Payload.States[msg.SenderId]; ok {
-				elevatorList[senderId] = HRAElevState{
-					Behavior:    state.Behavior,
-					Floor:       state.Floor,
-					Direction:   state.Direction,
-					CabRequests: append([]bool{}, state.CabRequests...), // Copy slice to avoid issues
-				}
-			} else {
-				fmt.Println("Error: Missing state for SenderId:", msg.SenderId)
-			}
-			hallOrderList[senderId]= msg.Payload.HallRequests
+			elevatorList[senderId]= msg.ElevatorList[senderId]
+			hallOrderList[senderId]= msg.HallOrderList[senderId]
 			//printHallOrderList(hallOrderList)
 			//Cyclic counter logic updates local world view
 			hallOrderList = cyclicCounter(hallOrderList,aliveList,nodeIDInt)
 			printHallOrderList(hallOrderList)
-			// TODO THIS CAN BE STREAMLINED
-			lastMessage.Payload.HallRequests = hallOrderList[nodeIDInt]
-			//TODO SHOULD BE elevatorList and aliveList
-			//messagetoOrderAssignerChannel <- msg
 
+			lastMessage.HallOrderList = hallOrderList
+			messagetoOrderAssignerChannel <- PayloadFromNetworkToAssigner{
+				AliveList:     aliveList,
+				ElevatorList:  elevatorList,
+				HallOrderList: hallOrderList,
+			}
+			
 			
 			
 			//send msg to assigner with function 
@@ -133,15 +119,18 @@ func Network(messagefromOrderAssigner <-chan HRAInput,
 		case payload := <-messagefromOrderAssigner:
 			fmt.Println("msg from assigmer")
 			messageInstance.SenderId = nodeID
-			messageInstance.Payload = payload
+			messageInstance.HallOrderList[nodeIDInt] = payload.HallRequests
+			//TODO BURDE VÆRE SAMME 
+			messageInstance.ElevatorList[nodeIDInt] = payload.States[nodeID]
 			messageInstance.OnlineStatus = onlineStatus
 			lastMessage = messageInstance
 			hallOrderList[nodeIDInt]= payload.HallRequests
 			printHallOrderList(hallOrderList)
 			//fmt.Println("Broadcast transmitted to network")
 			if !messageInstance.OnlineStatus {
+				// TODO set btn_pressed = assign and send to assigner 
 				print("sending msg back")
-				messagetoOrderAssignerChannel <- messageInstance
+				//messagetoOrderAssignerChannel <- messageInstance
 			}
 			broadcastTransmissionChannel <- messageInstance
 		}
