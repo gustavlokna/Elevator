@@ -128,6 +128,7 @@ func handlePayloadFromElevator(fromElevator  PayloadFromElevator,
 	// some logic that converts the completed progresses the copleted orders to order complete
 	// toNetwork.HallRequests 
 	// Iterate over CompletedOrders and update toNetwork.HallRequests
+	/*
 	for floor := 0; floor < NFloors; floor++ {
 		for btn := 0; btn < NButtons; btn++ {
 			if fromElevator.CompletedOrders[floor][btn] {
@@ -135,21 +136,30 @@ func handlePayloadFromElevator(fromElevator  PayloadFromElevator,
 				if toNetwork.HallRequests[floor][btn] == OrderAssigned {
 					toNetwork.HallRequests[floor][btn] = OrderComplete
 				}
-				if toNetwork.States[nodeID].CabRequests[floor]{
-					toNetwork.States[nodeID].CabRequests[floor] = false
-
+				if Button(btn) == BCab{
+					if toNetwork.States[nodeID].CabRequests[floor]{
+						toNetwork.States[nodeID].CabRequests[floor] = false
+	
+					}
 				}
+
+				
 			}
 			// TODO we need to clear the cab request
 		}
 	}
-	behavior, direction, _ := convertElevatorState(fromElevator.Elevator)
+		*/
+	behavior, direction, cabRequests := convertElevatorState(fromElevator.Elevator)
 	toNetwork.States[nodeID] = HRAElevState{
 		Behavior:    behavior,
 		Floor:       fromElevator.Elevator.CurrentFloor,
 		Direction:   direction,
-		//CabRequests: cabRequests,
+		CabRequests: cabRequests,
 	}
+	// Todo we set the cabrequests twice. this is because we have to make them :=0
+	// do this smarter
+	toNetwork = orderComplete(toNetwork, nodeID, fromElevator.CompletedOrders)
+
 	return toNetwork
 }
 
