@@ -40,12 +40,17 @@ func ElevatorDriver(
 	
 	// Initialize and send initial PayloadFromElevator
 	// Initialize and send initial PayloadFromElevator
+	// TODO NO NEED TO DeFINE THIS 
 	payload := PayloadFromElevator{
 		Elevator:        elevator,
 		CompletedOrders: completedOrders,
 	}
 	payloadFromElevator <- payload
 
+	payloadToLights <- PayloadFromDriver{
+		CurrentFloor : elevator.CurrentFloor,
+		DoorLight : toggledoorLight, 
+	}
 
 	for {
 		prevelevator = elevator
