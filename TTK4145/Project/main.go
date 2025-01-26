@@ -4,6 +4,7 @@ import (
 	. "Project/dataenums"
 	"Project/elevatordriver"
 	"Project/hwelevio"
+	"Project/lights"
 	"Project/network"
 	"Project/orderassigner"
 	"flag"
@@ -52,6 +53,10 @@ func main() {
 		nodeID,
 	)
 
+	go lights.LightsHandler(
+		fromAsstoLight,
+		fromDriverToLight,
+	)
 	// Sleep for a while to allow the goroutine to print the message
 	// Hold main function indefinitely
 	select {}

@@ -7,13 +7,14 @@ import (
 
 
 
-func lightsHandler(
+func LightsHandler(
 	orderList <-chan [NFloors][NButtons]ButtonState, 
 	payloadFromDriver <-chan PayloadFromDriver,
 ) {
 	for {
 		select {
 		case payload := <-payloadFromDriver:
+			print("hello")
 			hwelevio.SetFloorIndicator(payload.CurrentFloor)
 			hwelevio.SetDoorOpenLamp(payload.DoorLight)
 

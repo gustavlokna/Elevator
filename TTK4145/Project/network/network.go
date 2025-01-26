@@ -120,7 +120,6 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 			//send msg to assigner with function 
 
 		case payload := <-messagefromOrderAssigner:
-			fmt.Println("msg from assigmer")
 			messageInstance.SenderId = nodeID
 			messageInstance.HallOrderList[nodeIDInt] = payload.HallRequests
 			//TODO BURDE VÆRE SAMME 

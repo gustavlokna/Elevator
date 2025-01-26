@@ -76,7 +76,8 @@ func ElevatorDriver(
 				elevator.Dirn = MDStop
 				elevator.CurrentBehaviour = EBDoorOpen
 				// send to lights boolean that doorlight shows 
-				toggledoorLight = false 
+				toggledoorLight = true 
+				print("SEND MSG TO LIGHS")
 				doorTimeout = time.Now().Add(3*time.Second)
 				payloadToLights <- PayloadFromDriver{
 					CurrentFloor : elevator.CurrentFloor,
@@ -86,7 +87,7 @@ func ElevatorDriver(
 			}
 
 		case EBDoorOpen: // recive back from lights 
-			ElevatorPrint(elevator)
+			//ElevatorPrint(elevator)
 			if obstruction {
 				doorTimeout = time.Now().Add(3*time.Second)
 				//add state called obst ? 

@@ -56,6 +56,7 @@ func assignOrders(PayloadFromNetworkToAssigner PayloadFromNetworkToAssigner,
 }
 
 
+
 func convertPayloadToHRAInput(payload PayloadFromNetworkToAssigner, nodeID int) HRAInput {
 	
 	hraInput := InitialiseHRAInput()
@@ -128,6 +129,13 @@ func handlePayloadFromElevator(fromElevator  PayloadFromElevator,
 
 	return toNetwork
 }
+
+
+
+
+
+
+
 
 
 

@@ -41,31 +41,31 @@ func cyclicLogic(myOrder ButtonState,
 			//print("penis")
 			myOrder = Idle
 		case ButtonPressed:
-			print("hallo")
+			//print("hallo")
 			myOrder = ButtonPressed
 		case OrderAssigned: 
-			print("kuk")
+			//print("kuk")
 			// Error should not happen
 			// was myOrder = IDLE
 			myOrder = ButtonPressed
 		case OrderComplete: 
-			print("pikk")
+			//print("pikk")
 			myOrder = Idle
 
 	}  
 	case ButtonPressed: 
 		switch nodeOrder {
 		case Idle:
-			print("fack")
+			//print("fack")
 			myOrder = ButtonPressed 
 		case ButtonPressed:
-			print("tissefant")
+			//print("tissefant")
 			myOrder = OrderAssigned
 		case OrderAssigned: 
-			print("tullbal")
+			//print("tullbal")
 			myOrder = OrderAssigned
 		case OrderComplete: 
-			print("hva faen ButtonPressed, OrderComplete  ")
+			//print("hva faen ButtonPressed, OrderComplete  ")
 			// Error should not happen 
 			// I have set it to ButtonPressed
 			// such that we waith for that elevator to catch up 
@@ -76,17 +76,17 @@ func cyclicLogic(myOrder ButtonState,
 	case OrderAssigned:
 		switch nodeOrder {
 		case Idle:
-			print("hva faen, OrderAssigned Idle")
+			//print("hva faen, OrderAssigned Idle")
 			// Error Should not happen
 			myOrder = ButtonPressed
 		case ButtonPressed:
-			print("hei, OrderAssigned ButtonPressed ")
+			//print("hei, OrderAssigned ButtonPressed ")
 			myOrder = OrderAssigned
 		case OrderAssigned: 
-			print("hei, OrderAssigned OrderAssigned")
+			//print("hei, OrderAssigned OrderAssigned")
 			myOrder = OrderAssigned
 		case OrderComplete: 
-		print("hva faen, OrderAssigned OrderComplete")
+		//print("hva faen, OrderAssigned OrderComplete")
 			myOrder = OrderComplete
 
 	}  
