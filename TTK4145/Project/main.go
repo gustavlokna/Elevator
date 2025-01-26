@@ -25,12 +25,15 @@ func main() {
 		payloadFromElevator     = make(chan PayloadFromElevator, 100)
 		toNetworkChannel   = make(chan PayloadFromassignerToNetwork, 100)
 		fromNetworkChannel = make(chan PayloadFromNetworkToAssigner, 100)
+		fromDriverToLight = make(chan PayloadFromDriver, 100)
+		fromAsstoLight = make(chan [NFloors][NButtons]ButtonState, 100)
 	)
 
 	//todo set ip as id in main? 
 	go elevatordriver.ElevatorDriver(
 		newOrderChannel,
 		payloadFromElevator,
+		fromDriverToLight,
 		nodeID,
 	)
 
@@ -39,6 +42,7 @@ func main() {
 		payloadFromElevator,
 		toNetworkChannel,
 		fromNetworkChannel,
+		fromAsstoLight,
 		nodeID,
 	)
 

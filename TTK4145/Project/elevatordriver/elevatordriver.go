@@ -9,6 +9,7 @@ import (
 func ElevatorDriver(
 	newOrderChannel <-chan [NFloors][NButtons]bool,
 	payloadFromElevator chan<- PayloadFromElevator,
+	payloadToLights chan <-PayloadFromDriver,
 	nodeID string,
 ) {
 	print("Elevator module initiated with name: ", nodeID)
@@ -18,6 +19,9 @@ func ElevatorDriver(
 		prevelevator   = elevator
 		completedOrders = [NFloors][NButtons]bool{}
 		obstruction    = false
+		// somewhat compied fromØ 
+		doorTimeout  time.Time 
+		toggledoorLight = false 
 	)
 
 	drv_floors := make(chan int)
@@ -50,7 +54,12 @@ func ElevatorDriver(
 			print("obst: ", obstruction)
 		case elevator.CurrentFloor = <-drv_floors:
 			print("etasje: ", elevator.CurrentFloor)
-			hwelevio.SetFloorIndicator(elevator.CurrentFloor)
+			//send to lightshandler 
+			//hwelevio.SetFloorIndicator(elevator.CurrentFloor)
+			payloadToLights <- PayloadFromDriver{
+				CurrentFloor : elevator.CurrentFloor,
+				DoorLight : toggledoorLight, 
+			}
 		case elevator.Requests = <-newOrderChannel:
 		default:
 			time.Sleep(10 * time.Millisecond)
@@ -66,17 +75,35 @@ func ElevatorDriver(
 				hwelevio.SetMotorDirection(MDStop)
 				elevator.Dirn = MDStop
 				elevator.CurrentBehaviour = EBDoorOpen
+				// send to lights boolean that doorlight shows 
+				toggledoorLight = false 
+				doorTimeout = time.Now().Add(3*time.Second)
+				payloadToLights <- PayloadFromDriver{
+					CurrentFloor : elevator.CurrentFloor,
+					DoorLight : toggledoorLight, 
+				}
 				continue
 			}
 
-		case EBDoorOpen:
+		case EBDoorOpen: // recive back from lights 
 			ElevatorPrint(elevator)
 			if obstruction {
+				doorTimeout = time.Now().Add(3*time.Second)
+				//add state called obst ? 
 				print("hello we have a obst")
 			} else {
-				completedOrders = ClearAtCurrentFloor(elevator)
-				// time.Sleep(3 * time.Second) // Simulate door open time
-				elevator.CurrentBehaviour = EBIdle
+				if time.Now().After(doorTimeout){
+					
+					completedOrders = ClearAtCurrentFloor(elevator)
+					// time.Sleep(3 * time.Second) // Simulate door open time
+					elevator.CurrentBehaviour = EBIdle
+					toggledoorLight = false 
+					payloadToLights <- PayloadFromDriver{
+						CurrentFloor : elevator.CurrentFloor,
+						DoorLight : toggledoorLight, 
+					}
+				}
+
 			}
 		}
 

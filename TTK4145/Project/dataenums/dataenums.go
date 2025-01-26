@@ -117,6 +117,7 @@ type PayloadFromElevator struct {
 }
 
 type PayloadFromassignerToNetwork struct{
+	//TODO Is not just hallRequests. Name does not fit is also cab 
 	HallRequests        [NFloors][NButtons]ButtonState `json:"hallRequests"` 
 	States              map[string]HRAElevState `json:"states"`
 }
@@ -124,5 +125,11 @@ type PayloadFromassignerToNetwork struct{
 type PayloadFromNetworkToAssigner struct {
 	AliveList     [NUM_ELEVATORS]bool
 	ElevatorList  [NUM_ELEVATORS]HRAElevState
+	//TODO IS NOT just HallORders ? 
 	HallOrderList [NUM_ELEVATORS][NFloors][NButtons]ButtonState
+}
+
+type PayloadFromDriver struct {
+	CurrentFloor int
+	DoorLight bool 
 }
