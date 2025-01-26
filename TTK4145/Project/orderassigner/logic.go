@@ -135,15 +135,20 @@ func handlePayloadFromElevator(fromElevator  PayloadFromElevator,
 				if toNetwork.HallRequests[floor][btn] == OrderAssigned {
 					toNetwork.HallRequests[floor][btn] = OrderComplete
 				}
+				if toNetwork.States[nodeID].CabRequests[floor]{
+					toNetwork.States[nodeID].CabRequests[floor] = false
+
+				}
 			}
+			// TODO we need to clear the cab request
 		}
 	}
-	behavior, direction, cabRequests := convertElevatorState(fromElevator.Elevator)
+	behavior, direction, _ := convertElevatorState(fromElevator.Elevator)
 	toNetwork.States[nodeID] = HRAElevState{
 		Behavior:    behavior,
 		Floor:       fromElevator.Elevator.CurrentFloor,
 		Direction:   direction,
-		CabRequests: cabRequests,
+		//CabRequests: cabRequests,
 	}
 	return toNetwork
 }
