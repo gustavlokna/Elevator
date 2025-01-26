@@ -5,75 +5,180 @@ import (
 	//"os"
 	"encoding/json"
 	"os/exec"
+	"fmt"
 )
 
-func worldViewsAlign(hraInput HRAInput) bool{
-	WorldView := true
-	//logic to check if all counters are equal
-	return WorldView
-}
 
-func assignOrders(hraInput HRAInput, elevatorName string) [NFloors][NButtons]bool {
+func assignOrders(PayloadFromNetworkToAssigner PayloadFromNetworkToAssigner, 
+	nodeID int) [NFloors][NButtons]bool {
 	var orderList [NFloors][NButtons]bool
 
-	if len(hraInput.States) == 0 {
-		print("HRAInput.States is empty, skipping order assignment")
+	if !(PayloadFromNetworkToAssigner.AliveList[nodeID]) {
+		print("local elevator not alive")
 		return orderList
 	}
+	hraInput := convertPayloadToHRAInput(PayloadFromNetworkToAssigner, nodeID) 
 
 	jsonBytes, err := json.Marshal(hraInput)
 	if err != nil {
 		print("Failed to marshal HRAInput: %v\n", err)
 		return orderList
 	}
+	fmt.Printf("Serialized HRAInput: %s\n", string(jsonBytes))
 
+	
+	// TODO SOME LOGIC TO MAKE THE ButtonState to bool 
+	fmt.Println("all god here")
 	ret, err := exec.Command("hall_request_assigner", "-i", string(jsonBytes)).CombinedOutput()
 	if err != nil {
 		print("exec.Command error: %v\nOutput: %s\n", err, string(ret))
 		return orderList
 	}
+	
+	fmt.Printf("Raw output: %s\n", string(ret))
 
 	output := make(map[string][][2]bool)
 	if err := json.Unmarshal(ret, &output); err != nil {
 		print("json.Unmarshal error: %v\n", err)
 		return orderList
 	}
-
-	if orders, ok := output[elevatorName]; ok {
+	elevatorID := fmt.Sprintf("elevator_%d", nodeID)
+	if orders, ok := output[elevatorID]; ok {
 		for floor := 0; floor < NFloors && floor < len(orders); floor++ {
 			for btn := BHallUp; btn < BCab; btn++ {
 				orderList[floor][btn] = orders[floor][btn]
 			}
-			orderList[floor][BCab] = hraInput.States[elevatorName].CabRequests[floor]
+			orderList[floor][BCab] = hraInput.States[elevatorID].CabRequests[floor]
 		}
 	}
 	
 	return orderList
 }
 
+
+func convertPayloadToHRAInput(payload PayloadFromNetworkToAssigner, nodeID int) HRAInput {
+	
+	hraInput := InitialiseHRAInput()
+	for i, alive := range payload.AliveList {
+
+		if alive {
+
+			elevatorID := fmt.Sprintf("elevator_%d", i) // Convert index to string key
+			hraInput.States[elevatorID] = payload.ElevatorList[i]
+		}
+	}
+	//print("printer hra")
+	//PrintHraInput(hraInput)
+	// Iterate over all floors and buttons
+	for floor := 0; floor < NFloors; floor++ {
+		for btn := BHallUp; btn <= BHallDown; btn++ { 
+			allAssigned := true
+	
+			// Check all alive elevators for the specific button and floor
+			for i, alive := range payload.AliveList {
+				if alive {
+					if payload.HallOrderList[i][floor][btn] != OrderAssigned {
+						allAssigned = false
+						break
+					}
+				}
+			}
+			if allAssigned {
+				hraInput.HallRequests[floor][btn] = true
+			} else {
+				hraInput.HallRequests[floor][btn] = false 
+			}
+		}
+	}
+	
+	return hraInput
+}
+
 func InitialiseHRAInput() HRAInput {
 	hraInput := HRAInput{
-		HallRequests: make([][2]bool, NFloors),
+		HallRequests: [NFloors][NButtons-1]bool{},
 		States:       make(map[string]HRAElevState),
-		CounterHallRequests : make([][2]int, NFloors),
 	}
 	return hraInput
 }
-func handlePayloadFromElevator(hraInput HRAInput, e Elevator,
-	elevatorName string) HRAInput{
+
+func InitialisePayloadFromassignerToNetwork() PayloadFromassignerToNetwork {
+	payloadFromassignerToNetwork := PayloadFromassignerToNetwork{
+		HallRequests: [NFloors][NButtons]ButtonState{},
+		States:       make(map[string]HRAElevState),
+	}
+	return payloadFromassignerToNetwork
+}
+
+/*
+func handlePayloadFromElevator(payloadFromassignerToNetwork PayloadFromassignerToNetwork, e Elevator,
+	elevatorName string) PayloadFromassignerToNetwork{
 	behavior, direction, cabRequests := convertElevatorState(e)
-	hraInput.States[elevatorName] = HRAElevState{
+	payloadFromassignerToNetwork.States[elevatorName] = HRAElevState{
 		Behavior:    behavior,
 		Floor:       e.CurrentFloor,
 		Direction:   direction,
 		CabRequests: cabRequests,
 	}
-	return hraInput
+	return payloadFromassignerToNetwork
+}
+*/
+func handlePayloadFromElevator(fromElevator  PayloadFromElevator, 
+	toNetwork PayloadFromassignerToNetwork, nodeID string ) PayloadFromassignerToNetwork{
+	// some logic that converts the completed progresses the copleted orders to order complete
+	// toNetwork.HallRequests 
+	// Iterate over CompletedOrders and update toNetwork.HallRequests
+	/*
+	for floor := 0; floor < NFloors; floor++ {
+		for btn := 0; btn < NButtons; btn++ {
+			if fromElevator.CompletedOrders[floor][btn] {
+				// Progress button state to OrderComplete
+				if toNetwork.HallRequests[floor][btn] == OrderAssigned {
+					toNetwork.HallRequests[floor][btn] = OrderComplete
+				}
+				if Button(btn) == BCab{
+					if toNetwork.States[nodeID].CabRequests[floor]{
+						toNetwork.States[nodeID].CabRequests[floor] = false
+	
+					}
+				}
+
+				
+			}
+			// TODO we need to clear the cab request
+		}
+	}
+		*/
+	behavior, direction, cabRequests := convertElevatorState(fromElevator.Elevator)
+	toNetwork.States[nodeID] = HRAElevState{
+		Behavior:    behavior,
+		Floor:       fromElevator.Elevator.CurrentFloor,
+		Direction:   direction,
+		CabRequests: cabRequests,
+	}
+	// Todo we set the cabrequests twice. this is because we have to make them :=0
+	// do this smarter
+	toNetwork = orderComplete(toNetwork, nodeID, fromElevator.CompletedOrders)
+
+	return toNetwork
 }
 
-func handlePayloadFromNetwork(localHRA HRAInput, Incoming HRAInput)HRAInput{
-	// TODO: 
-	return Incoming
+
+
+
+
+
+
+
+
+
+func handlePayloadFromNetwork(payload PayloadFromassignerToNetwork, 
+	PayloadFromNetwork PayloadFromNetworkToAssigner,
+	nodeID int)PayloadFromassignerToNetwork{
+	payload.HallRequests = PayloadFromNetwork.HallOrderList[nodeID]
+	//payload.States[nodeID] = PayloadFromNetwork.ElevatorList[nodeID]
+	//payload.States = PayloadFromNetwork.ElevatorList
+	return payload
 }
 
 func convertElevatorState(e Elevator) (string, string, []bool) {
@@ -87,3 +192,6 @@ func convertElevatorState(e Elevator) (string, string, []bool) {
 	}
 	return behavior, direction, cabRequests
 }
+
+
+

@@ -4,20 +4,46 @@ import (
 	. "Project/dataenums"
 )
 
-func buttonPressed(btnEvent ButtonEvent) [NFloors][NButtons]bool {
-	var buttons [NFloors][NButtons]bool
-	buttons[btnEvent.Floor][btnEvent.Button] = true
-	return buttons
-}
-func buttonAlreadyActive(HRAInput HRAInput,elevatorName string,
-	btnEvent ButtonEvent) bool {
+func buttonPressed(payload PayloadFromassignerToNetwork, ElevatorName string,
+	btnEvent ButtonEvent) PayloadFromassignerToNetwork {
+// Note did something like this ? 
+// 	if requests.ShouldClearImmediately(elevator, btnFloor, btn) && (elevator.CurrentBehaviour == elev.EBDoorOpen) {
+// er.Start(elevator.Config.DoorOpenDurationS)
+// Send dir to driver ? 
+// else : 
 	switch btnEvent.Button {
-	case BHallUp:
-		return HRAInput.HallRequests[btnEvent.Floor][BHallUp]
-	case BHallDown:
-		return HRAInput.HallRequests[btnEvent.Floor][BHallDown]
-	case BCab:
-		return HRAInput.States[elevatorName].CabRequests[btnEvent.Floor]
+		case BHallUp:
+			if payload.HallRequests[btnEvent.Floor][BHallUp] == Idle{
+				payload.HallRequests[btnEvent.Floor][BHallUp] = ButtonPressed
+			}
+		case BHallDown:
+			if payload.HallRequests[btnEvent.Floor][BHallDown]== Idle{
+				payload.HallRequests[btnEvent.Floor][BHallDown] = ButtonPressed
+			}
+		case BCab:
+			print("CAB BUTTON PRESSED")
+			payload.States[ElevatorName].CabRequests[btnEvent.Floor] = true
+		}
+	return payload
 	}
-	return false
-}
+
+
+
+func orderComplete(payload PayloadFromassignerToNetwork, elevatorName string,
+	completedOrders [NFloors][NButtons]bool) PayloadFromassignerToNetwork {
+	for floor := 0; floor < NFloors; floor++ {
+		for btn := BHallUp; btn <= BCab; btn++ {
+			if completedOrders[floor][btn] {
+				switch btn {
+					case BHallUp:
+						payload.HallRequests[floor][BHallUp] = OrderComplete
+					case BHallDown:
+						payload.HallRequests[floor][BHallDown] = OrderComplete
+					case BCab:
+						payload.States[elevatorName].CabRequests[floor] = false
+					}
+				}
+			}
+		}
+	return payload
+	}

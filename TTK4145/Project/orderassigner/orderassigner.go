@@ -5,44 +5,73 @@ import (
 	//"Project/elevatordriver"
 	"Project/hwelevio"
 	"fmt"
+	"strconv"
 	//"time"
 )
 
 func OrderAssigner(
 	newOrderChannel chan<- [NFloors][NButtons]bool,
 	payloadFromElevator <-chan PayloadFromElevator,
-	toNetworkChannel chan<- HRAInput,
-	fromNetworkChannel <-chan Message,
+	toNetworkChannel chan<- PayloadFromassignerToNetwork,
+	fromNetworkChannel <-chan PayloadFromNetworkToAssigner,
 	nodeID string,
 ) {
 	var (
-		hraInput = InitialiseHRAInput()
+		PayloadFromassignerToNetwork = InitialisePayloadFromassignerToNetwork()
+		
+		//PayloadFromNetwork PayloadFromNetworkToAssigner
 	)
+	// Convert nodeID to int
+	myID, err := strconv.Atoi(nodeID)
+	if err != nil {
+		fmt.Printf("Invalid nodeID: %v\n", err)
+		return
+	}
 	payload := <-payloadFromElevator
-	hraInput = handlePayloadFromElevator(hraInput, payload.Elevator, nodeID)
+	PayloadFromassignerToNetwork = handlePayloadFromElevator(payload,
+		PayloadFromassignerToNetwork, nodeID)
 	//check if it creates error by sending to network here
-	toNetworkChannel <- hraInput
+	toNetworkChannel <- PayloadFromassignerToNetwork
 
 	drv_buttons := make(chan ButtonEvent)
 	go hwelevio.PollButtons(drv_buttons)
 	print("PENIS")
+	
 	for {
 		select {
 		case btnEvent := <-drv_buttons:
+			//Note make cylick counter own module and put this there ? 
 			fmt.Println("button pressed")
-			hraInput = ButtonPressed(hraInput, nodeID, btnEvent)
-			toNetworkChannel <- hraInput
-
+			// TODO do not overwrite this is fixed when we get the fromNetworkChannel working
+			PayloadFromassignerToNetwork = buttonPressed(PayloadFromassignerToNetwork, 
+				nodeID, btnEvent)
+			//PrintHRAInput(hraInput)
+			toNetworkChannel <- PayloadFromassignerToNetwork
+		
 		case payload := <-payloadFromElevator:
+			/*
 			hraInput = handlePayloadFromElevator(hraInput, payload.Elevator, nodeID)
 			hraInput = orderComplete(hraInput, nodeID, payload.CompletedOrders)
 			fmt.Println("elevator was changed")
-			toNetworkChannel <- hraInput
-
-		case incomingmsg := <-fromNetworkChannel:
-			hraInput = mergeHRA(hraInput, incomingmsg.Payload, incomingmsg.SenderId)
-			newOrderChannel <- assignOrders(hraInput, nodeID)
+			*/
+			PayloadFromassignerToNetwork = handlePayloadFromElevator(payload,
+				PayloadFromassignerToNetwork, nodeID)
+			print("hallo")
+			toNetworkChannel <- PayloadFromassignerToNetwork
+		
+		case PayloadFromNetwork := <-fromNetworkChannel:
+			//TODO why this. 
+			
+			PayloadFromassignerToNetwork = handlePayloadFromNetwork(PayloadFromassignerToNetwork, 
+				PayloadFromNetwork, myID)
+			fmt.Println("Big Cock")
+			
+			newOrderChannel <- assignOrders(PayloadFromNetwork,myID)
 			fmt.Println("nye meldinger incomming")
+			
+			
+		
 		}
 	}
+	
 }

@@ -4,6 +4,7 @@ const (
 	NFloors    int = 4
 	NButtons   int = 3
 	PollRateMS     = 20
+ 	NUM_ELEVATORS int = 2
 )
 
 /*
@@ -17,6 +18,15 @@ const (
 	BHallUp Button = iota
 	BHallDown
 	BCab
+)
+
+type ButtonState int
+
+const (
+	Idle ButtonState = iota
+	ButtonPressed
+	OrderAssigned
+	OrderComplete
 )
 
 type HWMotorDirection int
@@ -69,8 +79,11 @@ type DirnBehaviourPair struct {
 type Elevator struct {
 	CurrentFloor     int
 	Dirn             HWMotorDirection
+	//todo do not need this ? 
 	Requests         [NFloors][NButtons]bool
 	CurrentBehaviour ElevatorBehaviour
+	//what is this condfig++
+
 	Config           ElevatorConfig
 }
 
@@ -82,18 +95,34 @@ type HRAElevState struct {
 }
 
 type HRAInput struct {
-	HallRequests        [][2]bool `json:"hallRequests"`
-	CounterHallRequests [][2]int
+	//TODO:  Make variabels HallRequests        [][2]ButtonState `json:"hallRequests"` 
+	//HallRequests        [NFloors][NButtons]bool `json:"hallRequests"` 
+	HallRequests        [NFloors][2]bool `json:"hallRequests"` 
+	//NOTE THIS WAS BOOL AND TO USE ASSIGNER MUST BE CONVERTED TO INTEGER 
+	//Coul BE SIMPLE IN ASSIGNER IF HallRequests == OrderAssigned then 1, else 0 
 	States              map[string]HRAElevState `json:"states"`
 }
 
 type Message struct {
+	//TODO: Make int
 	SenderId     string // IPv4
-	Payload      HRAInput
+	ElevatorList  [NUM_ELEVATORS]HRAElevState
+	HallOrderList [NUM_ELEVATORS][NFloors][NButtons]ButtonState
 	OnlineStatus bool
 }
 
 type PayloadFromElevator struct {
 	Elevator        Elevator
 	CompletedOrders [NFloors][NButtons]bool
+}
+
+type PayloadFromassignerToNetwork struct{
+	HallRequests        [NFloors][NButtons]ButtonState `json:"hallRequests"` 
+	States              map[string]HRAElevState `json:"states"`
+}
+
+type PayloadFromNetworkToAssigner struct {
+	AliveList     [NUM_ELEVATORS]bool
+	ElevatorList  [NUM_ELEVATORS]HRAElevState
+	HallOrderList [NUM_ELEVATORS][NFloors][NButtons]ButtonState
 }

@@ -23,8 +23,8 @@ func main() {
 	var (
 		newOrderChannel    = make(chan [NFloors][NButtons]bool, 100)
 		payloadFromElevator     = make(chan PayloadFromElevator, 100)
-		toNetworkChannel   = make(chan HRAInput, 100)
-		fromNetworkChannel = make(chan Message, 100)
+		toNetworkChannel   = make(chan PayloadFromassignerToNetwork, 100)
+		fromNetworkChannel = make(chan PayloadFromNetworkToAssigner, 100)
 	)
 
 	//todo set ip as id in main? 
@@ -47,6 +47,7 @@ func main() {
 		fromNetworkChannel,
 		nodeID,
 	)
+
 	// Sleep for a while to allow the goroutine to print the message
 	// Hold main function indefinitely
 	select {}
