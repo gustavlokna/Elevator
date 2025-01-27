@@ -75,12 +75,25 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 		select {
 		case reg := <-nodeRegistryChannel:
 			for _, lostNode := range reg.Lost {
+
 				fmt.Printf("Node lost connection: %s\n", lostNode)
+				lostNodeInt,_ := strconv.Atoi(lostNode)
+				//TODO: let this be overwritte by incommin msg but since broadcast 
+				aliveList[lostNodeInt] = false 	
+				//TODO if only one node is alive
+				// assigning will not work, but this is outside specs
+				
 				// Handle lost nodes (e.g., update aliveList or notify assigner)
 			}
 		
 			for _, activeNode := range reg.Nodes {
 				fmt.Printf("Node active: %s\n", activeNode)
+				activeNodeInt,_ := strconv.Atoi(activeNode)
+				//TODO: let this be overwritte by incommin msg but since broadcast 
+				//freqency is so high i do not belive this will be a problem 
+				// this however can be problem if we set our elevator to online. 
+				// but we are obstructed. This Will need some better logic. 
+				aliveList[activeNodeInt] = true	
 				// set all states of node to garbage 
 				// Handle active nodes as needed
 			}
