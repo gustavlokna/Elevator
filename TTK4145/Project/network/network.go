@@ -67,7 +67,7 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 	go func() {
 		for {
 			broadcastTransmissionChannel <- lastMessage
-			time.Sleep(500 * time.Millisecond)
+			time.Sleep(10 * time.Millisecond)
 		}
 	}()
 	

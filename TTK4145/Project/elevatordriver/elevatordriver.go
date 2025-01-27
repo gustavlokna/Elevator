@@ -19,6 +19,8 @@ func ElevatorDriver(
 		prevelevator   = elevator
 		completedOrders = [NFloors][NButtons]bool{}
 		obstruction    = false
+		timerActive   = false
+		motorTimeout    time.Time
 		// somewhat compied fromØ 
 		doorTimeout  time.Time 
 		toggledoorLight = false 
@@ -58,7 +60,9 @@ func ElevatorDriver(
 		case obstruction = <-drv_obstr:
 			print("obst: ", obstruction)
 		case elevator.CurrentFloor = <-drv_floors:
+			motorTimeout = time.Now().Add(3 * time.Second)
 			print("etasje: ", elevator.CurrentFloor)
+
 			//send to lightshandler 
 			//hwelevio.SetFloorIndicator(elevator.CurrentFloor)
 			payloadToLights <- PayloadFromDriver{
@@ -74,9 +78,20 @@ func ElevatorDriver(
 		case EBIdle:
 			elevator = ChooseDirection(elevator)
 			hwelevio.SetMotorDirection(elevator.Dirn)
+			if elevator.CurrentBehaviour == EBMoving && !timerActive{
+				motorTimeout = time.Now().Add(3 * time.Second)
+				timerActive = true
+			}
 
 		case EBMoving:
-			if ShouldStop(elevator) {
+
+			if timerActive && time.Now().After(motorTimeout){
+				print("motor timeout")
+			}
+
+			// bolea is copied from Ø and if sentence can just be put in case elevator.CurrentFloor = <-drv_floors:
+			if ShouldStop(elevator) && elevator.CurrentFloor != prevelevator.CurrentFloor {
+				timerActive = false
 				hwelevio.SetMotorDirection(MDStop)
 				elevator.Dirn = MDStop
 				elevator.CurrentBehaviour = EBDoorOpen

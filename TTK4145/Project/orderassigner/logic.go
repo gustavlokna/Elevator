@@ -24,18 +24,18 @@ func assignOrders(PayloadFromNetworkToAssigner PayloadFromNetworkToAssigner,
 		print("Failed to marshal HRAInput: %v\n", err)
 		return orderList
 	}
-	fmt.Printf("Serialized HRAInput: %s\n", string(jsonBytes))
+	//fmt.Printf("Serialized HRAInput: %s\n", string(jsonBytes))
 
 	
 	// TODO SOME LOGIC TO MAKE THE ButtonState to bool 
-	fmt.Println("all god here")
+	//fmt.Println("all god here")
 	ret, err := exec.Command("hall_request_assigner", "-i", string(jsonBytes)).CombinedOutput()
 	if err != nil {
 		print("exec.Command error: %v\nOutput: %s\n", err, string(ret))
 		return orderList
 	}
 	
-	fmt.Printf("Raw output: %s\n", string(ret))
+	//fmt.Printf("Raw output: %s\n", string(ret))
 
 	output := make(map[string][][2]bool)
 	if err := json.Unmarshal(ret, &output); err != nil {
