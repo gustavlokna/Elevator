@@ -23,7 +23,8 @@ const (
 type ButtonState int
 
 const (
-	Idle ButtonState = iota
+	Initital ButtonState = iota
+	Idle 
 	ButtonPressed
 	OrderAssigned
 	OrderComplete

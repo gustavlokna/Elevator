@@ -25,6 +25,7 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 		print("Unable to get the IP address")
 	}
 	//TODO: MAKE THIS BETTER 
+	/*
 	nodeIPint, err := strconv.Atoi(nodeIP)
 	if err != nil {
 		fmt.Println("Error:", err)
@@ -33,6 +34,7 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 	}
 
 	//nodeUid := fmt.Sprintf("peer-%s-%d", nodeIP, os.Getpid())
+
 
 	// setup lifeline for network node registry
 	nodeRegistryChannel := make(chan nodes.NetworkNodeRegistry)
@@ -67,7 +69,7 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 	go func() {
 		for {
 			broadcastTransmissionChannel <- lastMessage
-			time.Sleep(500 * time.Millisecond)
+			time.Sleep(10 * time.Millisecond)
 		}
 	}()
 	
@@ -88,6 +90,7 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 				// assigning will not work, but this is outside specs
 
 				// Handle lost nodes (e.g., update aliveList or notify assigner)
+
 			}
 			for _, activeNode := range reg.Nodes {
 				fmt.Printf("Node active: %s\n", activeNode)
@@ -100,7 +103,10 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 
 				// set all states of node to garbage 
 				// Handle active nodes as needed
+
 			}
+		
+		
 			//if offline send to orderassigner! 
 			// send btn to ass? 
 
@@ -112,7 +118,7 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 			// Convert SenderId (string) to an integer
 			senderId, _ := strconv.Atoi(msg.SenderId)
 			
-			aliveList[senderId] = true 
+			aliveList[senderId] = msg.OnlineStatus
 			elevatorList[senderId]= msg.ElevatorList[senderId]
 			hallOrderList[senderId]= msg.HallOrderList[senderId]
 			//printHallOrderList(hallOrderList)
@@ -139,6 +145,8 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 			messageInstance.HallOrderList[nodeIDInt] = payload.HallRequests
 			//TODO BURDE VÆRE SAMME 
 			messageInstance.ElevatorList[nodeIDInt] = payload.States[nodeID]
+			
+			// TODO should contain info also abot motorstop and obst
 			messageInstance.OnlineStatus = onlineStatus
 			lastMessage = messageInstance
 			hallOrderList[nodeIDInt]= payload.HallRequests

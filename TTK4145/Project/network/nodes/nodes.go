@@ -84,4 +84,6 @@ func Sender(port int, senderId string, enableTransmit <-chan bool) {
 			conn.WriteTo([]byte(senderId), addr)
 		}
 	}
+
 }
+
