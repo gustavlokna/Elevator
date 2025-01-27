@@ -17,21 +17,6 @@ type NetworkNodeRegistry struct {
 const interval = 150 * time.Millisecond
 const timeout = 3000 * time.Millisecond
 
-func Sender(port int, id string, enableTransmit <-chan bool) {
-	conn 	:= conn.DialBroadcastUDP(port)
-	addr, _ := net.ResolveUDPAddr("udp", fmt.Sprintf("255.255.255.255:%d", port))
-	enable 	:= true
-
-	for {
-		select {
-		case enable = <-enableTransmit:
-		case <-time.After(interval):
-		}
-		if enable {
-			conn.WriteTo([]byte(id), addr)
-		}
-	}
-}
 
 func Receiver(port int, updateChannel chan<- NetworkNodeRegistry) {
 	var buffer [1024]byte
@@ -80,6 +65,23 @@ func Receiver(port int, updateChannel chan<- NetworkNodeRegistry) {
 			sort.Strings(reg.Nodes)
 			//sort.Strings(reg.Lost)
 			updateChannel <- reg
+		}
+	}
+}
+
+
+func Sender(port int, senderId string, enableTransmit <-chan bool) {
+	conn := conn.DialBroadcastUDP(port)
+	addr, _ := net.ResolveUDPAddr("udp", fmt.Sprintf("255.255.255.255:%d", port))
+	enable := true
+
+	for {
+		select {
+		case enable = <-enableTransmit:
+		case <-time.After(interval):
+		}
+		if enable {
+			conn.WriteTo([]byte(senderId), addr)
 		}
 	}
 }

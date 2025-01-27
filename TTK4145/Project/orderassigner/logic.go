@@ -56,6 +56,7 @@ func assignOrders(PayloadFromNetworkToAssigner PayloadFromNetworkToAssigner,
 }
 
 
+
 func convertPayloadToHRAInput(payload PayloadFromNetworkToAssigner, nodeID int) HRAInput {
 	
 	hraInput := InitialiseHRAInput()
@@ -94,6 +95,7 @@ func convertPayloadToHRAInput(payload PayloadFromNetworkToAssigner, nodeID int) 
 	return hraInput
 }
 
+// TODO DO NOT LIKE HAVING BOTH THESE TWO 
 func InitialiseHRAInput() HRAInput {
 	hraInput := HRAInput{
 		HallRequests: [NFloors][NButtons-1]bool{},
@@ -110,45 +112,10 @@ func InitialisePayloadFromassignerToNetwork() PayloadFromassignerToNetwork {
 	return payloadFromassignerToNetwork
 }
 
-/*
-func handlePayloadFromElevator(payloadFromassignerToNetwork PayloadFromassignerToNetwork, e Elevator,
-	elevatorName string) PayloadFromassignerToNetwork{
-	behavior, direction, cabRequests := convertElevatorState(e)
-	payloadFromassignerToNetwork.States[elevatorName] = HRAElevState{
-		Behavior:    behavior,
-		Floor:       e.CurrentFloor,
-		Direction:   direction,
-		CabRequests: cabRequests,
-	}
-	return payloadFromassignerToNetwork
-}
-*/
+
 func handlePayloadFromElevator(fromElevator  PayloadFromElevator, 
 	toNetwork PayloadFromassignerToNetwork, nodeID string ) PayloadFromassignerToNetwork{
-	// some logic that converts the completed progresses the copleted orders to order complete
-	// toNetwork.HallRequests 
-	// Iterate over CompletedOrders and update toNetwork.HallRequests
-	/*
-	for floor := 0; floor < NFloors; floor++ {
-		for btn := 0; btn < NButtons; btn++ {
-			if fromElevator.CompletedOrders[floor][btn] {
-				// Progress button state to OrderComplete
-				if toNetwork.HallRequests[floor][btn] == OrderAssigned {
-					toNetwork.HallRequests[floor][btn] = OrderComplete
-				}
-				if Button(btn) == BCab{
-					if toNetwork.States[nodeID].CabRequests[floor]{
-						toNetwork.States[nodeID].CabRequests[floor] = false
-	
-					}
-				}
 
-				
-			}
-			// TODO we need to clear the cab request
-		}
-	}
-		*/
 	behavior, direction, cabRequests := convertElevatorState(fromElevator.Elevator)
 	toNetwork.States[nodeID] = HRAElevState{
 		Behavior:    behavior,

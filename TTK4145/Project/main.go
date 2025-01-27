@@ -4,6 +4,7 @@ import (
 	. "Project/dataenums"
 	"Project/elevatordriver"
 	"Project/hwelevio"
+	"Project/lights"
 	"Project/network"
 	"Project/orderassigner"
 	"flag"
@@ -25,12 +26,15 @@ func main() {
 		payloadFromElevator     = make(chan PayloadFromElevator, 100)
 		toNetworkChannel   = make(chan PayloadFromassignerToNetwork, 100)
 		fromNetworkChannel = make(chan PayloadFromNetworkToAssigner, 100)
+		fromDriverToLight = make(chan PayloadFromDriver, 100)
+		fromAsstoLight = make(chan [NFloors][NButtons]ButtonState, 100)
 	)
 
 	//todo set ip as id in main? 
 	go elevatordriver.ElevatorDriver(
 		newOrderChannel,
 		payloadFromElevator,
+		fromDriverToLight,
 		nodeID,
 	)
 
@@ -39,6 +43,7 @@ func main() {
 		payloadFromElevator,
 		toNetworkChannel,
 		fromNetworkChannel,
+		fromAsstoLight,
 		nodeID,
 	)
 
@@ -48,6 +53,10 @@ func main() {
 		nodeID,
 	)
 
+	go lights.LightsHandler(
+		fromAsstoLight,
+		fromDriverToLight,
+	)
 	// Sleep for a while to allow the goroutine to print the message
 	// Hold main function indefinitely
 	select {}

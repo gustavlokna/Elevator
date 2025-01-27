@@ -14,6 +14,8 @@ func OrderAssigner(
 	payloadFromElevator <-chan PayloadFromElevator,
 	toNetworkChannel chan<- PayloadFromassignerToNetwork,
 	fromNetworkChannel <-chan PayloadFromNetworkToAssigner,
+	// TODO: use this fromAsstoLight
+	fromAsstoLight chan <- [NFloors][NButtons]ButtonState,
 	nodeID string,
 ) {
 	var (
@@ -56,7 +58,7 @@ func OrderAssigner(
 			*/
 			PayloadFromassignerToNetwork = handlePayloadFromElevator(payload,
 				PayloadFromassignerToNetwork, nodeID)
-			print("hallo")
+			//print("hallo")
 			toNetworkChannel <- PayloadFromassignerToNetwork
 		
 		case PayloadFromNetwork := <-fromNetworkChannel:
@@ -64,12 +66,10 @@ func OrderAssigner(
 			
 			PayloadFromassignerToNetwork = handlePayloadFromNetwork(PayloadFromassignerToNetwork, 
 				PayloadFromNetwork, myID)
-			fmt.Println("Big Cock")
 			
 			newOrderChannel <- assignOrders(PayloadFromNetwork,myID)
-			fmt.Println("nye meldinger incomming")
 			
-			
+			fromAsstoLight <- PayloadFromassignerToNetwork.HallRequests
 		
 		}
 	}
