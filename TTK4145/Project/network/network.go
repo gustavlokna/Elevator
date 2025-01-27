@@ -6,7 +6,7 @@ import (
 	"Project/network/local"
 	"Project/network/nodes"
 	"fmt"
-	"os"
+	//"os"
 	"time"
 	"strconv"
 )
@@ -32,13 +32,15 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 		fmt.Println("Converted number:", nodeIPint)
 	}
 
-	nodeUid := fmt.Sprintf("peer-%s-%d", nodeIP, os.Getpid())
+	//nodeUid := fmt.Sprintf("peer-%s-%d", nodeIP, os.Getpid())
 
 	// setup lifeline for network node registry
 	nodeRegistryChannel := make(chan nodes.NetworkNodeRegistry)
 	TransmissionEnableChannel := make(chan bool)
-	go nodes.Sender(lifelinePort, nodeUid, TransmissionEnableChannel)
+	go nodes.Sender(lifelinePort, nodeID, TransmissionEnableChannel)
+
 	go nodes.Receiver(lifelinePort, nodeRegistryChannel)
+
 
 	// setup broadcast for message transmission
 	broadcastTransmissionChannel := make(chan Message)
@@ -72,19 +74,32 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 	for {
 		select {
 		case reg := <-nodeRegistryChannel:
-			// TODO: FIX BUG HERE 
-			// TODO: ISSUE 4 process
-			if contains(reg.Lost, nodeUid) {
-				fmt.Println("Node lost connection:", nodeUid)
-				onlineStatus = false
-				
-				aliveList[nodeIDInt] = false
-				//if i lose connection update aliveList
+			for _, lostNode := range reg.Lost {
 
-			} else if reg.New == nodeUid {
-				fmt.Println("Node connected:", nodeUid)
-				onlineStatus = true
-				aliveList[nodeIDInt] = true
+				fmt.Printf("Node lost connection: %s\n", lostNode)
+				lostNodeInt,_ := strconv.Atoi(lostNode)
+				//TODO: let this be overwritte by incommin msg but since broadcast 
+				aliveList[lostNodeInt] = false 	
+				// below is not needed since we are setting aliveList to false and CC does not count itv 
+				//hallOrderList[lostNodeInt] = [NFloors][NButtons]Init
+				// set that elevators hallOrderList to garbage
+
+				//TODO if only one node is alive
+				// assigning will not work, but this is outside specs
+
+				// Handle lost nodes (e.g., update aliveList or notify assigner)
+			}
+			for _, activeNode := range reg.Nodes {
+				fmt.Printf("Node active: %s\n", activeNode)
+				activeNodeInt,_ := strconv.Atoi(activeNode)
+				//TODO: let this be overwritte by incommin msg but since broadcast 
+				//freqency is so high i do not belive this will be a problem 
+				// this however can be problem if we set our elevator to online. 
+				// but we are obstructed. This Will need some better logic. 
+				aliveList[activeNodeInt] = true	
+
+				// set all states of node to garbage 
+				// Handle active nodes as needed
 			}
 			//if offline send to orderassigner! 
 			// send btn to ass? 
