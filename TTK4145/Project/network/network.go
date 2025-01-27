@@ -80,9 +80,13 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 				lostNodeInt,_ := strconv.Atoi(lostNode)
 				//TODO: let this be overwritte by incommin msg but since broadcast 
 				aliveList[lostNodeInt] = false 	
+				// below is not needed since we are setting aliveList to false and CC does not count itv 
+				//hallOrderList[lostNodeInt] = [NFloors][NButtons]Init
+				// set that elevators hallOrderList to garbage
+
 				//TODO if only one node is alive
 				// assigning will not work, but this is outside specs
-				
+
 				// Handle lost nodes (e.g., update aliveList or notify assigner)
 			}
 		
@@ -94,6 +98,7 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 				// this however can be problem if we set our elevator to online. 
 				// but we are obstructed. This Will need some better logic. 
 				aliveList[activeNodeInt] = true	
+
 				// set all states of node to garbage 
 				// Handle active nodes as needed
 			}
