@@ -19,6 +19,11 @@ const messagePort int = lifelinePort + 1
 func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 	messagetoOrderAssignerChannel chan<- PayloadFromNetworkToAssigner,
 	nodeID string) {
+
+	// **WAIT FOR INITIALIZATION** BEFORE STARTING MAIN LOOP
+	fmt.Println("Waiting for network initialization...")
+	time.Sleep(2 * time.Second) // Adjust as needed
+	
 	nodeIP, err := local.GetIP()
 	nodeIDInt,_ := strconv.Atoi(nodeID)
 	if err != nil {

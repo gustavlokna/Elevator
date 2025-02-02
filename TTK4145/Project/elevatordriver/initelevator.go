@@ -7,24 +7,24 @@ import (
 	"os"
 )
 
-func initelevator() Elevator {
-
+func initelevator() (Elevator, bool) {
 	elevator, err := loadElevator()
 	if err == nil {
-		return elevator
+		return elevator, false // False means backup file was used
 	}
 
 	// Default initialization if file doesn't exist or decoding fails
 	return Elevator{
-		CurrentFloor:     -1, //TODO need to go down one floor
-		Dirn: MDDown,
+		CurrentFloor:     -1, 
+		Dirn:             MDDown,
 		CurrentBehaviour: EBIdle,
 		Config: ElevatorConfig{
 			ClearRequestVariant: ClearRequestVariantConfig,
 			DoorOpenDurationS:   DoorOpenDurationSConfig,
 		},
-	}
+	}, true // True means it was reset (no backup existed)
 }
+
 
 
 // SaveElevator saves the elevator state to "elevatorBackup.json"

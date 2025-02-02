@@ -15,17 +15,15 @@ func ElevatorDriver(
 	print("Elevator module initiated with name: ", nodeID)
 
 	var (
-		elevator       = initelevator()
-		prevelevator   = elevator
-		completedOrders = [NFloors][NButtons]bool{}
-		obstruction    = false
-		timerActive   = false
-		motorTimeout    time.Time
-		// somewhat compied fromØ 
-		doorTimeout  time.Time 
-		toggledoorLight = false 
+		elevator, wasReset = initelevator()
+		prevelevator       = elevator
+		completedOrders    = [NFloors][NButtons]bool{}
+		obstruction        = false
+		timerActive        = false
+		motorTimeout       time.Time
+		doorTimeout        time.Time 
+		toggledoorLight    = false 
 	)
-
 	drv_floors := make(chan int)
 	drv_obstr := make(chan bool)
 	drv_stop := make(chan bool)
@@ -33,11 +31,15 @@ func ElevatorDriver(
 	go hwelevio.PollFloorSensor(drv_floors)
 	go hwelevio.PollObstructionSwitch(drv_obstr)
 	go hwelevio.PollStopButton(drv_stop)
+	
+
 
 	// Initialization of elevator
 	hwelevio.SetMotorDirection(elevator.Dirn)
 	elevator.CurrentFloor = <-drv_floors
-	elevator.Dirn = MDStop
+	if wasReset{
+		elevator.Dirn = MDStop
+	}
 	hwelevio.SetMotorDirection(elevator.Dirn)
 	
 	// Initialize and send initial PayloadFromElevator
