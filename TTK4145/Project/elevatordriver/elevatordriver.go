@@ -137,5 +137,6 @@ func ElevatorDriver(
 			payloadFromElevator <- payload
 			
 		}
+		saveElevator(elevator)
 	}
 }
