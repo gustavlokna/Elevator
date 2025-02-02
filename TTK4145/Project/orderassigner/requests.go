@@ -11,21 +11,24 @@ func buttonPressed(payload PayloadFromassignerToNetwork, ElevatorName string,
 // er.Start(elevator.Config.DoorOpenDurationS)
 // Send dir to driver ? 
 // else : 
-	switch btnEvent.Button {
-		case BHallUp:
-			if payload.HallRequests[btnEvent.Floor][BHallUp] == Idle{
-				payload.HallRequests[btnEvent.Floor][BHallUp] = ButtonPressed
-			}
-		case BHallDown:
-			if payload.HallRequests[btnEvent.Floor][BHallDown]== Idle{
-				payload.HallRequests[btnEvent.Floor][BHallDown] = ButtonPressed
-			}
-		case BCab:
-			print("CAB BUTTON PRESSED")
-			payload.States[ElevatorName].CabRequests[btnEvent.Floor] = true
-		}
-	return payload
+switch btnEvent.Button {
+case BHallUp:
+	// TODO CHECK IF IF SETNTENCE IS NECESSARY
+	if payload.HallRequests[btnEvent.Floor][BHallUp] == Idle || payload.HallRequests[btnEvent.Floor][BHallUp] == Initial {
+		payload.HallRequests[btnEvent.Floor][BHallUp] = ButtonPressed
 	}
+case BHallDown:
+	// TODO CHECK IF IF SETNTENCE IS NECESSARY
+	if payload.HallRequests[btnEvent.Floor][BHallDown] == Idle || payload.HallRequests[btnEvent.Floor][BHallDown] == Initial {
+		payload.HallRequests[btnEvent.Floor][BHallDown] = ButtonPressed
+	}
+case BCab:
+	// For Cab button press
+	print("CAB BUTTON PRESSED")
+	payload.States[ElevatorName].CabRequests[btnEvent.Floor] = true
+}
+return payload
+}
 
 
 
