@@ -15,7 +15,7 @@ func cyclicCounter(
 			myOrder := hallOrderList[myID][floor][btn]
 			for node := 0; node < NUM_ELEVATORS; node++ {
 				nodeOrder := hallOrderList[node][floor][btn]
-				if !aliveList[node] || node == myID || nodeOrder== Initial {
+				if !aliveList[node] || node == myID || nodeOrder == Initial{
 					continue
 				}
 				myOrder = cyclicLogic(myOrder, nodeOrder)
@@ -31,10 +31,11 @@ func cyclicLogic(myOrder ButtonState,
     ) ButtonState {
     // I want to only progress if all are equal 
     //or i am behind unless transition from complete to idle 
-	
+	if myOrder == Initial {
+        return nodeOrder
+    }
+
 	switch myOrder {
-	case Initial: 
-		myOrder = nodeOrder
 	case Idle:
 		switch nodeOrder {
 
