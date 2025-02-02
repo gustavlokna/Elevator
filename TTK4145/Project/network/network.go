@@ -96,10 +96,6 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 			for _, activeNode := range reg.Nodes {
 				fmt.Printf("Node active: %s\n", activeNode)
 				activeNodeInt,_ := strconv.Atoi(activeNode)
-				//TODO: let this be overwritte by incommin msg but since broadcast 
-				//freqency is so high i do not belive this will be a problem 
-				// this however can be problem if we set our elevator to online. 
-				// but we are obstructed. This Will need some better logic. 
 				aliveList[activeNodeInt] = true	
 
 				// set all states of node to garbage 

@@ -9,18 +9,14 @@ import (
 	"Project/orderassigner"
 	"flag"
 	"strconv"
-	//"time"
 )
 
 func main() {
+	
 	nodeID := parseArgs()
-	print("hei: ", nodeID)
 
-	//INITILIZE DRIVER
 	hwelevio.Init(Addr)
 
-	// Ensure that hwelevio.Init() has completed successfully before continuing
-	print("Initialization of hwelevio completed.")
 	var (
 		newOrderChannel    = make(chan [NFloors][NButtons]bool, 100)
 		payloadFromElevator     = make(chan PayloadFromElevator, 100)
@@ -30,7 +26,6 @@ func main() {
 		fromAsstoLight = make(chan [NFloors][NButtons]ButtonState, 100)
 	)
 
-	//todo set ip as id in main? 
 	go elevatordriver.ElevatorDriver(
 		newOrderChannel,
 		payloadFromElevator,
@@ -57,11 +52,8 @@ func main() {
 		fromAsstoLight,
 		fromDriverToLight,
 	)
-	// Sleep for a while to allow the goroutine to print the message
-	// Hold main function indefinitely
+	// TODO is the select needed ? 
 	select {}
-	//time.Sleep(1 * time.Second)
-
 }
 
 

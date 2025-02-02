@@ -63,7 +63,7 @@ func convertPayloadToHRAInput(payload PayloadFromNetworkToAssigner, nodeID int) 
 	for i, alive := range payload.AliveList {
 
 		if alive {
-
+			// TODO is i and elevatorID the same ? 
 			elevatorID := fmt.Sprintf("elevator_%d", i) // Convert index to string key
 			hraInput.States[elevatorID] = payload.ElevatorList[i]
 		}

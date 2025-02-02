@@ -14,12 +14,10 @@ func cyclicCounter(
 		for btn := 0; btn < NButtons; btn++ {
 			myOrder := hallOrderList[myID][floor][btn]
 			for node := 0; node < NUM_ELEVATORS; node++ {
-				if !aliveList[node] || node == myID {
+				nodeOrder := hallOrderList[node][floor][btn]
+				if !aliveList[node] || node == myID || nodeOrder== Initial {
 					continue
 				}
-				//fmt.Printf("myID %d is alive\n", myID)
-				//fmt.Printf("node %d is alive\n", node)
-				nodeOrder := hallOrderList[node][floor][btn]
 				myOrder = cyclicLogic(myOrder, nodeOrder)
 			}
 			hallOrderList[myID][floor][btn] = myOrder
@@ -35,8 +33,11 @@ func cyclicLogic(myOrder ButtonState,
     //or i am behind unless transition from complete to idle 
 	
 	switch myOrder {
+	case Initial: 
+		myOrder = nodeOrder
 	case Idle:
 		switch nodeOrder {
+
 		case Idle:
 			//print("penis")
 			myOrder = Idle
@@ -51,7 +52,6 @@ func cyclicLogic(myOrder ButtonState,
 		case OrderComplete: 
 			//print("pikk")
 			myOrder = Idle
-
 	}  
 	case ButtonPressed: 
 		switch nodeOrder {
