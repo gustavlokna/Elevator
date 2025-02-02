@@ -81,9 +81,11 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 				// TODO REMOVE 
 				fmt.Printf("Node lost connection: %s\n", lostNode)
 				lostNodeInt,_ := strconv.Atoi(lostNode)
-				aliveList[lostNodeInt] = false 	
+				aliveList[lostNodeInt] = false
+				
 				//TODO if only one node is alive
 				// assigning will not work, but this is outside specs ? 
+				hallOrderList[lostNodeInt] = resetHallCalls()
 			}
 			for _, activeNode := range reg.Nodes {
 				fmt.Printf("Node active: %s\n", activeNode)
@@ -101,7 +103,7 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 			aliveList[senderId] = msg.OnlineStatus 
 			elevatorList[senderId]= msg.ElevatorList[senderId]
 			hallOrderList[senderId]= msg.HallOrderList[senderId]
-			hallOrderList = cyclicCounter(hallOrderList,aliveList,nodeIDInt)
+			hallOrderList = cyclicCounter(hallOrderList,nodeIDInt)
 
 			// TODO NECESSARY? 
 			lastMessage.HallOrderList = hallOrderList

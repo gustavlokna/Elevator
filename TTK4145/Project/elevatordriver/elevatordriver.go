@@ -118,7 +118,7 @@ func ElevatorDriver(
 				elevator.ActiveSatus = false 
 				doorTimeout = time.Now().Add(3*time.Second)
 				//add state called obst ? 
-				print("hello we have a obst")
+				//print("hello we have a obst")
 			} else {
 				if time.Now().After(doorTimeout){
 					elevator.ActiveSatus = true 

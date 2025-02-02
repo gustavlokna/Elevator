@@ -63,3 +63,12 @@ Network
 We are yet not able to preprosses incoming data
 - sol copy from old way
 - if we should use argpass we need to overwrite curret checking 
+
+
+//TO RUN 
+//chmod +x run.sh
+//./run.sh
+
+//TO KILL 
+// pkill -f run.sh
+

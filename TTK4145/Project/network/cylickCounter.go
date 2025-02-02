@@ -7,7 +7,7 @@ import (
 
 func cyclicCounter(
 	hallOrderList [NUM_ELEVATORS][NFloors][NButtons]ButtonState,
-	aliveList [NUM_ELEVATORS]bool,
+	//aliveList [NUM_ELEVATORS]bool,
 	myID int,
 ) [NUM_ELEVATORS][NFloors][NButtons]ButtonState {
 	for floor := 0; floor < NFloors; floor++ {
@@ -15,7 +15,12 @@ func cyclicCounter(
 			myOrder := hallOrderList[myID][floor][btn]
 			for node := 0; node < NUM_ELEVATORS; node++ {
 				nodeOrder := hallOrderList[node][floor][btn]
+				/*
 				if !aliveList[node] || node == myID || nodeOrder == Initial{
+					continue
+				}
+				*/
+				if node == myID || nodeOrder == Initial{
 					continue
 				}
 				myOrder = cyclicLogic(myOrder, nodeOrder)
