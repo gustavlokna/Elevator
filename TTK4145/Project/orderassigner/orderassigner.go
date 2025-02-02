@@ -2,6 +2,7 @@ package orderassigner
 
 import (
 	. "Project/dataenums"
+	"time"
 	//"Project/elevatordriver"
 	"Project/hwelevio"
 	"fmt"
@@ -38,7 +39,7 @@ func OrderAssigner(
 	drv_buttons := make(chan ButtonEvent)
 	go hwelevio.PollButtons(drv_buttons)
 	print("PENIS")
-	
+	time.Sleep(3 *time.Second)
 	for {
 		select {
 		case btnEvent := <-drv_buttons:

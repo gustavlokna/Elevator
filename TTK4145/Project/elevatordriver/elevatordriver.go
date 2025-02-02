@@ -3,6 +3,7 @@ package elevatordriver
 import (
 	. "Project/dataenums"
 	"Project/hwelevio"
+	"fmt"
 	"time"
 )
 
@@ -72,6 +73,7 @@ func ElevatorDriver(
 				DoorLight : toggledoorLight, 
 			}
 		case elevator.Requests = <-newOrderChannel:
+			fmt.Println("GEtting a new order")
 		default:
 			time.Sleep(10 * time.Millisecond)
 		}
@@ -137,8 +139,8 @@ func ElevatorDriver(
 				CompletedOrders: completedOrders,
 			}
 			payloadFromElevator <- payload
-			
+			saveElevator(elevator)
 		}
-		saveElevator(elevator)
+		
 	}
 }

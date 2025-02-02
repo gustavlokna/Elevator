@@ -22,8 +22,6 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 
 	// **WAIT FOR INITIALIZATION** BEFORE STARTING MAIN LOOP
 	fmt.Println("Waiting for network initialization...")
-	time.Sleep(2 * time.Second) // Adjust as needed
-	
 	nodeIP, err := local.GetIP()
 	nodeIDInt,_ := strconv.Atoi(nodeID)
 	if err != nil {
@@ -60,6 +58,7 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 		lastMessage       Message
 		
 		aliveList         [NUM_ELEVATORS]bool
+
 		//TODO THIS CAN BE A [NUM_ELEVATORS]HRAInput
 		elevatorList      [NUM_ELEVATORS]HRAElevState
 		hallOrderList     [NUM_ELEVATORS][NFloors][NButtons]ButtonState
@@ -120,6 +119,7 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 			aliveList[senderId] = true 
 			elevatorList[senderId]= msg.ElevatorList[senderId]
 			hallOrderList[senderId]= msg.HallOrderList[senderId]
+			
 			//printHallOrderList(hallOrderList)
 			//Cyclic counter logic updates local world view
 			hallOrderList = cyclicCounter(hallOrderList,aliveList,nodeIDInt)
