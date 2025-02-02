@@ -13,6 +13,17 @@ func contains(slice []string, item string) bool {
     return false
 }
 
+func resetHallCalls() [NFloors][NButtons]ButtonState {
+	var hallOrderList [NFloors][NButtons]ButtonState
+	for floor := 0; floor < NFloors; floor++ {
+		for button := 0; button < NButtons; button++ {
+			hallOrderList[floor][button] = Initial
+		}
+	}
+	return hallOrderList
+}
+
+
 // Helper function to check if HRAInput is empty
 func isEmptyHRAInput(input HRAInput) bool {
 	return len(input.HallRequests) == 0 && len(input.States) == 0

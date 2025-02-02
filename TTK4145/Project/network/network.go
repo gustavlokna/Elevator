@@ -52,7 +52,7 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 	go broadcast.Receiver(nodeIP, messagePort, broadcastReceiverChannel)
 	
 	var (
-		onlineStatus      = false
+		//onlineStatus      = false
 		messageInstance   Message
 		//TODO: DO WE NEED THIS? 
 		lastMessage       Message
@@ -67,7 +67,6 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 	// Periodic broadcast of the last updated message
 
 	// TODO: This is copied ?
-	
 	go func() {
 		for {
 			broadcastTransmissionChannel <- lastMessage
@@ -79,48 +78,32 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 		select {
 		case reg := <-nodeRegistryChannel:
 			for _, lostNode := range reg.Lost {
-
+				// TODO REMOVE 
 				fmt.Printf("Node lost connection: %s\n", lostNode)
 				lostNodeInt,_ := strconv.Atoi(lostNode)
-				//TODO: let this be overwritte by incommin msg but since broadcast 
 				aliveList[lostNodeInt] = false 	
-				// below is not needed since we are setting aliveList to false and CC does not count itv 
-				//hallOrderList[lostNodeInt] = [NFloors][NButtons]Init
-				// set that elevators hallOrderList to garbage
-
 				//TODO if only one node is alive
-				// assigning will not work, but this is outside specs
-
-				// Handle lost nodes (e.g., update aliveList or notify assigner)
+				// assigning will not work, but this is outside specs ? 
 			}
 			for _, activeNode := range reg.Nodes {
 				fmt.Printf("Node active: %s\n", activeNode)
 				activeNodeInt,_ := strconv.Atoi(activeNode)
+				hallOrderList[activeNodeInt] = resetHallCalls()
 				aliveList[activeNodeInt] = true	
-
-				// set all states of node to garbage 
-				// Handle active nodes as needed
 			}
 			//if offline send to orderassigner! 
 			// send btn to ass? 
 
 
 		case msg := <-broadcastReceiverChannel:
-			//we cant just set equal
-			// fmt.Println("hallo vi er på nettet")
-			// fmt.Println("msg id: ", msg.SenderId)
-			// Convert SenderId (string) to an integer
+			// TODO MAKE REDUNDANT (I WANT THIS AS INT)
 			senderId, _ := strconv.Atoi(msg.SenderId)
-			
-			aliveList[senderId] = true 
+			aliveList[senderId] = msg.OnlineStatus 
 			elevatorList[senderId]= msg.ElevatorList[senderId]
 			hallOrderList[senderId]= msg.HallOrderList[senderId]
-			
-			//printHallOrderList(hallOrderList)
-			//Cyclic counter logic updates local world view
 			hallOrderList = cyclicCounter(hallOrderList,aliveList,nodeIDInt)
-			//printHallOrderList(hallOrderList)
 
+			// TODO NECESSARY? 
 			lastMessage.HallOrderList = hallOrderList
 			
 
@@ -129,18 +112,15 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 				ElevatorList:  elevatorList,
 				HallOrderList: hallOrderList,
 			}
-			
-			
-			
-			
-			//send msg to assigner with function 
 
 		case payload := <-messagefromOrderAssigner:
 			messageInstance.SenderId = nodeID
 			messageInstance.HallOrderList[nodeIDInt] = payload.HallRequests
 			//TODO BURDE VÆRE SAMME 
 			messageInstance.ElevatorList[nodeIDInt] = payload.States[nodeID]
-			messageInstance.OnlineStatus = onlineStatus
+			messageInstance.OnlineStatus = payload.ActiveSatus
+			// TODO THIS CAN BE STREAMLINED INTO A ONELINER 
+			// TODO NO NEED FOR messageInstance variable 
 			lastMessage = messageInstance
 			hallOrderList[nodeIDInt]= payload.HallRequests
 			//printHallOrderList(hallOrderList)

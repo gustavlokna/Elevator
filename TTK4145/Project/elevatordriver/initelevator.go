@@ -18,6 +18,7 @@ func initelevator() (Elevator, bool) {
 		CurrentFloor:     -1, 
 		Dirn:             MDDown,
 		CurrentBehaviour: EBIdle,
+		ActiveSatus:      true, 
 		Config: ElevatorConfig{
 			ClearRequestVariant: ClearRequestVariantConfig,
 			DoorOpenDurationS:   DoorOpenDurationSConfig,

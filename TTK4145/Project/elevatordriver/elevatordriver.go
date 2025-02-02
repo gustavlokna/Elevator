@@ -60,7 +60,9 @@ func ElevatorDriver(
 		prevelevator = elevator
 		select {
 		case obstruction = <-drv_obstr:
+			
 			print("obst: ", obstruction)
+			
 		case elevator.CurrentFloor = <-drv_floors:
 			motorTimeout = time.Now().Add(3 * time.Second)
 			print("etasje: ", elevator.CurrentFloor)
@@ -88,11 +90,13 @@ func ElevatorDriver(
 		case EBMoving:
 
 			if timerActive && time.Now().After(motorTimeout){
+				elevator.ActiveSatus = false 
 				print("motor timeout")
 			}
 
 			// bolea is copied from Ø and if sentence can just be put in case elevator.CurrentFloor = <-drv_floors:
 			if ShouldStop(elevator) && elevator.CurrentFloor != prevelevator.CurrentFloor {
+				elevator.ActiveSatus = true 
 				timerActive = false
 				hwelevio.SetMotorDirection(MDStop)
 				elevator.Dirn = MDStop
@@ -111,12 +115,13 @@ func ElevatorDriver(
 		case EBDoorOpen: // recive back from lights 
 			//ElevatorPrint(elevator)
 			if obstruction {
+				elevator.ActiveSatus = false 
 				doorTimeout = time.Now().Add(3*time.Second)
 				//add state called obst ? 
 				print("hello we have a obst")
 			} else {
 				if time.Now().After(doorTimeout){
-					
+					elevator.ActiveSatus = true 
 					completedOrders = ClearAtCurrentFloor(elevator)
 					// time.Sleep(3 * time.Second) // Simulate door open time
 					elevator.CurrentBehaviour = EBIdle

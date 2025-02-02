@@ -123,6 +123,7 @@ func handlePayloadFromElevator(fromElevator  PayloadFromElevator,
 		Direction:   direction,
 		CabRequests: cabRequests,
 	}
+	toNetwork.ActiveSatus = fromElevator.Elevator.ActiveSatus
 	// Todo we set the cabrequests twice. this is because we have to make them :=0
 	// do this smarter
 	toNetwork = orderComplete(toNetwork, nodeID, fromElevator.CompletedOrders)

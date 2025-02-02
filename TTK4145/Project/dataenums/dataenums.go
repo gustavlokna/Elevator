@@ -84,7 +84,7 @@ type Elevator struct {
 	Requests         [NFloors][NButtons]bool
 	CurrentBehaviour ElevatorBehaviour
 	//what is this condfig++
-
+	ActiveSatus 	bool 
 	Config           ElevatorConfig
 }
 
@@ -121,6 +121,7 @@ type PayloadFromassignerToNetwork struct{
 	//TODO Is not just hallRequests. Name does not fit is also cab 
 	HallRequests        [NFloors][NButtons]ButtonState `json:"hallRequests"` 
 	States              map[string]HRAElevState `json:"states"`
+	ActiveSatus 		bool 
 }
 
 type PayloadFromNetworkToAssigner struct {
