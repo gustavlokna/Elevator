@@ -7,6 +7,7 @@ import (
 	"Project/hwelevio"
 	"fmt"
 	"strconv"
+	//"reflect"
 	//"time"
 )
 
@@ -21,8 +22,7 @@ func OrderAssigner(
 ) {
 	var (
 		PayloadFromassignerToNetwork = InitialisePayloadFromassignerToNetwork()
-		
-		//PayloadFromNetwork PayloadFromNetworkToAssigner
+		prevAssignedOrders           [NFloors][NButtons]bool // Track previous assigned orders
 	)
 	// Convert nodeID to int
 	myID, err := strconv.Atoi(nodeID)
@@ -67,7 +67,15 @@ func OrderAssigner(
 			PayloadFromassignerToNetwork = handlePayloadFromNetwork(PayloadFromassignerToNetwork, 
 				PayloadFromNetwork, myID)
 			
-			newOrderChannel <- assignOrders(PayloadFromNetwork,myID)
+			// Assign new orders
+			newOrders := assignOrders(PayloadFromNetwork, myID)
+
+			// Only send if different from previous orders
+			if newOrders != prevAssignedOrders {
+				fmt.Println("New orders detected, updating newOrderChannel")
+				newOrderChannel <- newOrders
+				prevAssignedOrders = newOrders // Store latest assigned orders
+			}
 			
 			fromAsstoLight <- PayloadFromassignerToNetwork.HallRequests
 		

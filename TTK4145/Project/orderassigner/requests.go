@@ -13,15 +13,10 @@ func buttonPressed(payload PayloadFromassignerToNetwork, ElevatorName string,
 // else : 
 switch btnEvent.Button {
 case BHallUp:
-	// TODO CHECK IF IF SETNTENCE IS NECESSARY
-	if payload.HallRequests[btnEvent.Floor][BHallUp] == Idle || payload.HallRequests[btnEvent.Floor][BHallUp] == Initial {
-		payload.HallRequests[btnEvent.Floor][BHallUp] = ButtonPressed
-	}
+	payload.HallRequests[btnEvent.Floor][BHallUp] = ButtonPressed
 case BHallDown:
-	// TODO CHECK IF IF SETNTENCE IS NECESSARY
-	if payload.HallRequests[btnEvent.Floor][BHallDown] == Idle || payload.HallRequests[btnEvent.Floor][BHallDown] == Initial {
-		payload.HallRequests[btnEvent.Floor][BHallDown] = ButtonPressed
-	}
+	payload.HallRequests[btnEvent.Floor][BHallDown] = ButtonPressed
+	
 case BCab:
 	// For Cab button press
 	print("CAB BUTTON PRESSED")

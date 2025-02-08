@@ -5,6 +5,7 @@ import (
 	"Project/hwelevio"
 	"time"
 	"fmt"
+
 )
 
 func ElevatorDriver(
@@ -76,6 +77,12 @@ func ElevatorDriver(
 				DoorLight : toggledoorLight, 
 			}
 		case elevator.Requests = <-newOrderChannel:
+			fmt.Println("we got new order")
+			fmt.Println("we got new order")
+			fmt.Println("we got new order")
+			fmt.Println("we got new order")
+			ElevatorPrint(elevator)
+			
 		default:
 			time.Sleep(10 * time.Millisecond)
 		}
@@ -84,6 +91,7 @@ func ElevatorDriver(
 		case EBIdle:
 			elevator = ChooseDirection(elevator)
 			hwelevio.SetMotorDirection(elevator.Dirn)
+			//ElevatorPrint(elevator)
 			if elevator.CurrentBehaviour == EBMoving && !timerActive{
 				motorTimeout = time.Now().Add(3 * time.Second)
 				timerActive = true
@@ -128,12 +136,26 @@ func ElevatorDriver(
 				fmt.Println("START TIMER")
 				doorOpen = true 
 				doorTimeout = time.Now().Add(3*time.Second)
+				toggledoorLight = true 
+				payloadToLights <- PayloadFromDriver{
+					CurrentFloor : elevator.CurrentFloor,
+					DoorLight : toggledoorLight, 
+				}
 			}  else {
 				if time.Now().After(doorTimeout){
 					elevator.ActiveSatus = true 
 					//TODO WE CLEAR BOTH SIMANTANIOUSLEY. NOT GOOD 
 					fmt.Println("WE CLEAR OUR ORDERS")
-					completedOrders = clearAtCurrentFloor(elevator)
+
+					fmt.Println("WE CLEAR OUR ORDERS")
+					fmt.Println("WE CLEAR OUR ORDERS")
+					fmt.Println("WE CLEAR OUR ORDERS")
+					fmt.Println("WE CLEAR OUR ORDERS")
+					fmt.Println("WE CLEAR OUR ORDERS")
+					//NEW 
+					ElevatorPrint(elevator)
+					completedOrders, elevator  = clearAtCurrentFloor(elevator)
+					ElevatorPrint(elevator)
 					//elevator.Dirn  =  decideDirection(elevator).Dirn
 					//elevator.CurrentBehaviour =  decideDirection(elevator).CurrentBehaviour
 					// time.Sleep(3 * time.Second) // Simulate door open time

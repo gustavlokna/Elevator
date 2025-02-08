@@ -73,12 +73,13 @@ func ClearAtCurrentFloor(e Elevator) [NFloors][NButtons]bool{
 	return clearedRequests
 }
 */
-func clearAtCurrentFloor(e Elevator) [NFloors][NButtons]bool {
+func clearAtCurrentFloor(e Elevator) ([NFloors][NButtons]bool, Elevator) {
 	clearedRequests := [NFloors][NButtons]bool{}
 	fmt.Println("WE ARE WORKING")
 	// Always clear cab order
 	if e.Requests[e.CurrentFloor][BCab] {
 		clearedRequests[e.CurrentFloor][BCab] = true
+		e.Requests[e.CurrentFloor][BCab]= false 
 	}
 
 	switch e.Dirn {
@@ -87,29 +88,31 @@ func clearAtCurrentFloor(e Elevator) [NFloors][NButtons]bool {
 		if e.Requests[e.CurrentFloor][BHallUp] {
 			fmt.Println("WE CLEAR MDUP")
 			clearedRequests[e.CurrentFloor][BHallUp] = true
+			e.Requests[e.CurrentFloor][BHallUp] = false 
 		}
 	case MDDown:
 		fmt.Println("WE MOVE down in life ")
 		if e.Requests[e.CurrentFloor][BHallDown] {
 			fmt.Println("WE CLEAR MDOWN")
 			clearedRequests[e.CurrentFloor][BHallDown] = true
+			e.Requests[e.CurrentFloor][BHallDown] = false 
 		}
 	case MDStop:
 		// Clear both if active
 		// TODO ADD SIMPLE LOGIC SO JUST ONE GETS CHOOSEN AT ONCE 
 		// VAR CLEARED UP = FALSE 
 		// 
-		fmt.Println("FUCK")
 		if e.Requests[e.CurrentFloor][BHallUp] {
 			clearedRequests[e.CurrentFloor][BHallUp] = true
-			// SET  CLEARED UP = TRUE 
+			e.Requests[e.CurrentFloor][BHallUp] = true 
 		}
-		if e.Requests[e.CurrentFloor][BHallDown] { // ADD BOLEAN 
+		if e.Requests[e.CurrentFloor][BHallDown] && !clearedRequests[e.CurrentFloor][BHallUp] { // ADD BOLEAN 
 			clearedRequests[e.CurrentFloor][BHallDown] = true
+			e.Requests[e.CurrentFloor][BHallDown] = false 
 		}
 	}
 
-	return clearedRequests
+	return clearedRequests, e
 }
 
 
@@ -119,7 +122,6 @@ func ChooseDirection(el Elevator) Elevator {
 
 	el.Dirn = dirnBehaviour.Dirn
 	el.CurrentBehaviour = dirnBehaviour.Behaviour
-
 	return el
 }
 
