@@ -2,6 +2,7 @@ package elevatordriver
 
 import (
 	. "Project/dataenums"
+	"fmt"
 )
 
 
@@ -21,6 +22,10 @@ func ShouldStop(e Elevator) bool {
 	}
 }
 
+
+// TODO THIS IS COPIED FROM LAST YEARS PROJECT
+// IT IS ALSO ASS
+/*
 func ClearAtCurrentFloor(e Elevator) [NFloors][NButtons]bool{
 	clearedRequests := [NFloors][NButtons]bool{}
 
@@ -65,6 +70,45 @@ func ClearAtCurrentFloor(e Elevator) [NFloors][NButtons]bool{
 			}
 		}
 	}
+	return clearedRequests
+}
+*/
+func clearAtCurrentFloor(e Elevator) [NFloors][NButtons]bool {
+	clearedRequests := [NFloors][NButtons]bool{}
+	fmt.Println("WE ARE WORKING")
+	// Always clear cab order
+	if e.Requests[e.CurrentFloor][BCab] {
+		clearedRequests[e.CurrentFloor][BCab] = true
+	}
+
+	switch e.Dirn {
+	case MDUp:
+		fmt.Println("WE MOVE UP in life ")
+		if e.Requests[e.CurrentFloor][BHallUp] {
+			fmt.Println("WE CLEAR MDUP")
+			clearedRequests[e.CurrentFloor][BHallUp] = true
+		}
+	case MDDown:
+		fmt.Println("WE MOVE down in life ")
+		if e.Requests[e.CurrentFloor][BHallDown] {
+			fmt.Println("WE CLEAR MDOWN")
+			clearedRequests[e.CurrentFloor][BHallDown] = true
+		}
+	case MDStop:
+		// Clear both if active
+		// TODO ADD SIMPLE LOGIC SO JUST ONE GETS CHOOSEN AT ONCE 
+		// VAR CLEARED UP = FALSE 
+		// 
+		fmt.Println("FUCK")
+		if e.Requests[e.CurrentFloor][BHallUp] {
+			clearedRequests[e.CurrentFloor][BHallUp] = true
+			// SET  CLEARED UP = TRUE 
+		}
+		if e.Requests[e.CurrentFloor][BHallDown] { // ADD BOLEAN 
+			clearedRequests[e.CurrentFloor][BHallDown] = true
+		}
+	}
+
 	return clearedRequests
 }
 

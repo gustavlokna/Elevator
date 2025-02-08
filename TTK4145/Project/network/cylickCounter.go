@@ -100,44 +100,21 @@ func cyclicLogic(myOrder ButtonState,
 	case OrderComplete:
 		switch nodeOrder {
 		case Idle:
-			print("hva faen, OrderComplete Idle")
+			//print("hva faen, OrderComplete Idle")
 			myOrder = Idle
 		case ButtonPressed:
-			print("hva faen, OrderComplete ButtonPressed")
+			//print("hva faen, OrderComplete ButtonPressed")
 			myOrder = ButtonPressed
 		case OrderAssigned: 
-			print("hva faen, OrderComplete OrderAssigned")
+			//print("hva faen, OrderComplete OrderAssigned")
 			myOrder = OrderComplete
 		case OrderComplete: 
-			print("hva faen, OrderComplete OrderComplete")
+			//print("hva faen, OrderComplete OrderComplete")
 			myOrder = Idle
 	}  
 	}
 	//print("myOrder: ", myOrder)
 	return myOrder
 }
-/*
-func cyclicLogic(myOrder ButtonState, 
-    nodeOrder ButtonState,
-    ) ButtonState {
-    // I want to only progress if all are equal 
-    //or i am behind unless transition from complete to idle 
-	if myOrder == Idle {
-		if nodeOrder != Idle && nodeOrder != OrderComplete {
-			// Progress to next state if another elevator is ahead
-			return (nodeOrder + 1) % (OrderComplete + 1)
-		}
-	}
-	if nodeOrder < myOrder && nodeOrder != Idle {
-		// Stay in the current state if another elevator is behind
-		return myOrder
-	}
-	// Progress to the next state
-
-    // I CANNOT progress from order assigned before i get msg form assigner! 
-
-	return (myOrder + 1) % (OrderComplete + 1)
-}
-*/
 
 

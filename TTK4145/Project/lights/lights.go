@@ -14,7 +14,6 @@ func LightsHandler(
 	for {
 		select {
 		case payload := <-payloadFromDriver:
-			print("hello")
 			hwelevio.SetFloorIndicator(payload.CurrentFloor)
 			hwelevio.SetDoorOpenLamp(payload.DoorLight)
 

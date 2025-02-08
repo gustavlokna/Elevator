@@ -4,6 +4,7 @@ import (
 	. "Project/dataenums"
 	"Project/hwelevio"
 	"time"
+	"fmt"
 )
 
 func ElevatorDriver(
@@ -23,6 +24,7 @@ func ElevatorDriver(
 		motorTimeout       time.Time
 		doorTimeout        time.Time 
 		toggledoorLight    = false 
+		doorOpen 			= false
 	)
 	drv_floors := make(chan int)
 	drv_obstr := make(chan bool)
@@ -99,11 +101,12 @@ func ElevatorDriver(
 				elevator.ActiveSatus = true 
 				timerActive = false
 				hwelevio.SetMotorDirection(MDStop)
-				elevator.Dirn = MDStop
+				// TODO TEST THIS
+				//elevator.Dirn = MDStop
 				elevator.CurrentBehaviour = EBDoorOpen
 				// send to lights boolean that doorlight shows 
 				toggledoorLight = true 
-				print("SEND MSG TO LIGHS")
+				//print("SEND MSG TO LIGHS")
 				doorTimeout = time.Now().Add(3*time.Second)
 				payloadToLights <- PayloadFromDriver{
 					CurrentFloor : elevator.CurrentFloor,
@@ -112,27 +115,42 @@ func ElevatorDriver(
 				continue
 			}
 
-		case EBDoorOpen: // recive back from lights 
-			//ElevatorPrint(elevator)
+		case EBDoorOpen: // recive back from lights
 			if obstruction {
+					
 				elevator.ActiveSatus = false 
 				doorTimeout = time.Now().Add(3*time.Second)
 				//add state called obst ? 
 				//print("hello we have a obst")
-			} else {
+			}
+			//This logic is copied from Ø
+			if !doorOpen{
+				fmt.Println("START TIMER")
+				doorOpen = true 
+				doorTimeout = time.Now().Add(3*time.Second)
+			}  else {
 				if time.Now().After(doorTimeout){
 					elevator.ActiveSatus = true 
-					completedOrders = ClearAtCurrentFloor(elevator)
+					//TODO WE CLEAR BOTH SIMANTANIOUSLEY. NOT GOOD 
+					fmt.Println("WE CLEAR OUR ORDERS")
+					completedOrders = clearAtCurrentFloor(elevator)
+					//elevator.Dirn  =  decideDirection(elevator).Dirn
+					//elevator.CurrentBehaviour =  decideDirection(elevator).CurrentBehaviour
 					// time.Sleep(3 * time.Second) // Simulate door open time
+					// SHOULD NOT BE EBIDLE ? 
 					elevator.CurrentBehaviour = EBIdle
+					elevator.Dirn = MDStop
 					toggledoorLight = false 
 					payloadToLights <- PayloadFromDriver{
 						CurrentFloor : elevator.CurrentFloor,
 						DoorLight : toggledoorLight, 
 					}
+					doorOpen = false 
 				}
-
 			}
+
+
+			
 		}
 
 		// Update and send PayloadFromElevator if elevator state changes
