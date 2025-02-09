@@ -25,6 +25,7 @@ func resetHallCalls() [NFloors][NButtons]ButtonState {
 
 
 // Helper function to check if HRAInput is empty
+// TODO ALL BELOW IS GARBAGE ? 
 func isEmptyHRAInput(input HRAInput) bool {
 	return len(input.HallRequests) == 0 && len(input.States) == 0
 }

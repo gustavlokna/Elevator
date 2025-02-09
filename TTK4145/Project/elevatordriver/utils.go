@@ -5,7 +5,6 @@ import (
 	"fmt"
 )
 
-
 func ElevatorPrint(e Elevator) {
 	fmt.Println("\n  +--------------------+")
 	fmt.Printf(

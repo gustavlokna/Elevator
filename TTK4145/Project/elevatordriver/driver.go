@@ -7,20 +7,7 @@ import (
 
 
 
-func ShouldStop(e Elevator) bool {
-	switch e.Dirn {
-	case MDDown:
-		return e.Requests[e.CurrentFloor][BHallDown] ||
-			e.Requests[e.CurrentFloor][BCab] ||
-			!requestsBelow(e)
-	case MDUp:
-		return e.Requests[e.CurrentFloor][BHallUp] ||
-			e.Requests[e.CurrentFloor][BCab] ||
-			!requestsAbove(e)
-	default:
-		return true
-	}
-}
+
 
 
 // TODO THIS IS COPIED FROM LAST YEARS PROJECT
@@ -97,16 +84,12 @@ func clearAtCurrentFloor(e Elevator) ([NFloors][NButtons]bool, Elevator) {
 			clearedRequests[e.CurrentFloor][BHallDown] = true
 			e.Requests[e.CurrentFloor][BHallDown] = false 
 		}
-	case MDStop:
-		// Clear both if active
-		// TODO ADD SIMPLE LOGIC SO JUST ONE GETS CHOOSEN AT ONCE 
-		// VAR CLEARED UP = FALSE 
-		// 
+	case MDStop: 
 		if e.Requests[e.CurrentFloor][BHallUp] {
 			clearedRequests[e.CurrentFloor][BHallUp] = true
 			e.Requests[e.CurrentFloor][BHallUp] = false  
 		}
-		if e.Requests[e.CurrentFloor][BHallDown] && !clearedRequests[e.CurrentFloor][BHallUp] { // ADD BOLEAN 
+		if e.Requests[e.CurrentFloor][BHallDown] && !clearedRequests[e.CurrentFloor][BHallUp] {
 			clearedRequests[e.CurrentFloor][BHallDown] = true
 			e.Requests[e.CurrentFloor][BHallDown] = false 
 		}
@@ -116,6 +99,21 @@ func clearAtCurrentFloor(e Elevator) ([NFloors][NButtons]bool, Elevator) {
 }
 
 
+// TODO BELOW HERE IS COPIED FROM LAST YEARS PROJECT 
+func ShouldStop(e Elevator) bool {
+	switch e.Dirn {
+	case MDDown:
+		return e.Requests[e.CurrentFloor][BHallDown] ||
+			e.Requests[e.CurrentFloor][BCab] ||
+			!requestsBelow(e)
+	case MDUp:
+		return e.Requests[e.CurrentFloor][BHallUp] ||
+			e.Requests[e.CurrentFloor][BCab] ||
+			!requestsAbove(e)
+	default:
+		return true
+	}
+}
 
 func ChooseDirection(el Elevator) Elevator {
 	dirnBehaviour := decideDirection(el)

@@ -1,5 +1,8 @@
 package hwelevio
 
+// TODO THIS ENTIRE FOLDER IS COPIED FROM LAST YEAR, CHECK IF THER IS SOMETHING WRONG
+// TODO FIX NAMING CONVETIONS 
+
 import (
 	. "Project/dataenums"
 	"fmt"

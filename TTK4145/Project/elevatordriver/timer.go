@@ -3,7 +3,8 @@ import (
 	"time"
 )
 //this folder is totaly copied
-
+// TODO NOTING HERE IS BEING USED. 
+// REMOVE ?!
 func GetCurrentTimeAsFloat() float64 {
 	now := time.Now()
 	return float64(now.Unix()) + float64(now.Nanosecond())*1e-9

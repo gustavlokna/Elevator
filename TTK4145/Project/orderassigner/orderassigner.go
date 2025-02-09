@@ -60,9 +60,10 @@ func OrderAssigner(
 		case PayloadFromNetwork := <-fromNetworkChannel:
 			//TODO why this. 
 			// TODO REMOVE ? 
+			/*
 			PayloadFromassignerToNetwork = handlePayloadFromNetwork(PayloadFromassignerToNetwork, 
 				PayloadFromNetwork, myID)
-			
+			*/
 			// Assign new orders
 			newOrders := assignOrders(PayloadFromNetwork, myID)
 
@@ -74,6 +75,7 @@ func OrderAssigner(
 			}
 			
 			fromAsstoLight <- updateLightStates(PayloadFromNetwork, myID)
+			
 		
 		}
 	}

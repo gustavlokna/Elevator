@@ -6,8 +6,6 @@ import (
 	"Project/network/local"
 	"Project/network/nodes"
 	"fmt"
-
-	//"os"
 	"reflect"
 	"strconv"
 	"time"
@@ -22,12 +20,16 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 
 	// **WAIT FOR INITIALIZATION** BEFORE STARTING MAIN LOOP
 	fmt.Println("Waiting for network initialization...")
+	// TODO NOT NECESSARY TO GET IP HERE, MOVE TO FUNC AND SEE IF NECESSARY  
 	nodeIP, err := local.GetIP()
-	nodeIDInt, _ := strconv.Atoi(nodeID)
 	if err != nil {
 		print("Unable to get the IP address")
 	}
+	// TODO MAKE CODE COMPATIBLE WITHOUT THIS "STR TO INT CONV"
+	nodeIDInt, _ := strconv.Atoi(nodeID)
+
 	//TODO: MAKE THIS BETTER
+	// TODO REMOVE ? 
 	nodeIPint, err := strconv.Atoi(nodeIP)
 	if err != nil {
 		fmt.Println("Error:", err)
@@ -35,35 +37,28 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 		fmt.Println("Converted number:", nodeIPint)
 	}
 
-	//nodeUid := fmt.Sprintf("peer-%s-%d", nodeIP, os.Getpid())
-
-	// setup lifeline for network node registry
 	nodeRegistryChannel := make(chan nodes.NetworkNodeRegistry)
 	TransmissionEnableChannel := make(chan bool)
+	// TODO COMBINE THE "NODES" AND "BRADCASTS" "SENDER" and "RECIVER", into one "SENDER" and one "RECIVER"
 	go nodes.Sender(lifelinePort, nodeID, TransmissionEnableChannel)
-
 	go nodes.Receiver(lifelinePort, nodeRegistryChannel)
 
-	// setup broadcast for message transmission
 	broadcastTransmissionChannel := make(chan Message)
 	broadcastReceiverChannel := make(chan Message)
 	go broadcast.Sender(messagePort, broadcastTransmissionChannel)
 	go broadcast.Receiver(nodeIP, messagePort, broadcastReceiverChannel)
 
 	var (
-		//onlineStatus      = false
-		//messageInstance   Message
-		//TODO: DO WE NEED THIS?
-		//lastMessage       Message
 
 		aliveList [NUM_ELEVATORS]bool
 		ackMap    [NUM_ELEVATORS]bool
 		//TODO THIS CAN BE A [NUM_ELEVATORS]HRAInput
+		// TODO INITILIZE THE LIST, else a crash may occur  
 		elevatorList  [NUM_ELEVATORS]HRAElevState
 		hallOrderList [NUM_ELEVATORS][NFloors][NButtons]ButtonState
 
 		online bool
-		wasReset  bool
+		init   bool
 	)
 
 	// Periodic broadcast of the last updated message
@@ -71,13 +66,17 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 	// TODO: This is copied ?
 	go func() {
 		for {
+			// NOTE REKEFØLGEN PÅ TIMEREN ER VIKTIG I HENHOLD TIL REINIT
+			// TODO MAY BE A PROBLEM WHEN PACETLOSS, BUT UNSURE 
+			// IF SO, ADD LOGIC THAT FIRST SLEEP IS LONGER THAN ALL OTHETS 
+			time.Sleep(10 * time.Millisecond)
 			broadcastTransmissionChannel <- Message{
 				SenderId:      nodeID,
 				ElevatorList:  elevatorList,
 				HallOrderList: hallOrderList,
 				OnlineStatus:  aliveList[nodeIDInt],
 			}
-			time.Sleep(10 * time.Millisecond)
+			
 		}
 	}()
 
@@ -89,6 +88,7 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 				// TODO REMOVE
 				fmt.Printf("Node lost connection: %s\n", lostNode)
 				lostNodeInt, _ := strconv.Atoi(lostNode)
+
 				// TODO MOVE THIS TO THE DEFULT CASE
 				if lostNodeInt == nodeIDInt {
 					online = false
@@ -121,46 +121,36 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 			// send btn to ass?
 
 		case msg := <-broadcastReceiverChannel:
-			/*
-				fmt.Println("My elevatorList: ", elevatorList)
-				fmt.Println("Incoming elevatorList: ", msg.ElevatorList)
-
-				if !reflect.DeepEqual(elevatorList, msg.ElevatorList) {
-					fmt.Println("Mismatch found!")
-				}
-			*/
 			senderId, _ := strconv.Atoi(msg.SenderId)
 			aliveList[senderId] = msg.OnlineStatus
 
-			// Directly check if the incoming elevator list matches mine
 			ackMap[senderId] = reflect.DeepEqual(elevatorList, msg.ElevatorList)
 
 			// Only update state if alive
+			// TODO THIS CAN BE A FUNC
 			elevatorList[senderId] = msg.ElevatorList[senderId]
-			if wasReset{
+			if !init {
+				fmt.Println(senderId)
+				fmt.Println("HALLO WE INIT ")
+				fmt.Println("HALLO WE INIT ")
 				elevatorList[nodeIDInt] = msg.ElevatorList[nodeIDInt]
+				printElevatorList(elevatorList)
+				init = true
 			}
 			hallOrderList[senderId] = msg.HallOrderList[senderId]
-
-			// Run cyclic logic to update local hallOrderList
 			hallOrderList = cyclicCounter(hallOrderList, aliveList, nodeIDInt)
-			printHallOrderList(hallOrderList)
-			// Check if all active elevators acknowledge the same states
 
+			//TODO THIS CAN BE FUNC
 			allAcknowledged := true
 			for i := 0; i < NUM_ELEVATORS; i++ {
 				if nodeIDInt == i {
 					continue
 				}
-				//print(ackMap[i] )
 				if aliveList[i] && !ackMap[i] {
 					allAcknowledged = false
-					//fmt.Println("NOOO")
 					break
 				}
 			}
-
-			// Only send message to assigner if all acknowledgments are true
 
 			if allAcknowledged {
 				messagetoOrderAssignerChannel <- PayloadFromNetworkToAssigner{
@@ -169,22 +159,9 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 					HallOrderList: hallOrderList,
 				}
 			}
-			/*
-				messagetoOrderAssignerChannel <- PayloadFromNetworkToAssigner{
-					AliveList:     aliveList,
-					ElevatorList:  elevatorList,
-					HallOrderList: hallOrderList,
-				}
-			*/
+
 		case payload := <-messagefromOrderAssigner:
 			fmt.Println("HI FROM ASS")
-			/*
-				messageInstance.SenderId = nodeID
-				messageInstance.HallOrderList[nodeIDInt] = payload.HallRequests
-				//TODO BURDE VÆRE SAMME
-				messageInstance.ElevatorList[nodeIDInt] = payload.States[nodeID]
-				messageInstance.OnlineStatus = payload.ActiveSatus
-			*/
 			hallOrderList[nodeIDInt] = payload.HallRequests
 			elevatorList[nodeIDInt] = payload.States[nodeID]
 			aliveList[nodeIDInt] = payload.ActiveSatus
@@ -208,5 +185,6 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 			}
 		}
 	}
+
 	// TODO ADD DEFULT CASE THAT IF WE ARE OFLINE SEND TO ASS AND SLEEP :)
 }

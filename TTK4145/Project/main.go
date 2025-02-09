@@ -12,18 +12,18 @@ import (
 )
 
 func main() {
-	
+
 	nodeID := parseArgs()
 
 	hwelevio.Init(Addr)
 
 	var (
-		newOrderChannel    = make(chan [NFloors][NButtons]bool, 100)
-		payloadFromElevator     = make(chan PayloadFromElevator, 100)
-		toNetworkChannel   = make(chan PayloadFromassignerToNetwork, 100)
-		fromNetworkChannel = make(chan PayloadFromNetworkToAssigner, 100)
-		fromDriverToLight = make(chan PayloadFromDriver, 100)
-		fromAsstoLight = make(chan [NFloors][NButtons]ButtonState, 100)
+		newOrderChannel     = make(chan [NFloors][NButtons]bool, 100)
+		payloadFromElevator = make(chan PayloadFromElevator, 100)
+		toNetworkChannel    = make(chan PayloadFromassignerToNetwork, 100)
+		fromNetworkChannel  = make(chan PayloadFromNetworkToAssigner, 100)
+		fromDriverToLight   = make(chan PayloadFromDriver, 100)
+		fromAsstoLight      = make(chan [NFloors][NButtons]ButtonState, 100)
 	)
 
 	go elevatordriver.ElevatorDriver(
@@ -52,10 +52,9 @@ func main() {
 		fromAsstoLight,
 		fromDriverToLight,
 	)
-	// TODO is the select needed ? 
+	// TODO is the select needed ?
 	select {}
 }
-
 
 func parseArgs() string {
 	var nodeID int
