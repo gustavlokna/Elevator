@@ -104,13 +104,16 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 				}
 
 			}
+			// TODO HERE WE REALY JUST CARE ABOUT US 
+			// AS WE WANT TO RESET OUR CALLS ON OUR REINT 
 			for _, activeNode := range reg.Nodes {
 				fmt.Printf("Node active: %s\n", activeNode)
 				activeNodeInt, _ := strconv.Atoi(activeNode)
 				if activeNodeInt == nodeIDInt {
+					hallOrderList[activeNodeInt] = resetHallCalls()
 					online = true
 				}
-				hallOrderList[activeNodeInt] = resetHallCalls()
+				//hallOrderList[activeNodeInt] = resetHallCalls()
 				aliveList[activeNodeInt] = true
 			}
 			//if offline send to orderassigner!
