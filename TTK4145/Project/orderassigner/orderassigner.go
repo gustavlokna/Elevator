@@ -77,7 +77,7 @@ func OrderAssigner(
 				prevAssignedOrders = newOrders // Store latest assigned orders
 			}
 			
-			fromAsstoLight <- PayloadFromassignerToNetwork.HallRequests
+			fromAsstoLight <- PayloadFromNetwork.HallOrderList[myID]
 		
 		}
 	}

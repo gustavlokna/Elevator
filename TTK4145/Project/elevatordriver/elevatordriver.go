@@ -61,6 +61,12 @@ func ElevatorDriver(
 
 	for {
 		prevelevator = elevator
+		//dobel init : not good 
+		//we need smart way to avouid
+		// what i want is to set it false on the start of the loop :) 
+		// else prev is stored 
+		var completedOrders [NFloors][NButtons]bool
+
 		select {
 		case obstruction = <-drv_obstr:
 			
@@ -90,7 +96,7 @@ func ElevatorDriver(
 		switch elevator.CurrentBehaviour {
 		case EBIdle:
 			elevator = ChooseDirection(elevator)
-			hwelevio.SetMotorDirection(elevator.Dirn)
+			
 			//ElevatorPrint(elevator)
 			if elevator.CurrentBehaviour == EBMoving && !timerActive{
 				motorTimeout = time.Now().Add(3 * time.Second)
@@ -98,7 +104,7 @@ func ElevatorDriver(
 			}
 
 		case EBMoving:
-
+			hwelevio.SetMotorDirection(elevator.Dirn)
 			if timerActive && time.Now().After(motorTimeout){
 				elevator.ActiveSatus = false 
 				print("motor timeout")
@@ -144,24 +150,14 @@ func ElevatorDriver(
 			}  else {
 				if time.Now().After(doorTimeout){
 					elevator.ActiveSatus = true 
-					//TODO WE CLEAR BOTH SIMANTANIOUSLEY. NOT GOOD 
-					fmt.Println("WE CLEAR OUR ORDERS")
-
-					fmt.Println("WE CLEAR OUR ORDERS")
-					fmt.Println("WE CLEAR OUR ORDERS")
-					fmt.Println("WE CLEAR OUR ORDERS")
-					fmt.Println("WE CLEAR OUR ORDERS")
-					fmt.Println("WE CLEAR OUR ORDERS")
-					//NEW 
-					ElevatorPrint(elevator)
 					completedOrders, elevator  = clearAtCurrentFloor(elevator)
-					ElevatorPrint(elevator)
+
 					//elevator.Dirn  =  decideDirection(elevator).Dirn
 					//elevator.CurrentBehaviour =  decideDirection(elevator).CurrentBehaviour
 					// time.Sleep(3 * time.Second) // Simulate door open time
 					// SHOULD NOT BE EBIDLE ? 
 					elevator.CurrentBehaviour = EBIdle
-					elevator.Dirn = MDStop
+					//elevator.Dirn = MDStop
 					toggledoorLight = false 
 					payloadToLights <- PayloadFromDriver{
 						CurrentFloor : elevator.CurrentFloor,

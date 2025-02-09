@@ -104,7 +104,7 @@ func clearAtCurrentFloor(e Elevator) ([NFloors][NButtons]bool, Elevator) {
 		// 
 		if e.Requests[e.CurrentFloor][BHallUp] {
 			clearedRequests[e.CurrentFloor][BHallUp] = true
-			e.Requests[e.CurrentFloor][BHallUp] = true 
+			e.Requests[e.CurrentFloor][BHallUp] = false  
 		}
 		if e.Requests[e.CurrentFloor][BHallDown] && !clearedRequests[e.CurrentFloor][BHallUp] { // ADD BOLEAN 
 			clearedRequests[e.CurrentFloor][BHallDown] = true
