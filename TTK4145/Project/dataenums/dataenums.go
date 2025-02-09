@@ -4,7 +4,7 @@ const (
 	NFloors    int = 4
 	NButtons   int = 3
 	PollRateMS     = 20
- 	NUM_ELEVATORS int = 2
+ 	NUM_ELEVATORS int = 3
 )
 
 /*

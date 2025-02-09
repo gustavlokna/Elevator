@@ -11,6 +11,7 @@ func buttonPressed(payload PayloadFromassignerToNetwork, ElevatorName string,
 // er.Start(elevator.Config.DoorOpenDurationS)
 // Send dir to driver ? 
 // else : 
+// TODO CHECK IF WE ARE ORDER ASS, IF NOT SET ButtonPressed
 switch btnEvent.Button {
 case BHallUp:
 	payload.HallRequests[btnEvent.Floor][BHallUp] = ButtonPressed
