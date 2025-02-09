@@ -82,11 +82,6 @@ func ElevatorDriver(
 				DoorLight : toggledoorLight, 
 			}
 		case elevator.Requests = <-newOrderChannel:
-			fmt.Println("we got new order")
-			fmt.Println("we got new order")
-			fmt.Println("we got new order")
-			fmt.Println("we got new order")
-			ElevatorPrint(elevator)
 			
 		default:
 			time.Sleep(10 * time.Millisecond)

@@ -63,7 +63,7 @@ func OrderAssigner(
 		
 		case PayloadFromNetwork := <-fromNetworkChannel:
 			//TODO why this. 
-			
+			// TODO REMOVE ? 
 			PayloadFromassignerToNetwork = handlePayloadFromNetwork(PayloadFromassignerToNetwork, 
 				PayloadFromNetwork, myID)
 			
@@ -77,7 +77,7 @@ func OrderAssigner(
 				prevAssignedOrders = newOrders // Store latest assigned orders
 			}
 			
-			fromAsstoLight <- PayloadFromNetwork.HallOrderList[myID]
+			fromAsstoLight <- updateLightStates(PayloadFromNetwork, myID)
 		
 		}
 	}
