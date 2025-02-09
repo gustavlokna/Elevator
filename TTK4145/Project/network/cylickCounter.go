@@ -62,7 +62,7 @@ func cyclicCounter(
 			// ORDER_COMPLETE -> remain ORDER_COMPLETE if all peers are ORDER_COMPLETE or IDLE
 			case OrderComplete:
 				if allIn(peers, OrderComplete, Idle) {
-					myState = OrderComplete
+					myState = Idle
 				}
 			}
 			orders[myID][f][b] = myState

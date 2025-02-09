@@ -137,7 +137,7 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 
 			// Run cyclic logic to update local hallOrderList
 			hallOrderList = cyclicCounter(hallOrderList,aliveList, nodeIDInt)
-
+			printHallOrderList(hallOrderList)
 			// Check if all active elevators acknowledge the same states
 
 			allAcknowledged := true
