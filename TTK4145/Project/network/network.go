@@ -63,6 +63,7 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 		hallOrderList [NUM_ELEVATORS][NFloors][NButtons]ButtonState
 
 		online bool
+		wasReset  bool
 	)
 
 	// Periodic broadcast of the last updated message
@@ -104,8 +105,8 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 				}
 
 			}
-			// TODO HERE WE REALY JUST CARE ABOUT US 
-			// AS WE WANT TO RESET OUR CALLS ON OUR REINT 
+			// TODO HERE WE REALY JUST CARE ABOUT US
+			// AS WE WANT TO RESET OUR CALLS ON OUR REINT
 			for _, activeNode := range reg.Nodes {
 				fmt.Printf("Node active: %s\n", activeNode)
 				activeNodeInt, _ := strconv.Atoi(activeNode)
@@ -136,10 +137,13 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 
 			// Only update state if alive
 			elevatorList[senderId] = msg.ElevatorList[senderId]
+			if wasReset{
+				elevatorList[nodeIDInt] = msg.ElevatorList[nodeIDInt]
+			}
 			hallOrderList[senderId] = msg.HallOrderList[senderId]
 
 			// Run cyclic logic to update local hallOrderList
-			hallOrderList = cyclicCounter(hallOrderList,aliveList, nodeIDInt)
+			hallOrderList = cyclicCounter(hallOrderList, aliveList, nodeIDInt)
 			printHallOrderList(hallOrderList)
 			// Check if all active elevators acknowledge the same states
 

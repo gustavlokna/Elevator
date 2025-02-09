@@ -16,7 +16,7 @@ func ElevatorDriver(
 	print("Elevator module initiated with name: ", nodeID)
 
 	var (
-		elevator, wasReset = initelevator()
+		elevator = initelevator()
 		prevelevator       = elevator
 		completedOrders    = [NFloors][NButtons]bool{}
 		obstruction        = false
@@ -39,9 +39,7 @@ func ElevatorDriver(
 	// Initialization of elevator
 	hwelevio.SetMotorDirection(elevator.Dirn)
 	elevator.CurrentFloor = <-drv_floors
-	if wasReset{
-		elevator.Dirn = MDStop
-	}
+	elevator.Dirn = MDStop
 	hwelevio.SetMotorDirection(elevator.Dirn)
 	
 	// Initialize and send initial PayloadFromElevator
@@ -171,7 +169,6 @@ func ElevatorDriver(
 				CompletedOrders: completedOrders,
 			}
 			payloadFromElevator <- payload
-			saveElevator(elevator)
 		}
 		
 	}
