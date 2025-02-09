@@ -63,6 +63,8 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 		//TODO THIS CAN BE A [NUM_ELEVATORS]HRAInput
 		elevatorList      [NUM_ELEVATORS]HRAElevState
 		hallOrderList     [NUM_ELEVATORS][NFloors][NButtons]ButtonState
+
+		online 			   bool 
 	)
 	
 	// Periodic broadcast of the last updated message
@@ -83,19 +85,33 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 	for {
 		select {
 		case reg := <-nodeRegistryChannel:
+			// TODO THIS reg/ or it can be a double variable CAN ALSO CONTAIN THE ONLIE STATUS :) 
 			for _, lostNode := range reg.Lost {
 				// TODO REMOVE 
 				fmt.Printf("Node lost connection: %s\n", lostNode)
 				lostNodeInt,_ := strconv.Atoi(lostNode)
-				aliveList[lostNodeInt] = false
-				
-				//TODO if only one node is alive
-				// assigning will not work, but this is outside specs ? 
-				hallOrderList[lostNodeInt] = resetHallCalls()
+				// TODO MOVE THIS TO THE DEFULT CASE 
+				if lostNodeInt == nodeIDInt{
+					online = false 
+					newAliveList := [NUM_ELEVATORS]bool{}
+					newAliveList[nodeIDInt] = aliveList[nodeIDInt]
+					messagetoOrderAssignerChannel <- PayloadFromNetworkToAssigner{
+						AliveList:     newAliveList,
+						ElevatorList:  elevatorList,
+						HallOrderList: hallOrderList,
+					}
+				}else{
+					aliveList[lostNodeInt] = false
+					hallOrderList[lostNodeInt] = resetHallCalls()
+				}
+
 			}
 			for _, activeNode := range reg.Nodes {
 				fmt.Printf("Node active: %s\n", activeNode)
 				activeNodeInt,_ := strconv.Atoi(activeNode)
+				if activeNodeInt == nodeIDInt{
+					online = true  
+				}
 				hallOrderList[activeNodeInt] = resetHallCalls()
 				aliveList[activeNodeInt] = true	
 			}
@@ -163,16 +179,24 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 			//TODO BURDE VÆRE SAMME 
 			messageInstance.ElevatorList[nodeIDInt] = payload.States[nodeID]
 			messageInstance.OnlineStatus = payload.ActiveSatus
-			if !messageInstance.OnlineStatus {
-				// TODO set btn_pressed = assign and send to assigner 
-				print("sending msg back")
-				//messagetoOrderAssignerChannel <- messageInstance
-			}
 			*/
-
 			hallOrderList[nodeIDInt]= payload.HallRequests
 			elevatorList[nodeIDInt] =  payload.States[nodeID]
 			aliveList[nodeIDInt] = payload.ActiveSatus
+			
+			// TODO MOVE THIS TO THE DEFULT CASE 
+			if !online{
+				newAliveList := [NUM_ELEVATORS]bool{}
+				newAliveList[nodeIDInt] = aliveList[nodeIDInt]
+				messagetoOrderAssignerChannel <- PayloadFromNetworkToAssigner{
+					AliveList:     newAliveList,
+					ElevatorList:  elevatorList,
+					HallOrderList: hallOrderList,
+				}
+			}
+			
+
+
 
 
 			broadcastTransmissionChannel <- Message{
@@ -183,4 +207,5 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 			}
 		}
 	}
+	// TODO ADD DEFULT CASE THAT IF WE ARE OFLINE SEND TO ASS AND SLEEP :) 
 }
