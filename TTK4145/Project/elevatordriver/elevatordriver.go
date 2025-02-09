@@ -90,18 +90,16 @@ func ElevatorDriver(
 		switch elevator.CurrentBehaviour {
 		case EBIdle:
 			elevator = ChooseDirection(elevator)
-			
-			//ElevatorPrint(elevator)
-			if elevator.CurrentBehaviour == EBMoving && !timerActive{
-				motorTimeout = time.Now().Add(3 * time.Second)
-				timerActive = true
-			}
 
 		case EBMoving:
 			hwelevio.SetMotorDirection(elevator.Dirn)
 			if timerActive && time.Now().After(motorTimeout){
 				elevator.ActiveSatus = false 
 				print("motor timeout")
+			}
+			if elevator.CurrentBehaviour == EBMoving && !timerActive{
+				motorTimeout = time.Now().Add(3 * time.Second)
+				timerActive = true
 			}
 
 			// bolea is copied from Ø and if sentence can just be put in case elevator.CurrentFloor = <-drv_floors:
@@ -150,7 +148,8 @@ func ElevatorDriver(
 					//elevator.CurrentBehaviour =  decideDirection(elevator).CurrentBehaviour
 					// time.Sleep(3 * time.Second) // Simulate door open time
 					// SHOULD NOT BE EBIDLE ? 
-					elevator.CurrentBehaviour = EBIdle
+					//elevator.CurrentBehaviour = EBIdle
+					elevator = ChooseDirection(elevator)
 					//elevator.Dirn = MDStop
 					toggledoorLight = false 
 					payloadToLights <- PayloadFromDriver{

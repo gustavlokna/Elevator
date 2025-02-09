@@ -148,10 +148,10 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 				if nodeIDInt==i{
 					continue 
 				}
-				print(ackMap[i] )
+				//print(ackMap[i] )
 				if aliveList[i] && !ackMap[i] {
 					allAcknowledged = false
-					fmt.Println("NOOO")
+					//fmt.Println("NOOO")
 					break
 				}
 			}
@@ -173,6 +173,7 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 			}
 			*/ 
 		case payload := <-messagefromOrderAssigner:
+			fmt.Println("HI FROM ASS")
 			/*
 			messageInstance.SenderId = nodeID
 			messageInstance.HallOrderList[nodeIDInt] = payload.HallRequests
