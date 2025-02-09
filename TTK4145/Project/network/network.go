@@ -9,6 +9,7 @@ import (
 	//"os"
 	"time"
 	"strconv"
+	"reflect"
 )
 
 const lifelinePort int = 1337
@@ -53,12 +54,12 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 	
 	var (
 		//onlineStatus      = false
-		messageInstance   Message
+		//messageInstance   Message
 		//TODO: DO WE NEED THIS? 
-		lastMessage       Message
+		//lastMessage       Message
 		
 		aliveList         [NUM_ELEVATORS]bool
-
+		ackMap 			  [NUM_ELEVATORS]bool
 		//TODO THIS CAN BE A [NUM_ELEVATORS]HRAInput
 		elevatorList      [NUM_ELEVATORS]HRAElevState
 		hallOrderList     [NUM_ELEVATORS][NFloors][NButtons]ButtonState
@@ -69,7 +70,12 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 	// TODO: This is copied ?
 	go func() {
 		for {
-			broadcastTransmissionChannel <- lastMessage
+			broadcastTransmissionChannel <- Message{
+				SenderId: nodeID,
+				ElevatorList: elevatorList, 
+				HallOrderList: hallOrderList, 
+				OnlineStatus: aliveList[nodeIDInt], 
+			}
 			time.Sleep(10 * time.Millisecond)
 		}
 	}()
@@ -98,46 +104,83 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 
 
 		case msg := <-broadcastReceiverChannel:
-			// TODO MAKE REDUNDANT (I WANT THIS AS INT)
+			/*
+			fmt.Println("My elevatorList: ", elevatorList)
+			fmt.Println("Incoming elevatorList: ", msg.ElevatorList)
+
+			if !reflect.DeepEqual(elevatorList, msg.ElevatorList) {
+				fmt.Println("Mismatch found!")
+			}
+			*/
 			senderId, _ := strconv.Atoi(msg.SenderId)
 			aliveList[senderId] = msg.OnlineStatus 
-			elevatorList[senderId]= msg.ElevatorList[senderId]
-			hallOrderList[senderId]= msg.HallOrderList[senderId]
-			hallOrderList = cyclicCounter(hallOrderList,nodeIDInt)
-
-			// TODO NECESSARY? 
-			lastMessage.HallOrderList = hallOrderList
+		
+			// Directly check if the incoming elevator list matches mine
+			ackMap[senderId] = reflect.DeepEqual(elevatorList, msg.ElevatorList)
+		
+			// Only update state if alive
+			elevatorList[senderId] = msg.ElevatorList[senderId]
+			hallOrderList[senderId] = msg.HallOrderList[senderId]
+		
+			// Run cyclic logic to update local hallOrderList
+			hallOrderList = cyclicCounter(hallOrderList, nodeIDInt)
+		
+			// Check if all active elevators acknowledge the same states
 			
-
+			allAcknowledged := true
+			for i := 0; i < NUM_ELEVATORS; i++ {
+				if nodeIDInt==i{
+					continue 
+				}
+				print(ackMap[i] )
+				if aliveList[i] && !ackMap[i] {
+					allAcknowledged = false
+					fmt.Println("NOOO")
+					break
+				}
+			}
+			
+			// Only send message to assigner if all acknowledgments are true
+			
+			if allAcknowledged {
+				messagetoOrderAssignerChannel <- PayloadFromNetworkToAssigner{
+					AliveList:     aliveList,
+					ElevatorList:  elevatorList,
+					HallOrderList: hallOrderList,
+				}
+			}
+			/*
 			messagetoOrderAssignerChannel <- PayloadFromNetworkToAssigner{
 				AliveList:     aliveList,
 				ElevatorList:  elevatorList,
 				HallOrderList: hallOrderList,
 			}
-
+			*/ 
 		case payload := <-messagefromOrderAssigner:
+			/*
 			messageInstance.SenderId = nodeID
 			messageInstance.HallOrderList[nodeIDInt] = payload.HallRequests
 			//TODO BURDE VÆRE SAMME 
 			messageInstance.ElevatorList[nodeIDInt] = payload.States[nodeID]
 			messageInstance.OnlineStatus = payload.ActiveSatus
-			// TODO THIS CAN BE STREAMLINED INTO A ONELINER 
-			// TODO NO NEED FOR messageInstance variable 
-			lastMessage = messageInstance
-			hallOrderList[nodeIDInt]= payload.HallRequests
-			//printHallOrderList(hallOrderList)
-			//printElevatorList(messageInstance.ElevatorList)
-
-			// TODO this should be simpler (just add everything to elevatorList
-			//  hallOrderList etc and brodcast thoe variables )
-			elevatorList[nodeIDInt] =  payload.States[nodeID]
-			//fmt.Println("Broadcast transmitted to network")
 			if !messageInstance.OnlineStatus {
 				// TODO set btn_pressed = assign and send to assigner 
 				print("sending msg back")
 				//messagetoOrderAssignerChannel <- messageInstance
 			}
-			broadcastTransmissionChannel <- messageInstance
+			*/
+
+			hallOrderList[nodeIDInt]= payload.HallRequests
+			elevatorList[nodeIDInt] =  payload.States[nodeID]
+			aliveList[nodeIDInt] = payload.ActiveSatus
+
+
+			broadcastTransmissionChannel <- Message{
+				SenderId: nodeID,
+				ElevatorList: elevatorList, 
+				HallOrderList: hallOrderList, 
+				OnlineStatus: aliveList[nodeIDInt], 
+			}
 		}
 	}
 }
