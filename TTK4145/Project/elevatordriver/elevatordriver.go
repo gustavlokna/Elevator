@@ -34,7 +34,7 @@ func ElevatorDriver(
 	go hwelevio.PollObstructionSwitch(drv_obstr)
 	go hwelevio.PollStopButton(drv_stop)
 	
-
+	fmt.Println("HALLO")
 
 	// Initialization of elevator
 	hwelevio.SetMotorDirection(elevator.Dirn)
@@ -66,7 +66,7 @@ func ElevatorDriver(
 
 		select {
 		case obstruction = <-drv_obstr:
-			
+			//ElevatorPrint(elevator)
 			print("obst: ", obstruction)
 			
 		case elevator.CurrentFloor = <-drv_floors:
@@ -80,6 +80,7 @@ func ElevatorDriver(
 				DoorLight : toggledoorLight, 
 			}
 		case elevator.Requests = <-newOrderChannel:
+			//ElevatorPrint(elevator)
 			
 		default:
 			time.Sleep(10 * time.Millisecond)
@@ -125,7 +126,7 @@ func ElevatorDriver(
 				elevator.ActiveSatus = false 
 				doorTimeout = time.Now().Add(3*time.Second)
 				//add state called obst ? 
-				//print("hello we have a obst")
+				
 			}
 			//This logic is copied from Ø
 			if !doorOpen{
@@ -139,6 +140,7 @@ func ElevatorDriver(
 				}
 			}  else {
 				if time.Now().After(doorTimeout){
+					print("hello we have a obst")
 					elevator.ActiveSatus = true 
 					completedOrders, elevator  = clearAtCurrentFloor(elevator)
 
@@ -146,7 +148,7 @@ func ElevatorDriver(
 					//elevator.CurrentBehaviour =  decideDirection(elevator).CurrentBehaviour
 					// time.Sleep(3 * time.Second) // Simulate door open time
 					// SHOULD NOT BE EBIDLE ? 
-					//elevator.CurrentBehaviour = EBIdle
+					elevator.CurrentBehaviour = EBIdle
 					elevator = ChooseDirection(elevator)
 					//elevator.Dirn = MDStop
 					toggledoorLight = false 

@@ -131,8 +131,6 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 			elevatorList[senderId] = msg.ElevatorList[senderId]
 			if !init {
 				fmt.Println(senderId)
-				fmt.Println("HALLO WE INIT ")
-				fmt.Println("HALLO WE INIT ")
 				elevatorList[nodeIDInt] = msg.ElevatorList[nodeIDInt]
 				printElevatorList(elevatorList)
 				init = true
@@ -161,13 +159,13 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 			}
 
 		case payload := <-messagefromOrderAssigner:
-			fmt.Println("HI FROM ASS")
+			printElevatorList(elevatorList)
 			hallOrderList[nodeIDInt] = payload.HallRequests
 			elevatorList[nodeIDInt] = payload.States[nodeID]
 			aliveList[nodeIDInt] = payload.ActiveSatus
-
 			//s TODO MOVE THIS TO THE DEFULT CASE
 			if !online {
+				printElevatorList(elevatorList)
 				newAliveList := [NUM_ELEVATORS]bool{}
 				newAliveList[nodeIDInt] = aliveList[nodeIDInt]
 				messagetoOrderAssignerChannel <- PayloadFromNetworkToAssigner{

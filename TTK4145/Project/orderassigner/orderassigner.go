@@ -52,9 +52,25 @@ func OrderAssigner(
 			hraInput = orderComplete(hraInput, nodeID, payload.CompletedOrders)
 			fmt.Println("elevator was changed")
 			*/
+			/*
+			print("hallo")
+			print("hallo")
+			print("hallo")
+			print("hallo")
+			print("hallo")
+			PrintPayloadFromElevator(payload)
+			*/
 			PayloadFromassignerToNetwork = handlePayloadFromElevator(payload,
 				PayloadFromassignerToNetwork, nodeID)
-			//print("hallo")
+			
+			print("Penis")
+			print("Penis")
+			print("Penis")
+			print("Penis")
+			print("Penis")
+			
+			PrintPayloadFromElevator(payload)
+			//PrintPayloadFromassignerToNetwork(PayloadFromassignerToNetwork)
 			toNetworkChannel <- PayloadFromassignerToNetwork
 		
 		case PayloadFromNetwork := <-fromNetworkChannel:
@@ -66,7 +82,7 @@ func OrderAssigner(
 			*/
 			// Assign new orders
 			newOrders := assignOrders(PayloadFromNetwork, myID)
-
+			
 			// Only send if different from previous orders
 			if newOrders != prevAssignedOrders {
 				fmt.Println("New orders detected, updating newOrderChannel")

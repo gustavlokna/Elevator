@@ -33,6 +33,35 @@ func ElevDirToString(d HWMotorDirection) string {
 }
 
 
+func PrintPayloadFromElevator(payload PayloadFromElevator) {
+    fmt.Println("PayloadFromElevator:")
+
+    fmt.Println("Elevator:")
+    fmt.Printf("  Floor: %d\n", payload.Elevator.CurrentFloor)
+    fmt.Printf("  Direction: %s\n", ElevDirToString(payload.Elevator.Dirn))
+    fmt.Printf("  Behavior: %s\n", EBToString(payload.Elevator.CurrentBehaviour))
+    fmt.Printf("  Active Status: %t\n", payload.Elevator.ActiveSatus)
+
+    fmt.Println("Requests:")
+    for floor := NFloors - 1; floor >= 0; floor-- {
+        fmt.Printf("  Floor %d: [Up: %t, Down: %t, Cab: %t]\n",
+            floor,
+            payload.Elevator.Requests[floor][BHallUp],
+            payload.Elevator.Requests[floor][BHallDown],
+            payload.Elevator.Requests[floor][BCab],
+        )
+    }
+
+    fmt.Println("Completed Orders:")
+    for floor := NFloors - 1; floor >= 0; floor-- {
+        fmt.Printf("  Floor %d: [Up: %t, Down: %t, Cab: %t]\n",
+            floor,
+            payload.CompletedOrders[floor][BHallUp],
+            payload.CompletedOrders[floor][BHallDown],
+            payload.CompletedOrders[floor][BCab],
+        )
+    }
+}
 
 
 
