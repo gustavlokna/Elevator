@@ -109,23 +109,23 @@ func Receiver(port int, myID string, messageCh chan<- Message, registryCh chan<-
 				activeNodes = append(activeNodes, id)
 			}
 		}
-		var newNode string
+		var newNodes []string
 		for _, id := range activeNodes {
 			if reportedNew[id] == false {
-				newNode = id
+				newNodes = append(newNodes, id)
 				reportedNew[id] = true
-				break
 			}
 		}
-		if len(lostNodes) > 0 || newNode != "" {
+		if len(lostNodes) > 0 || len(newNodes) > 0 {
 			sort.Strings(activeNodes)
 			reg := NetworkNodeRegistry{
 				Nodes: activeNodes,
-				New:   newNode,
+				New:   newNodes,
 				Lost:  lostNodes,
 			}
 			registryCh <- reg
 		}
+		
 	}
 }
 

@@ -2,6 +2,7 @@ package network
 
 import (
 	. "Project/dataenums"
+	"fmt"
 )
 
 func cyclicCounter(
@@ -63,18 +64,51 @@ func cyclicCounter(
 				case Idle:
 					if !(allIn(peers, Idle, ButtonPressed) || allIn(peers, Idle, OrderComplete)) {
 						myState = Initial // Illegal combination detected.
+						fmt.Println("FUUUUCKKKKK")
+						fmt.Println("FUUUUCKKKKK")
+						fmt.Println("FUUUUCKKKKK")
+						fmt.Println("FUUUUCKKKKK")
+						fmt.Println("FUUUUCKKKKK")
+						fmt.Println("FUUUUCKKKKK")
+						fmt.Println("FUUUUCKKKKK")
+						fmt.Println("FUUUUCKKKKK")
+
 					}
 				case ButtonPressed:
 					if !(allIn(peers, ButtonPressed, OrderAssigned) || allIn(peers, Idle, ButtonPressed)) {
 						myState = Initial
+						fmt.Println("FUUUUCKKKKK")
+						fmt.Println("FUUUUCKKKKK")
+						fmt.Println("FUUUUCKKKKK")
+						fmt.Println("FUUUUCKKKKK")
+						fmt.Println("FUUUUCKKKKK")
+						fmt.Println("FUUUUCKKKKK")
+						fmt.Println("FUUUUCKKKKK")
+						fmt.Println("FUUUUCKKKKK")
 					}
 				case OrderAssigned:
 					if !(allIn(peers, OrderAssigned, OrderComplete) || allIn(peers, OrderAssigned, ButtonPressed)){
 						myState = Initial
+						fmt.Println("FUUUUCKKKKK")
+						fmt.Println("FUUUUCKKKKK")
+						fmt.Println("FUUUUCKKKKK")
+						fmt.Println("FUUUUCKKKKK")
+						fmt.Println("FUUUUCKKKKK")
+						fmt.Println("FUUUUCKKKKK")
+						fmt.Println("FUUUUCKKKKK")
+						fmt.Println("FUUUUCKKKKK")
 					}
 				case OrderComplete:
 					if !(allIn(peers, OrderComplete, Idle)  || allIn(peers, OrderAssigned, OrderComplete)) {
 						myState = Initial
+						fmt.Println("FUUUUCKKKKK")
+						fmt.Println("FUUUUCKKKKK")
+						fmt.Println("FUUUUCKKKKK")
+						fmt.Println("FUUUUCKKKKK")
+						fmt.Println("FUUUUCKKKKK")
+						fmt.Println("FUUUUCKKKKK")
+						fmt.Println("FUUUUCKKKKK")
+						fmt.Println("FUUUUCKKKKK")
 					}
 				}
 			}

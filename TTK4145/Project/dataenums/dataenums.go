@@ -139,6 +139,6 @@ type PayloadFromDriver struct {
 
 type NetworkNodeRegistry struct {
 	Nodes []string
-	New   string
+	New   []string
 	Lost  []string
 }

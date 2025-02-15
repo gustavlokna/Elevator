@@ -137,10 +137,24 @@ func handlePayloadFromElevator(fromElevator  PayloadFromElevator,
 
 
 
-func handlePayloadFromNetwork(payload PayloadFromassignerToNetwork, 
-	PayloadFromNetwork PayloadFromNetworkToAssigner,
-	nodeID int)PayloadFromassignerToNetwork{
-	payload.HallRequests = PayloadFromNetwork.HallOrderList[nodeID]
+func handlePayloadFromNetwork(
+	payload PayloadFromassignerToNetwork, 
+	netPayload PayloadFromNetworkToAssigner,
+	nodeID int,
+) PayloadFromassignerToNetwork {
+	// TODO IS IT NECESSARY ? 
+	for f := 0; f < NFloors; f++ {
+		for b := 0; b < NButtons; b++ {
+			incomingState := netPayload.HallOrderList[nodeID][f][b]
+			localState := payload.HallRequests[f][b]
+			// If local state is OrderComplete and incoming is OrderAssigned, keep local state.
+			if localState == OrderComplete && incomingState == OrderAssigned {
+				// do nothing; stay OrderComplete.
+			} else {
+				payload.HallRequests[f][b] = incomingState
+			}
+		}
+	}
 	return payload
 }
 

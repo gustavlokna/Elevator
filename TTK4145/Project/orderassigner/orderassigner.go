@@ -52,23 +52,17 @@ func OrderAssigner(
 			toNetworkChannel <- PayloadFromassignerToNetwork
 		
 		case PayloadFromNetwork := <-fromNetworkChannel:
-			//TODO why this. 
 			// TOOD CANNOT REMOVE YET: NEED FUNC, BUT I WANT TO 
-			// TODO DO NOT OVERWRITE ORDER COMPLETE IF INNCOMING IS ORDER ASS :) 
 			// THIS CAN HAPPEN IF THERE IS MISSHAP IN THE ORDER THINGS OCCUR 
 			PayloadFromassignerToNetwork = handlePayloadFromNetwork(PayloadFromassignerToNetwork, 
 				PayloadFromNetwork, myID)
 			
-			// Assign new orders
 			newOrders := assignOrders(PayloadFromNetwork, myID)
 			
-			// Only send if different from previous orders
 			if newOrders != prevAssignedOrders {
-				//fmt.Println("New orders detected, updating newOrderChannel")
 				newOrderChannel <- newOrders
-				prevAssignedOrders = newOrders // Store latest assigned orders
+				prevAssignedOrders = newOrders
 			}
-			// TODO 
 			fromAsstoLight <- updateLightStates(PayloadFromNetwork, myID)
 		
 		}
