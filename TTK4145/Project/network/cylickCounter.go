@@ -64,19 +64,19 @@ func cyclicCounter(
 			if myState == origState {
 				switch origState {
 				case Idle:
-					if !allIn(peers, Idle, ButtonPressed) {
+					if !allIn(peers, Idle, ButtonPressed) || !allIn(peers, Idle, OrderComplete) {
 						myState = Initial // Illegal combination detected.
 					}
 				case ButtonPressed:
-					if !allIn(peers, ButtonPressed, OrderAssigned) {
+					if !allIn(peers, ButtonPressed, OrderAssigned) || !allIn(peers, Idle, ButtonPressed) {
 						myState = Initial
 					}
 				case OrderAssigned:
-					if !allIn(peers, OrderAssigned, OrderComplete) {
+					if !allIn(peers, OrderAssigned, OrderComplete) || !allIn(peers, OrderAssigned, ButtonPressed){
 						myState = Initial
 					}
 				case OrderComplete:
-					if !allIn(peers, OrderComplete, Idle) {
+					if !allIn(peers, OrderComplete, Idle)  || !allIn(peers, OrderAssigned, OrderComplete) {
 						myState = Initial
 					}
 				}
