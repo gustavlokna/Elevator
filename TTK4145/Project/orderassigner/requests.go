@@ -16,11 +16,11 @@ func buttonPressed(payload PayloadFromassignerToNetwork, ElevatorName string,
 	// TODO CHECK IF WE ARE ORDER ASS, IF NOT SET ButtonPressed
 	switch btnEvent.Button {
 	case BHallUp:
-		if payload.HallRequests[btnEvent.Floor][BHallUp] == Idle {
+		if payload.HallRequests[btnEvent.Floor][BHallUp] != OrderComplete {
 			payload.HallRequests[btnEvent.Floor][BHallUp] = ButtonPressed
 		}
 	case BHallDown:
-		if payload.HallRequests[btnEvent.Floor][BHallDown] == Idle {
+		if payload.HallRequests[btnEvent.Floor][BHallDown] != OrderComplete {
 			payload.HallRequests[btnEvent.Floor][BHallDown] = ButtonPressed
 		}
 

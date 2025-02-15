@@ -124,9 +124,10 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 				elevatorList[nodeIDInt] = msg.ElevatorList[nodeIDInt]
 				init = true
 			}
+			printHallOrderList(hallOrderList)
 			hallOrderList[senderId] = msg.HallOrderList[senderId]
 			hallOrderList = cyclicCounter(hallOrderList, aliveList, nodeIDInt)
-
+			printHallOrderList(hallOrderList)
 			//TODO THIS CAN BE FUNC
 			allAcknowledged := true
 			for i := 0; i < NUM_ELEVATORS; i++ {
@@ -148,9 +149,24 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 			}
 
 		case payload := <-messagefromOrderAssigner:
+
 			hallOrderList[nodeIDInt] = payload.HallRequests
 			elevatorList[nodeIDInt] = payload.States[nodeID]
 			aliveList[nodeIDInt] = payload.ActiveSatus
+			fmt.Println("HELLO FROM ASS")
+			fmt.Println("HELLO FROM ASS")
+			fmt.Println("HELLO FROM ASS")
+			fmt.Println("HELLO FROM ASS")
+			fmt.Println("HELLO FROM ASS")
+			fmt.Println("HELLO FROM ASS")
+			fmt.Println("HELLO FROM ASS")
+			fmt.Println("HELLO FROM ASS")
+			fmt.Println("HELLO FROM ASS")
+			fmt.Println("HELLO FROM ASS")
+			fmt.Println("HELLO FROM ASS")
+			fmt.Println("HELLO FROM ASS")
+			
+			printHallOrderList(hallOrderList)
 			//s TODO MOVE THIS TO THE DEFULT CASE
 			if !online {
 				newAliveList := [NUM_ELEVATORS]bool{}
