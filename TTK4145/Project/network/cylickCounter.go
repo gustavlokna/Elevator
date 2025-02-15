@@ -18,7 +18,8 @@ func cyclicCounter(
 			// If I'm Initial, copy the first alive peer’s state that isn't Initial.
 			if myState == Initial {
 				for e := 0; e < NUM_ELEVATORS; e++ {
-					if e != myID && alive[e] && orders[e][f][b] != Initial {
+					//if e != myID && alive[e] && orders[e][f][b] != Initial
+					if e != myID && orders[e][f][b] != Initial {
 						myState = orders[e][f][b]
 						break
 					}
@@ -30,7 +31,8 @@ func cyclicCounter(
 			// Gather other elevators' states if they're alive.
 			var peers []ButtonState
 			for e := 0; e < NUM_ELEVATORS; e++ {
-				if e != myID && alive[e]  && orders[e][f][b] != Initial {
+				//if e != myID && alive[e]  && orders[e][f][b] != Initial
+				if e != myID && orders[e][f][b] != Initial {
 					peers = append(peers, orders[e][f][b])
 				}
 			}
