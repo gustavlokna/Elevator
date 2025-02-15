@@ -24,16 +24,16 @@ func resetHallCalls() [NFloors][NButtons]ButtonState {
 }
 
 func initializeElevatorList() [NUM_ELEVATORS]HRAElevState {
-	var elevatorList [NUM_ELEVATORS]HRAElevState
+	var list [NUM_ELEVATORS]HRAElevState
 	for i := 0; i < NUM_ELEVATORS; i++ {
-		elevatorList[i] = HRAElevState{
-			Behavior:    "EBIdle",         // default behavior
-			Floor:       0,                // starting at floor 0
-			Direction:   "MDStop",         // not moving initially
-			CabRequests: make([]bool, NButtons), // one entry per cab button
+		list[i] = HRAElevState{
+			Behavior:    "EBIdle",
+			Floor:       0,
+			Direction:   "MDStop",
+			CabRequests: make([]bool, NFloors),
 		}
 	}
-	return elevatorList
+	return list
 }
 
 // Helper function to check if HRAInput is empty

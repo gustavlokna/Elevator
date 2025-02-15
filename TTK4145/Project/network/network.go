@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-//TODO MOVE DATA ENUMS ? 
+// TODO MOVE DATA ENUMS ?
 const messagePort int = 1338
 
 func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
@@ -24,16 +24,16 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 	broadcastReceiverChannel := make(chan Message)
 	go broadcast.Sender(messagePort, broadcastTransmissionChannel)
 	go broadcast.Receiver(messagePort, nodeID, broadcastReceiverChannel, nodeRegistryChannel)
-	
 
 	var (
 		//TODO THIS CAN BE A [NUM_ELEVATORS]HRAInput
 		elevatorList =   initializeElevatorList()
+		//elevatorList  [NUM_ELEVATORS]HRAElevState
 		hallOrderList [NUM_ELEVATORS][NFloors][NButtons]ButtonState
-		aliveList [NUM_ELEVATORS]bool
-		ackMap    [NUM_ELEVATORS]bool
-		online bool
-		init   bool
+		aliveList     [NUM_ELEVATORS]bool
+		ackMap        [NUM_ELEVATORS]bool
+		online        bool
+		init          bool
 	)
 
 	for {
@@ -67,10 +67,12 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 			senderId, _ := strconv.Atoi(msg.SenderId)
 			ackMap[senderId] = reflect.DeepEqual(elevatorList, msg.ElevatorList) && reflect.DeepEqual(hallOrderList, msg.HallOrderList)
 			// TODO THIS CAN BE A FUNC
+
 			if !init {
 				elevatorList[nodeIDInt] = msg.ElevatorList[nodeIDInt]
 				init = true
 			}
+
 			printHallOrderList(hallOrderList)
 			aliveList[senderId] = msg.OnlineStatus
 			elevatorList[senderId] = msg.ElevatorList[senderId]
@@ -113,7 +115,7 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 				HallOrderList: hallOrderList,
 				OnlineStatus:  aliveList[nodeIDInt],
 			}
-			
+
 			if !online {
 				newAliveList := [NUM_ELEVATORS]bool{}
 				newAliveList[nodeIDInt] = aliveList[nodeIDInt]
@@ -122,9 +124,9 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 					ElevatorList:  elevatorList,
 					HallOrderList: hallOrderList,
 				}
-			
+
 			}
-			
+
 		}
 	}
 }
