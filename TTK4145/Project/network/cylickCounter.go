@@ -30,7 +30,7 @@ func cyclicCounter(
 			// Gather other elevators' states if they're alive.
 			var peers []ButtonState
 			for e := 0; e < NUM_ELEVATORS; e++ {
-				if e != myID && alive[e] {
+				if e != myID && alive[e]  && orders[e][f][b] != Initial {
 					peers = append(peers, orders[e][f][b])
 				}
 			}
