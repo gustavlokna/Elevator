@@ -140,24 +140,6 @@ func ElevatorDriver(
 				}
 			}  else {
 				if time.Now().After(doorTimeout){
-					fmt.Println("WE CLEAR ORDERS ")
-					fmt.Println("WE CLEAR ORDERS ")
-
-					fmt.Println("WE CLEAR ORDERS ")
-					fmt.Println("WE CLEAR ORDERS ")
-					fmt.Println("WE CLEAR ORDERS ")
-					fmt.Println("WE CLEAR ORDERS ")
-					fmt.Println("WE CLEAR ORDERS ")
-
-					fmt.Println("WE CLEAR ORDERS ")
-					fmt.Println("WE CLEAR ORDERS ")
-					fmt.Println("WE CLEAR ORDERS ")
-					fmt.Println("WE CLEAR ORDERS ")
-
-					fmt.Println("WE CLEAR ORDERS ")
-					fmt.Println("WE CLEAR ORDERS ")
-					fmt.Println("WE CLEAR ORDERS ")
-					
 					elevator.ActiveSatus = true 
 					completedOrders, elevator  = clearAtCurrentFloor(elevator)
 

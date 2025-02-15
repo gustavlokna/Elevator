@@ -12,7 +12,8 @@ func cyclicCounter(
 
 	for f := 0; f < NFloors; f++ {
 		for b := 0; b < NButtons; b++ {
-			myState := orders[myID][f][b]
+			origState := orders[myID][f][b]
+			myState := origState
 
 			// If I'm Initial, copy the first alive peer’s state that isn't Initial.
 			if myState == Initial {
@@ -34,44 +35,59 @@ func cyclicCounter(
 				}
 			}
 
-			switch myState {
-
-			// IDLE -> BUTTON_PRESSED if:
-			//    1) All peers are either IDLE or BUTTON_PRESSED
-			//    2) At least one peer is BUTTON_PRESSED
+			// Attempt a valid transition.
+			switch origState {
 			case Idle:
 				if allIn(peers, Idle, ButtonPressed) && anyIs(peers, ButtonPressed) {
 					myState = ButtonPressed
 				}
-
-			// BUTTON_PRESSED -> ORDER_ASSIGNED if:
-			//    1) All peers are either BUTTON_PRESSED or ORDER_ASSIGNED
 			case ButtonPressed:
 				if allIn(peers, ButtonPressed, OrderAssigned) {
 					myState = OrderAssigned
 				}
-
-			// ORDER_ASSIGNED -> ORDER_COMPLETE if:
-			//    1) All peers are either ORDER_ASSIGNED or ORDER_COMPLETE
-			//    2) At least one peer is ORDER_COMPLETE
 			case OrderAssigned:
 				if allIn(peers, OrderAssigned, OrderComplete) && anyIs(peers, OrderComplete) {
 					myState = OrderComplete
 				}
-
-			// ORDER_COMPLETE -> remain ORDER_COMPLETE if all peers are ORDER_COMPLETE or IDLE
 			case OrderComplete:
 				if allIn(peers, OrderComplete, Idle) {
 					myState = Idle
 				}
 			}
+
+			// If no valid transition occurred, check for an illegal combination.
+			// For each state, we define the allowed peer states:
+			// Idle: allowed peers are Idle or ButtonPressed.
+			// ButtonPressed: allowed peers are ButtonPressed or OrderAssigned.
+			// OrderAssigned: allowed peers are OrderAssigned or OrderComplete.
+			// OrderComplete: allowed peers are OrderComplete or Idle.
+			if myState == origState {
+				switch origState {
+				case Idle:
+					if !allIn(peers, Idle, ButtonPressed) {
+						myState = Initial // Illegal combination detected.
+					}
+				case ButtonPressed:
+					if !allIn(peers, ButtonPressed, OrderAssigned) {
+						myState = Initial
+					}
+				case OrderAssigned:
+					if !allIn(peers, OrderAssigned, OrderComplete) {
+						myState = Initial
+					}
+				case OrderComplete:
+					if !allIn(peers, OrderComplete, Idle) {
+						myState = Initial
+					}
+				}
+			}
+
 			orders[myID][f][b] = myState
 		}
 	}
 	return orders
 }
 
-// allIn checks whether every peer is either optA or optB.
 func allIn(peers []ButtonState, optA, optB ButtonState) bool {
 	for _, p := range peers {
 		if p != optA && p != optB {
@@ -81,7 +97,6 @@ func allIn(peers []ButtonState, optA, optB ButtonState) bool {
 	return true
 }
 
-// anyIs checks if at least one peer matches a specific state.
 func anyIs(peers []ButtonState, target ButtonState) bool {
 	for _, p := range peers {
 		if p == target {
