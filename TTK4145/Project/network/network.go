@@ -23,7 +23,8 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 	broadcastTransmissionChannel := make(chan Message)
 	broadcastReceiverChannel := make(chan Message)
 	go broadcast.Sender(messagePort, broadcastTransmissionChannel)
-	go broadcast.Receiver(messagePort, broadcastReceiverChannel, nodeRegistryChannel)
+	go broadcast.Receiver(messagePort, nodeID, broadcastReceiverChannel, nodeRegistryChannel)
+	
 
 	var (
 		aliveList [NUM_ELEVATORS]bool

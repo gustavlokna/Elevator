@@ -81,9 +81,9 @@ func OrderAssigner(
 				newOrderChannel <- newOrders
 				prevAssignedOrders = newOrders // Store latest assigned orders
 			}
-			
+			/*
 			fromAsstoLight <- updateLightStates(PayloadFromNetwork, myID)
-			
+			*/
 		
 		}
 	}

@@ -3,7 +3,6 @@ package broadcast
 import (
 	. "Project/dataenums"
 	"Project/network/conn"
-	"Project/network/local"
 	"encoding/json"
 	"fmt"
 	"net"
@@ -54,7 +53,7 @@ func Sender(port int, chans ...interface{}) {
 // sends the decoded value on the corresponding channel
 // CHANGED: Modified Receiver to integrate heartbeat/node registry tracking.
 // NEW: A simplified Receiver that uses two explicit channels.
-func Receiver(port int, messageCh chan<- Message, registryCh chan<- NetworkNodeRegistry) {
+func Receiver(port int, myID string, messageCh chan<- Message, registryCh chan<- NetworkNodeRegistry) {
 	const heartbeatInterval = 150 * time.Millisecond
 	const heartbeatTimeout = 3000 * time.Millisecond
 	lastSeen := make(map[string]time.Time)
@@ -64,41 +63,32 @@ func Receiver(port int, messageCh chan<- Message, registryCh chan<- NetworkNodeR
 	conn := conn.DialBroadcastUDP(port)
 
 	for {
-		// Set a deadline for read (heartbeat check frequency)
 		conn.SetReadDeadline(time.Now().Add(heartbeatInterval))
-		n, addr, err := conn.ReadFrom(buf[0:])
+		n, _, err := conn.ReadFrom(buf[0:])
 		if err != nil {
 			if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
-				// Timeout: no packet received this cycle
+				// No packet received this cycle—still run heartbeat check.
 			} else {
 				fmt.Printf("Receiver error: %v\n", err)
 			}
 		} else {
-			// Always perform heartbeat checking regardless of sender.
-			localIP, err := local.GetIP()
-			if err != nil {
-				localIP = "0.0.0.0"
-			}
-			ownAddr, _ := net.ResolveUDPAddr("udp4", fmt.Sprintf("%s:%d", localIP, port))
-			// If the packet comes from ourselves, we ignore message processing,
-			// but we do NOT skip the lost-node check.
-			if addr.String() != ownAddr.String() {
-				var ttj typeTaggedJSON
-				if err := json.Unmarshal(buf[:n], &ttj); err != nil {
-					fmt.Printf("Failed to unmarshal typeTaggedJSON: %v\n", err)
-				} else {
-					// We only expect Message types here.
-					if ttj.TypeId == reflect.TypeOf(Message{}).String() {
-						var m Message
-						if err := json.Unmarshal(ttj.JSON, &m); err != nil {
-							fmt.Printf("Failed to unmarshal Message: %v\n", err)
-						} else {
-							// Update heartbeat timestamp.
-							lastSeen[m.SenderId] = time.Now()
-							if _, exists := reportedNew[m.SenderId]; !exists {
-								reportedNew[m.SenderId] = false
-							}
-							// Send the decoded message.
+			var ttj typeTaggedJSON
+			if err := json.Unmarshal(buf[:n], &ttj); err != nil {
+				fmt.Printf("Failed to unmarshal typeTaggedJSON: %v\n", err)
+			} else {
+				// Process only Message types.
+				if ttj.TypeId == reflect.TypeOf(Message{}).String() {
+					var m Message
+					if err := json.Unmarshal(ttj.JSON, &m); err != nil {
+						fmt.Printf("Failed to unmarshal Message: %v\n", err)
+					} else {
+						// Always update the heartbeat timestamp.
+						lastSeen[m.SenderId] = time.Now()
+						if _, exists := reportedNew[m.SenderId]; !exists {
+							reportedNew[m.SenderId] = false
+						}
+						// Only forward messages from other nodes.
+						if m.SenderId != myID {
 							messageCh <- m
 						}
 					}
@@ -106,7 +96,7 @@ func Receiver(port int, messageCh chan<- Message, registryCh chan<- NetworkNodeR
 			}
 		}
 
-		// --- Heartbeat check: run on every loop iteration ---
+		// Heartbeat check: determine lost and active nodes.
 		now := time.Now()
 		var lostNodes []string
 		var activeNodes []string
@@ -128,7 +118,6 @@ func Receiver(port int, messageCh chan<- Message, registryCh chan<- NetworkNodeR
 			}
 		}
 		if len(lostNodes) > 0 || newNode != "" {
-			// Sort active nodes to maintain a consistent order.
 			sort.Strings(activeNodes)
 			reg := NetworkNodeRegistry{
 				Nodes: activeNodes,
