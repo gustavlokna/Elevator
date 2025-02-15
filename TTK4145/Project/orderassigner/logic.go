@@ -136,7 +136,7 @@ func handlePayloadFromElevator(fromElevator  PayloadFromElevator,
 }
 
 
-
+// TODO DO WE NEED? 
 func handlePayloadFromNetwork(
 	payload PayloadFromassignerToNetwork, 
 	netPayload PayloadFromNetworkToAssigner,

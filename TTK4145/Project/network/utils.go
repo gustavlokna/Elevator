@@ -4,14 +4,6 @@ import (
 	. "Project/dataenums"
     "fmt"
 )
-func contains(slice []string, item string) bool {
-    for _, s := range slice {
-        if s == item {
-            return true
-        }
-    }
-    return false
-}
 
 func resetHallCalls() [NFloors][NButtons]ButtonState {
 	var hallOrderList [NFloors][NButtons]ButtonState
@@ -36,11 +28,6 @@ func initializeElevatorList() [NUM_ELEVATORS]HRAElevState {
 	return list
 }
 
-// Helper function to check if HRAInput is empty
-// TODO ALL BELOW IS GARBAGE ? 
-func isEmptyHRAInput(input HRAInput) bool {
-	return len(input.HallRequests) == 0 && len(input.States) == 0
-}
 // Helper function to get a readable string for ButtonState
 func buttonStateToString(state ButtonState) string {
 	switch state {

@@ -73,7 +73,7 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 				init = true
 			}
 
-			printHallOrderList(hallOrderList)
+			//printHallOrderList(hallOrderList)
 			aliveList[senderId] = msg.OnlineStatus
 			elevatorList[senderId] = msg.ElevatorList[senderId]
 			hallOrderList[senderId] = msg.HallOrderList[senderId]
