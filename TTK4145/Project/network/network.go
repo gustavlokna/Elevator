@@ -31,12 +31,23 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 		ackMap    [NUM_ELEVATORS]bool
 		//TODO THIS CAN BE A [NUM_ELEVATORS]HRAInput
 		// TODO INITILIZE THE LIST, else a crash may occur
-		elevatorList  [NUM_ELEVATORS]HRAElevState
+		//elevatorList  [NUM_ELEVATORS]HRAElevState
 		hallOrderList [NUM_ELEVATORS][NFloors][NButtons]ButtonState
 
 		online bool
 		init   bool
 	)
+
+	    // NEW: Initialize elevatorList with valid default values
+	var elevatorList [NUM_ELEVATORS]HRAElevState
+	for i := 0; i < NUM_ELEVATORS; i++ {
+		elevatorList[i] = HRAElevState{
+			Behavior:    "EBIdle",      // valid default behavior string
+			Floor:       0,
+			Direction:   "MDStop",      // valid default direction string
+			CabRequests: make([]bool, NButtons),
+		}
+	}
 
 	// Periodic broadcast of the last updated message
 
