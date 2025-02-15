@@ -2,12 +2,10 @@ package network
 
 import (
 	. "Project/dataenums"
-	"fmt"
 )
 
 func cyclicCounter(
 	orders [NUM_ELEVATORS][NFloors][NButtons]ButtonState,
-	alive [NUM_ELEVATORS]bool,
 	myID int,
 ) [NUM_ELEVATORS][NFloors][NButtons]ButtonState {
 
@@ -57,67 +55,26 @@ func cyclicCounter(
 					myState = Idle
 				}
 			}
-
+			// TODO THIS IS ERROR HANDELING
+			// SHOULD BE NON ESSENTIAL BUT IT IS AT THE TIME 
 			// If no valid transition occurred, check for an illegal combination.
-			// For each state, we define the allowed peer states:
-			// Idle: allowed peers are Idle or ButtonPressed.
-			// ButtonPressed: allowed peers are ButtonPressed or OrderAssigned.
-			// OrderAssigned: allowed peers are OrderAssigned or OrderComplete.
-			// OrderComplete: allowed peers are OrderComplete or Idle.
 			if myState == origState {
 				switch origState {
 				case Idle:
 					if !(allIn(peers, Idle, ButtonPressed) || allIn(peers, Idle, OrderComplete)) {
 						myState = Initial // Illegal combination detected.
-						fmt.Println("Idle")
-						fmt.Println("FUUUUCKKKK")
-						fmt.Println("FUUUUCKKKK")
-						fmt.Println("FUUUUCKKKK")
-
-						fmt.Println("FUUUUCKKKK")
-						fmt.Println("FUUUUCKKKK")
-						fmt.Println("FUUUUCKKKK")
-						fmt.Println("FUUUUCKKKK")
-
 					}
 				case ButtonPressed:
 					if !(allIn(peers, ButtonPressed, OrderAssigned) || allIn(peers, Idle, ButtonPressed)) {
 						myState = Initial
-						fmt.Println("ButtonPressed")
-						fmt.Println("FUUUUCKKKK")
-						fmt.Println("FUUUUCKKKK")
-						fmt.Println("FUUUUCKKKK")
-
-						fmt.Println("FUUUUCKKKK")
-						fmt.Println("FUUUUCKKKK")
-						fmt.Println("FUUUUCKKKK")
-						fmt.Println("FUUUUCKKKK")
 					}
 				case OrderAssigned:
 					if !(allIn(peers, OrderAssigned, OrderComplete) || allIn(peers, OrderAssigned, ButtonPressed)){
 						myState = Initial
-						fmt.Println("OrderAssigned")
-						fmt.Println("FUUUUCKKKK")
-						fmt.Println("FUUUUCKKKK")
-						fmt.Println("FUUUUCKKKK")
-
-						fmt.Println("FUUUUCKKKK")
-						fmt.Println("FUUUUCKKKK")
-						fmt.Println("FUUUUCKKKK")
-						fmt.Println("FUUUUCKKKK")
 					}
 				case OrderComplete:
 					if !(allIn(peers, OrderComplete, Idle)  || allIn(peers, OrderAssigned, OrderComplete)) {
 						myState = Initial
-						fmt.Println("OrderComplete")
-						fmt.Println("FUUUUCKKKK")
-						fmt.Println("FUUUUCKKKK")
-						fmt.Println("FUUUUCKKKK")
-
-						fmt.Println("FUUUUCKKKK")
-						fmt.Println("FUUUUCKKKK")
-						fmt.Println("FUUUUCKKKK")
-						fmt.Println("FUUUUCKKKK")
 					}
 				}
 			}

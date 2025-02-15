@@ -38,7 +38,6 @@ func OrderAssigner(
 	for {
 		select {
 		case btnEvent := <-drv_buttons:
-			//Note make cylick counter own module and put this there ? 
 			fmt.Println("button pressed")
 			// TODO do not overwrite this is fixed when we get the fromNetworkChannel working
 			PayloadFromassignerToNetwork = buttonPressed(PayloadFromassignerToNetwork, 
@@ -55,6 +54,8 @@ func OrderAssigner(
 		case PayloadFromNetwork := <-fromNetworkChannel:
 			//TODO why this. 
 			// TOOD CANNOT REMOVE YET: NEED FUNC, BUT I WANT TO 
+			// TODO DO NOT OVERWRITE ORDER COMPLETE IF INNCOMING IS ORDER ASS :) 
+			// THIS CAN HAPPEN IF THERE IS MISSHAP IN THE ORDER THINGS OCCUR 
 			PayloadFromassignerToNetwork = handlePayloadFromNetwork(PayloadFromassignerToNetwork, 
 				PayloadFromNetwork, myID)
 			
