@@ -31,7 +31,7 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 		ackMap    [NUM_ELEVATORS]bool
 		//TODO THIS CAN BE A [NUM_ELEVATORS]HRAInput
 		// TODO INITILIZE THE LIST, else a crash may occur
-		//elevatorList  [NUM_ELEVATORS]HRAElevState
+		elevatorList  [NUM_ELEVATORS]HRAElevState
 		hallOrderList [NUM_ELEVATORS][NFloors][NButtons]ButtonState
 
 		online bool
@@ -39,15 +39,6 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 	)
 
 	    // NEW: Initialize elevatorList with valid default values
-	var elevatorList [NUM_ELEVATORS]HRAElevState
-	for i := 0; i < NUM_ELEVATORS; i++ {
-		elevatorList[i] = HRAElevState{
-			Behavior:    "EBIdle",      // valid default behavior string
-			Floor:       0,
-			Direction:   "MDStop",      // valid default direction string
-			CabRequests: make([]bool, NButtons),
-		}
-	}
 
 	// Periodic broadcast of the last updated message
 
@@ -124,7 +115,7 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 				elevatorList[nodeIDInt] = msg.ElevatorList[nodeIDInt]
 				init = true
 			}
-			printHallOrderList(hallOrderList)
+			//printHallOrderList(hallOrderList)
 			hallOrderList[senderId] = msg.HallOrderList[senderId]
 			hallOrderList = cyclicCounter(hallOrderList, aliveList, nodeIDInt)
 			printHallOrderList(hallOrderList)
@@ -153,19 +144,15 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 			hallOrderList[nodeIDInt] = payload.HallRequests
 			elevatorList[nodeIDInt] = payload.States[nodeID]
 			aliveList[nodeIDInt] = payload.ActiveSatus
-			fmt.Println("HELLO FROM ASS")
-			fmt.Println("HELLO FROM ASS")
-			fmt.Println("HELLO FROM ASS")
-			fmt.Println("HELLO FROM ASS")
-			fmt.Println("HELLO FROM ASS")
-			fmt.Println("HELLO FROM ASS")
-			fmt.Println("HELLO FROM ASS")
-			fmt.Println("HELLO FROM ASS")
-			fmt.Println("HELLO FROM ASS")
-			fmt.Println("HELLO FROM ASS")
-			fmt.Println("HELLO FROM ASS")
-			fmt.Println("HELLO FROM ASS")
-			
+			fmt.Println("HELLO FROM ASS ")
+			fmt.Println("HELLO FROM ASS ")
+
+			fmt.Println("HELLO FROM ASS ")
+			fmt.Println("HELLO FROM ASS ")
+			fmt.Println("HELLO FROM ASS ")
+			fmt.Println("HELLO FROM ASS ")
+			fmt.Println("HELLO FROM ASS ")
+			fmt.Println("HELLO FROM ASS ")
 			printHallOrderList(hallOrderList)
 			//s TODO MOVE THIS TO THE DEFULT CASE
 			if !online {

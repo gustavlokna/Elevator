@@ -25,7 +25,6 @@ func buttonPressed(payload PayloadFromassignerToNetwork, ElevatorName string,
 		}
 
 	case BCab:
-		// For Cab button press
 		payload.States[ElevatorName].CabRequests[btnEvent.Floor] = true
 
 	}

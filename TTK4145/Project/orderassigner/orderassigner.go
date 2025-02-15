@@ -47,19 +47,6 @@ func OrderAssigner(
 			toNetworkChannel <- PayloadFromassignerToNetwork
 		
 		case payload := <-payloadFromElevator:
-			/*
-			hraInput = handlePayloadFromElevator(hraInput, payload.Elevator, nodeID)
-			hraInput = orderComplete(hraInput, nodeID, payload.CompletedOrders)
-			fmt.Println("elevator was changed")
-			*/
-			/*
-			print("hallo")
-			print("hallo")
-			print("hallo")
-			print("hallo")
-			print("hallo")
-			PrintPayloadFromElevator(payload)
-			*/
 			PayloadFromassignerToNetwork = handlePayloadFromElevator(payload,
 				PayloadFromassignerToNetwork, nodeID)
 			//PrintPayloadFromassignerToNetwork(PayloadFromassignerToNetwork)
@@ -67,23 +54,21 @@ func OrderAssigner(
 		
 		case PayloadFromNetwork := <-fromNetworkChannel:
 			//TODO why this. 
-			// TODO REMOVE ? 
-			/*
+			// TOOD CANNOT REMOVE YET: NEED FUNC, BUT I WANT TO 
 			PayloadFromassignerToNetwork = handlePayloadFromNetwork(PayloadFromassignerToNetwork, 
 				PayloadFromNetwork, myID)
-			*/
+			
 			// Assign new orders
 			newOrders := assignOrders(PayloadFromNetwork, myID)
 			
 			// Only send if different from previous orders
 			if newOrders != prevAssignedOrders {
-				fmt.Println("New orders detected, updating newOrderChannel")
+				//fmt.Println("New orders detected, updating newOrderChannel")
 				newOrderChannel <- newOrders
 				prevAssignedOrders = newOrders // Store latest assigned orders
 			}
-			/*
+			
 			fromAsstoLight <- updateLightStates(PayloadFromNetwork, myID)
-			*/
 		
 		}
 	}
