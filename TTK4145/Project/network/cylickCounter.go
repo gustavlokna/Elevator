@@ -2,6 +2,7 @@ package network
 
 import (
 	. "Project/dataenums"
+	"fmt"
 )
 
 func cyclicCounter(
@@ -66,20 +67,57 @@ func cyclicCounter(
 			if myState == origState {
 				switch origState {
 				case Idle:
-					if !allIn(peers, Idle, ButtonPressed) || !allIn(peers, Idle, OrderComplete) {
+					if !(allIn(peers, Idle, ButtonPressed) || allIn(peers, Idle, OrderComplete)) {
 						myState = Initial // Illegal combination detected.
+						fmt.Println("Idle")
+						fmt.Println("FUUUUCKKKK")
+						fmt.Println("FUUUUCKKKK")
+						fmt.Println("FUUUUCKKKK")
+
+						fmt.Println("FUUUUCKKKK")
+						fmt.Println("FUUUUCKKKK")
+						fmt.Println("FUUUUCKKKK")
+						fmt.Println("FUUUUCKKKK")
+
 					}
 				case ButtonPressed:
-					if !allIn(peers, ButtonPressed, OrderAssigned) || !allIn(peers, Idle, ButtonPressed) {
+					if !(allIn(peers, ButtonPressed, OrderAssigned) || allIn(peers, Idle, ButtonPressed)) {
 						myState = Initial
+						fmt.Println("ButtonPressed")
+						fmt.Println("FUUUUCKKKK")
+						fmt.Println("FUUUUCKKKK")
+						fmt.Println("FUUUUCKKKK")
+
+						fmt.Println("FUUUUCKKKK")
+						fmt.Println("FUUUUCKKKK")
+						fmt.Println("FUUUUCKKKK")
+						fmt.Println("FUUUUCKKKK")
 					}
 				case OrderAssigned:
-					if !allIn(peers, OrderAssigned, OrderComplete) || !allIn(peers, OrderAssigned, ButtonPressed){
+					if !(allIn(peers, OrderAssigned, OrderComplete) || allIn(peers, OrderAssigned, ButtonPressed)){
 						myState = Initial
+						fmt.Println("OrderAssigned")
+						fmt.Println("FUUUUCKKKK")
+						fmt.Println("FUUUUCKKKK")
+						fmt.Println("FUUUUCKKKK")
+
+						fmt.Println("FUUUUCKKKK")
+						fmt.Println("FUUUUCKKKK")
+						fmt.Println("FUUUUCKKKK")
+						fmt.Println("FUUUUCKKKK")
 					}
 				case OrderComplete:
-					if !allIn(peers, OrderComplete, Idle)  || !allIn(peers, OrderAssigned, OrderComplete) {
+					if !(allIn(peers, OrderComplete, Idle)  || allIn(peers, OrderAssigned, OrderComplete)) {
 						myState = Initial
+						fmt.Println("OrderComplete")
+						fmt.Println("FUUUUCKKKK")
+						fmt.Println("FUUUUCKKKK")
+						fmt.Println("FUUUUCKKKK")
+
+						fmt.Println("FUUUUCKKKK")
+						fmt.Println("FUUUUCKKKK")
+						fmt.Println("FUUUUCKKKK")
+						fmt.Println("FUUUUCKKKK")
 					}
 				}
 			}

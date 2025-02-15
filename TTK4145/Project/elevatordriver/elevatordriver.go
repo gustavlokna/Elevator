@@ -142,6 +142,12 @@ func ElevatorDriver(
 				if time.Now().After(doorTimeout){
 					elevator.ActiveSatus = true 
 					completedOrders, elevator  = clearAtCurrentFloor(elevator)
+					fmt.Println("I CLEARED THE FUCKING ORDER")
+					fmt.Println("I CLEARED THE FUCKING ORDER")
+					fmt.Println("I CLEARED THE FUCKING ORDER")
+					fmt.Println("I CLEARED THE FUCKING ORDER")
+					fmt.Println("I CLEARED THE FUCKING ORDER")
+					fmt.Println("I CLEARED THE FUCKING ORDER")
 
 					//elevator.Dirn  =  decideDirection(elevator).Dirn
 					//elevator.CurrentBehaviour =  decideDirection(elevator).CurrentBehaviour
