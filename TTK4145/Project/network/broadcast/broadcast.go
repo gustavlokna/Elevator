@@ -1,12 +1,15 @@
 package broadcast
 
 import (
+	. "Project/dataenums"
 	"encoding/json"
 	"fmt"
 	"net"
 	"Project/network/local"
 	"Project/network/conn"
 	"reflect"
+	"time"
+	"sort"
 )
 
 const bufferSize = 4 * 1024
@@ -47,9 +50,12 @@ func Sender(port int, chans ...interface{}) {
 	}
 }
 
+
+
 // Matches type-tagged JSON received on `port` to element types of `chans`, then
 // sends the decoded value on the corresponding channel
-func Receiver(ownIp string, port int, chans ...interface{}) {
+// CHANGED: Modified Receiver to integrate heartbeat/node registry tracking.
+func Receiver(port int, chans ...interface{}) {
 	checkArgs(chans...)
 	chansMap := make(map[string]interface{})
 
@@ -57,41 +63,99 @@ func Receiver(ownIp string, port int, chans ...interface{}) {
 		chansMap[reflect.TypeOf(ch).Elem().String()] = ch
 	}
 
+	// TODO INTEGARTE IN DATAENUMS
+	const heartbeatInterval = 150 * time.Millisecond 
+	const heartbeatTimeout = 3000 * time.Millisecond   
+	lastSeen := make(map[string]time.Time)             
+	reportedNew := make(map[string]bool)            
+
 	var buf [bufferSize]byte
 	conn := conn.DialBroadcastUDP(port)
 	for {
+		// Set read deadline for heartbeat checking
+		conn.SetReadDeadline(time.Now().Add(heartbeatInterval)) // CHANGED
 		n, addr, e := conn.ReadFrom(buf[0:])
 		if e != nil {
-			fmt.Printf("bcast.Receiver(%d, ...):ReadFrom() failed: \"%+v\"\n", port, e)
+			if netErr, ok := e.(net.Error); ok && netErr.Timeout() {
+				// Timeout reached, no packet received.
+			} else {
+				fmt.Printf("bcast.Receiver(%d, ...):ReadFrom() failed: \"%+v\"\n", port, e)
+			}
+		} else {
+			localIP, err := local.GetIP()
+			if err != nil {
+				print("ERROR: Unable to get the IP address")
+				localIP = "Disconnected"
+			}
+			ownAddress, _ := net.ResolveUDPAddr("udp4", fmt.Sprintf("%s:%d", localIP, port))
+			if ownAddress.String() == addr.String() {
+				continue
+			}
+
+			var ttj typeTaggedJSON
+			json.Unmarshal(buf[0:n], &ttj)
+			ch, ok := chansMap[ttj.TypeId]
+			if !ok {
+				continue
+			}
+			v := reflect.New(reflect.TypeOf(ch).Elem())
+			json.Unmarshal(ttj.JSON, v.Interface())
+
+			if ttj.TypeId == reflect.TypeOf((*Message)(nil)).Elem().String() {
+				if m, ok := v.Elem().Interface().(Message); ok { // CHANGED
+					if _, exists := lastSeen[m.SenderId]; !exists {
+						reportedNew[m.SenderId] = false 
+					}
+					lastSeen[m.SenderId] = time.Now()
+				}
+			}
+
+			reflect.Select([]reflect.SelectCase{{
+				Dir:  reflect.SelectSend,
+				Chan: reflect.ValueOf(ch),
+				Send: reflect.Indirect(v),
+			}})
 		}
 
-		localIP, err := local.GetIP()
-		if err != nil {
-			print("ERROR: Unable to get the IP address")
-			localIP = "Disconnected"
+		now := time.Now()
+		var lostNodes []string
+		var activeNodes []string
+		for id, t := range lastSeen {
+			if now.Sub(t) > heartbeatTimeout {
+				lostNodes = append(lostNodes, id)
+				delete(lastSeen, id)
+				delete(reportedNew, id)
+			} else {
+				activeNodes = append(activeNodes, id)
+			}
 		}
-
-		ownAddress, _ := net.ResolveUDPAddr("udp4", fmt.Sprintf("%s:%d", localIP, port))
-		if ownAddress.String() == addr.String() {
-			//print("Ignoring broadcast message from self")
-			continue
+		var newNode string
+		for _, id := range activeNodes {
+			if reportedNew[id] == false {
+				newNode = id
+				reportedNew[id] = true
+				break
+			}
 		}
-
-		var ttj typeTaggedJSON
-		json.Unmarshal(buf[0:n], &ttj)
-		ch, ok := chansMap[ttj.TypeId]
-		if !ok {
-			continue
+		if len(lostNodes) > 0 || newNode != "" {
+			sort.Strings(activeNodes)
+			reg := NetworkNodeRegistry{
+				Nodes: activeNodes,
+				New:   newNode,
+				Lost:  lostNodes,
+			}
+			key := reflect.TypeOf((*NetworkNodeRegistry)(nil)).Elem().String()
+			if regCh, ok := chansMap[key]; ok {
+				reflect.Select([]reflect.SelectCase{{
+					Dir:  reflect.SelectSend,
+					Chan: reflect.ValueOf(regCh),
+					Send: reflect.ValueOf(reg),
+				}})
+			}
 		}
-		v := reflect.New(reflect.TypeOf(ch).Elem())
-		json.Unmarshal(ttj.JSON, v.Interface())
-		reflect.Select([]reflect.SelectCase{{
-			Dir:  reflect.SelectSend,
-			Chan: reflect.ValueOf(ch),
-			Send: reflect.Indirect(v),
-		}})
 	}
 }
+
 
 type typeTaggedJSON struct {
 	TypeId string

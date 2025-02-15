@@ -136,3 +136,9 @@ type PayloadFromDriver struct {
 	CurrentFloor int
 	DoorLight bool 
 }
+
+type NetworkNodeRegistry struct {
+	Nodes []string
+	New   string
+	Lost  []string
+}
