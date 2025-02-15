@@ -106,7 +106,7 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 			senderId, _ := strconv.Atoi(msg.SenderId)
 			aliveList[senderId] = msg.OnlineStatus
 
-			ackMap[senderId] = reflect.DeepEqual(elevatorList, msg.ElevatorList)
+			ackMap[senderId] = reflect.DeepEqual(elevatorList, msg.ElevatorList) && reflect.DeepEqual(hallOrderList, msg.HallOrderList)
 
 			// Only update state if alive
 			// TODO THIS CAN BE A FUNC
@@ -132,6 +132,11 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 			}
 
 			if allAcknowledged {
+				for i := 0; i < NUM_ELEVATORS; i++ {
+					if i != nodeIDInt {
+						ackMap[i] = false
+					}
+				}
 				messagetoOrderAssignerChannel <- PayloadFromNetworkToAssigner{
 					AliveList:     aliveList,
 					ElevatorList:  elevatorList,
@@ -144,16 +149,6 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 			hallOrderList[nodeIDInt] = payload.HallRequests
 			elevatorList[nodeIDInt] = payload.States[nodeID]
 			aliveList[nodeIDInt] = payload.ActiveSatus
-			fmt.Println("HELLO FROM ASS ")
-			fmt.Println("HELLO FROM ASS ")
-
-			fmt.Println("HELLO FROM ASS ")
-			fmt.Println("HELLO FROM ASS ")
-			fmt.Println("HELLO FROM ASS ")
-			fmt.Println("HELLO FROM ASS ")
-			fmt.Println("HELLO FROM ASS ")
-			fmt.Println("HELLO FROM ASS ")
-			printHallOrderList(hallOrderList)
 			//s TODO MOVE THIS TO THE DEFULT CASE
 			if !online {
 				newAliveList := [NUM_ELEVATORS]bool{}

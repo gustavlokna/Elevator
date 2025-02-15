@@ -137,19 +137,10 @@ func handlePayloadFromElevator(fromElevator  PayloadFromElevator,
 
 
 
-
-
-
-
-
-
-
 func handlePayloadFromNetwork(payload PayloadFromassignerToNetwork, 
 	PayloadFromNetwork PayloadFromNetworkToAssigner,
 	nodeID int)PayloadFromassignerToNetwork{
 	payload.HallRequests = PayloadFromNetwork.HallOrderList[nodeID]
-	//payload.States[nodeID] = PayloadFromNetwork.ElevatorList[nodeID]
-	//payload.States = PayloadFromNetwork.ElevatorList
 	return payload
 }
 
