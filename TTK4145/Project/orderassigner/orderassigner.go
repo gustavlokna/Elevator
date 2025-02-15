@@ -62,14 +62,6 @@ func OrderAssigner(
 			*/
 			PayloadFromassignerToNetwork = handlePayloadFromElevator(payload,
 				PayloadFromassignerToNetwork, nodeID)
-			
-			print("Penis")
-			print("Penis")
-			print("Penis")
-			print("Penis")
-			print("Penis")
-			
-			PrintPayloadFromElevator(payload)
 			//PrintPayloadFromassignerToNetwork(PayloadFromassignerToNetwork)
 			toNetworkChannel <- PayloadFromassignerToNetwork
 		

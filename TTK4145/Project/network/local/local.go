@@ -6,7 +6,7 @@ import (
 )
 
 var hostIP string
-
+// TODO MOVE TO BROADCAST  
 func GetIP() (string, error) {
 	if hostIP == "" {
 		conn, err := net.DialTCP("tcp", nil, &net.TCPAddr{IP: []byte{8, 8, 8, 8}, Port: 53})

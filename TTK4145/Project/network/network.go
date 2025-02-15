@@ -63,6 +63,7 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 		select {
 		case reg := <-nodeRegistryChannel:
 			// TODO THIS reg/ or it can be a double variable CAN ALSO CONTAIN THE ONLIE STATUS :)
+			fmt.Println("HALLO")
 			for _, lostNode := range reg.Lost {
 				// TODO REMOVE
 				fmt.Printf("Node lost connection: %s\n", lostNode)
@@ -98,6 +99,7 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 			}
 
 		case msg := <-broadcastReceiverChannel:
+			
 			senderId, _ := strconv.Atoi(msg.SenderId)
 			aliveList[senderId] = msg.OnlineStatus
 

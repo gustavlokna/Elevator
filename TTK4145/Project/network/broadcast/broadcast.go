@@ -2,14 +2,14 @@ package broadcast
 
 import (
 	. "Project/dataenums"
+	"Project/network/conn"
+	"Project/network/local"
 	"encoding/json"
 	"fmt"
 	"net"
-	"Project/network/local"
-	"Project/network/conn"
 	"reflect"
-	"time"
 	"sort"
+	"time"
 )
 
 const bufferSize = 4 * 1024
@@ -50,73 +50,63 @@ func Sender(port int, chans ...interface{}) {
 	}
 }
 
-
-
 // Matches type-tagged JSON received on `port` to element types of `chans`, then
 // sends the decoded value on the corresponding channel
 // CHANGED: Modified Receiver to integrate heartbeat/node registry tracking.
-func Receiver(port int, chans ...interface{}) {
-	checkArgs(chans...)
-	chansMap := make(map[string]interface{})
-
-	for _, ch := range chans {
-		chansMap[reflect.TypeOf(ch).Elem().String()] = ch
-	}
-
-	// TODO INTEGARTE IN DATAENUMS
-	const heartbeatInterval = 150 * time.Millisecond 
-	const heartbeatTimeout = 3000 * time.Millisecond   
-	lastSeen := make(map[string]time.Time)             
-	reportedNew := make(map[string]bool)            
+// NEW: A simplified Receiver that uses two explicit channels.
+func Receiver(port int, messageCh chan<- Message, registryCh chan<- NetworkNodeRegistry) {
+	const heartbeatInterval = 150 * time.Millisecond
+	const heartbeatTimeout = 3000 * time.Millisecond
+	lastSeen := make(map[string]time.Time)
+	reportedNew := make(map[string]bool)
 
 	var buf [bufferSize]byte
 	conn := conn.DialBroadcastUDP(port)
+
 	for {
-		// Set read deadline for heartbeat checking
-		conn.SetReadDeadline(time.Now().Add(heartbeatInterval)) // CHANGED
-		n, addr, e := conn.ReadFrom(buf[0:])
-		if e != nil {
-			if netErr, ok := e.(net.Error); ok && netErr.Timeout() {
-				// Timeout reached, no packet received.
+		// Set a deadline for read (heartbeat check frequency)
+		conn.SetReadDeadline(time.Now().Add(heartbeatInterval))
+		n, addr, err := conn.ReadFrom(buf[0:])
+		if err != nil {
+			if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
+				// Timeout: no packet received this cycle
 			} else {
-				fmt.Printf("bcast.Receiver(%d, ...):ReadFrom() failed: \"%+v\"\n", port, e)
+				fmt.Printf("Receiver error: %v\n", err)
 			}
 		} else {
+			// Always perform heartbeat checking regardless of sender.
 			localIP, err := local.GetIP()
 			if err != nil {
-				print("ERROR: Unable to get the IP address")
-				localIP = "Disconnected"
+				localIP = "0.0.0.0"
 			}
-			ownAddress, _ := net.ResolveUDPAddr("udp4", fmt.Sprintf("%s:%d", localIP, port))
-			if ownAddress.String() == addr.String() {
-				continue
-			}
-
-			var ttj typeTaggedJSON
-			json.Unmarshal(buf[0:n], &ttj)
-			ch, ok := chansMap[ttj.TypeId]
-			if !ok {
-				continue
-			}
-			v := reflect.New(reflect.TypeOf(ch).Elem())
-			json.Unmarshal(ttj.JSON, v.Interface())
-
-			if ttj.TypeId == reflect.TypeOf((*Message)(nil)).Elem().String() {
-				if m, ok := v.Elem().Interface().(Message); ok { // CHANGED
-					if _, exists := lastSeen[m.SenderId]; !exists {
-						reportedNew[m.SenderId] = false 
+			ownAddr, _ := net.ResolveUDPAddr("udp4", fmt.Sprintf("%s:%d", localIP, port))
+			// If the packet comes from ourselves, we ignore message processing,
+			// but we do NOT skip the lost-node check.
+			if addr.String() != ownAddr.String() {
+				var ttj typeTaggedJSON
+				if err := json.Unmarshal(buf[:n], &ttj); err != nil {
+					fmt.Printf("Failed to unmarshal typeTaggedJSON: %v\n", err)
+				} else {
+					// We only expect Message types here.
+					if ttj.TypeId == reflect.TypeOf(Message{}).String() {
+						var m Message
+						if err := json.Unmarshal(ttj.JSON, &m); err != nil {
+							fmt.Printf("Failed to unmarshal Message: %v\n", err)
+						} else {
+							// Update heartbeat timestamp.
+							lastSeen[m.SenderId] = time.Now()
+							if _, exists := reportedNew[m.SenderId]; !exists {
+								reportedNew[m.SenderId] = false
+							}
+							// Send the decoded message.
+							messageCh <- m
+						}
 					}
-					lastSeen[m.SenderId] = time.Now()
 				}
 			}
-
-			reflect.Select([]reflect.SelectCase{{
-				Dir:  reflect.SelectSend,
-				Chan: reflect.ValueOf(ch),
-				Send: reflect.Indirect(v),
-			}})
 		}
 
+		// --- Heartbeat check: run on every loop iteration ---
 		now := time.Now()
 		var lostNodes []string
 		var activeNodes []string
@@ -138,24 +128,17 @@ func Receiver(port int, chans ...interface{}) {
 			}
 		}
 		if len(lostNodes) > 0 || newNode != "" {
+			// Sort active nodes to maintain a consistent order.
 			sort.Strings(activeNodes)
 			reg := NetworkNodeRegistry{
 				Nodes: activeNodes,
 				New:   newNode,
 				Lost:  lostNodes,
 			}
-			key := reflect.TypeOf((*NetworkNodeRegistry)(nil)).Elem().String()
-			if regCh, ok := chansMap[key]; ok {
-				reflect.Select([]reflect.SelectCase{{
-					Dir:  reflect.SelectSend,
-					Chan: reflect.ValueOf(regCh),
-					Send: reflect.ValueOf(reg),
-				}})
-			}
+			registryCh <- reg
 		}
 	}
 }
-
 
 type typeTaggedJSON struct {
 	TypeId string
