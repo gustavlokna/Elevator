@@ -30,7 +30,7 @@ func main() {
 		newOrderChannel,
 		payloadFromElevator,
 		fromDriverToLight,
-		nodeID,
+		//nodeID,
 	)
 
 	go orderassigner.OrderAssigner(

@@ -56,35 +56,36 @@ func ElevatorDriver(
 
 					//TODO: Understand why we are chechking for request above and below in this case?
 
-					//if elevator.Requests[elevator.CurrentFloor][BHallUp] || elevator.Requests[elevator.CurrentFloor][BCab] || requestsAbove(elevator) {
-					if elevator.Requests[elevator.CurrentFloor][BHallUp] || elevator.Requests[elevator.CurrentFloor][BCab] {
-						hwelevio.SetMotorDirection(MDStop)
-						motorActiveChan <- false
+					if elevator.Requests[elevator.CurrentFloor][BHallUp] || elevator.Requests[elevator.CurrentFloor][BCab] || !requestsAbove(elevator) {
+						if elevator.Requests[elevator.CurrentFloor][BHallUp] || elevator.Requests[elevator.CurrentFloor][BCab] {
+							hwelevio.SetMotorDirection(MDStop)
+							motorActiveChan <- false
 
-						payloadToLights <- PayloadFromDriver{
-							CurrentFloor: elevator.CurrentFloor,
-							DoorLight:    true,
+							payloadToLights <- PayloadFromDriver{
+								CurrentFloor: elevator.CurrentFloor,
+								DoorLight:    true,
+							}
+
+							doorOpenChan <- true
+							elevator.CurrentBehaviour = EBDoorOpen
 						}
-
-						doorOpenChan <- true
-						elevator.CurrentBehaviour = EBDoorOpen
 					}
 				case MDDown:
-					//if elevator.Requests[elevator.CurrentFloor][BHallDown] || elevator.Requests[elevator.CurrentFloor][BCab] || requestsBelow(elevator) {
-					if elevator.Requests[elevator.CurrentFloor][BHallDown] || elevator.Requests[elevator.CurrentFloor][BCab] {
-						hwelevio.SetMotorDirection(MDStop)
-						motorActiveChan <- false
+					if elevator.Requests[elevator.CurrentFloor][BHallDown] || elevator.Requests[elevator.CurrentFloor][BCab] || !requestsBelow(elevator) {
+						if elevator.Requests[elevator.CurrentFloor][BHallDown] || elevator.Requests[elevator.CurrentFloor][BCab] {
+							hwelevio.SetMotorDirection(MDStop)
+							motorActiveChan <- false
 
-						payloadToLights <- PayloadFromDriver{
-							CurrentFloor: elevator.CurrentFloor,
-							DoorLight:    true,
+							payloadToLights <- PayloadFromDriver{
+								CurrentFloor: elevator.CurrentFloor,
+								DoorLight:    true,
+							}
+
+							doorOpenChan <- true
+							elevator.CurrentBehaviour = EBDoorOpen
+
 						}
-
-						doorOpenChan <- true
-						elevator.CurrentBehaviour = EBDoorOpen
-
 					}
-				}
 
 				// -------------------------------- DUE TO INITIALIZING ERRORS --------------------------------------
 			default:
