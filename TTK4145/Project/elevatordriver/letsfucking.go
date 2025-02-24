@@ -5,8 +5,8 @@ import (
 	"Project/elevatordriver/timer"
 	"Project/hwelevio"
 	//"fmt"
+	//"fmt"
 )
-
 
 func ElevatorDriver(
 	newOrderChannel <-chan [NFloors][NButtons]bool,
@@ -28,7 +28,7 @@ func ElevatorDriver(
 
 	elevator := initelevator()
 	hwelevio.SetMotorDirection(elevator.Dirn)
-	
+
 	clearedRequests := [NFloors][NButtons]bool{}
 	// var obstruction = <-obstructionChannel
 	var obstruction bool
@@ -46,12 +46,14 @@ func ElevatorDriver(
 	for {
 		select {
 		case elevator.CurrentFloor = <-floorChannel:
+			elevator.ActiveSatus = true
+			motorActiveChan <- true
 			switch elevator.CurrentBehaviour {
 			case EBMoving:
-				motorActiveChan <- true
+				
 				switch elevator.Dirn {
 				case MDUp:
-					
+
 					//TODO: Understand why we are chechking for request above and below in this case?
 
 					//if elevator.Requests[elevator.CurrentFloor][BHallUp] || elevator.Requests[elevator.CurrentFloor][BCab] || requestsAbove(elevator) {
@@ -59,16 +61,12 @@ func ElevatorDriver(
 						hwelevio.SetMotorDirection(MDStop)
 						motorActiveChan <- false
 
-						payloadFromElevator <- PayloadFromElevator{
-							Elevator:        elevator,
-							CompletedOrders: clearedRequests,
-						}
 						payloadToLights <- PayloadFromDriver{
 							CurrentFloor: elevator.CurrentFloor,
 							DoorLight:    true,
 						}
 
-						doorOpenChan <- true	
+						doorOpenChan <- true
 						elevator.CurrentBehaviour = EBDoorOpen
 					}
 				case MDDown:
@@ -77,14 +75,10 @@ func ElevatorDriver(
 						hwelevio.SetMotorDirection(MDStop)
 						motorActiveChan <- false
 
-						payloadFromElevator <- PayloadFromElevator{
-							Elevator:        elevator,
-							CompletedOrders: clearedRequests,
-						}
 						payloadToLights <- PayloadFromDriver{
 							CurrentFloor: elevator.CurrentFloor,
 							DoorLight:    true,
-						} 
+						}
 
 						doorOpenChan <- true
 						elevator.CurrentBehaviour = EBDoorOpen
@@ -92,12 +86,10 @@ func ElevatorDriver(
 					}
 				}
 
-// -------------------------------- DUE TO INITIALIZING ERRORS --------------------------------------
+				// -------------------------------- DUE TO INITIALIZING ERRORS --------------------------------------
 			default:
 				hwelevio.SetMotorDirection(MDStop)
 				//TODO: Maybe write this into a struct from the beginning to make it more clean
-				
-				elevator = ChooseDirection(elevator)
 
 				payloadFromElevator <- PayloadFromElevator{
 					Elevator:        elevator,
@@ -107,22 +99,18 @@ func ElevatorDriver(
 					CurrentFloor: elevator.CurrentFloor,
 					DoorLight:    false,
 				}
-//---------------------------------------------------------------------------------------------------
+				//---------------------------------------------------------------------------------------------------
 			}
-
 
 		case <-doorClosedChan:
 			//TODO: Might be kicking in to late if obstruction is turned on and of while the initial dooropen-timer is counting
 			if obstruction {
-				// elevator.ActiveSatus = !obstruction
-				// payloadToLights <- PayloadFromDriver{
-				// 	CurrentFloor: elevator.CurrentFloor,
-				// 	DoorLight:    true,
-				// }
-				// payloadFromElevator <- PayloadFromElevator{
-				// 	Elevator:        elevator,
-				// 	CompletedOrders: clearedRequests,
-				// }
+				elevator.ActiveSatus = !obstruction
+				doorOpenChan <- true
+				payloadFromElevator <- PayloadFromElevator{
+					Elevator:        elevator,
+					CompletedOrders: clearedRequests,
+				}
 				continue
 			}
 			if elevator.CurrentBehaviour == EBDoorOpen {
@@ -173,51 +161,42 @@ func ElevatorDriver(
 					Elevator:        elevator,
 					CompletedOrders: clearedRequests,
 				}
-			} 
+			}
 
 		case obstruction = <-obstructionChannel:
-			//TODO: This does not work. 
-			elevator.ActiveSatus = !obstruction
-			if obstruction || elevator.CurrentBehaviour == EBDoorOpen {
-				payloadToLights <- PayloadFromDriver{
-					CurrentFloor: elevator.CurrentFloor,
-					DoorLight:    true,
-				}
-			} else {
-				payloadToLights <- PayloadFromDriver{
-					CurrentFloor: elevator.CurrentFloor,
-					DoorLight:    false,
-				}
+			if elevator.CurrentBehaviour == EBDoorOpen {
+				elevator.ActiveSatus = !obstruction
+				doorOpenChan <- !obstruction
 			}
+
 			payloadFromElevator <- PayloadFromElevator{
 				Elevator:        elevator,
 				CompletedOrders: clearedRequests,
 			}
 
-
 		case elevator.Requests = <-newOrderChannel:
+			//TODO: Wrte into switch-case
+			//Why does this start moving at the beggining when the state is IDLE?
 			if elevator.CurrentBehaviour == EBIdle {
-				if elevator.Requests[elevator.CurrentFloor][BCab] {
+				if requestsHere(elevator) {
 					elevator.CurrentBehaviour = EBDoorOpen
 					doorOpenChan <- true
 					payloadToLights <- PayloadFromDriver{
 						CurrentFloor: elevator.CurrentFloor,
 						DoorLight:    true,
 					}
-				} else {
+				}
+				if !requestsHere(elevator) {
+					motorActiveChan <- true
 					elevator = ChooseDirection(elevator)
 					hwelevio.SetMotorDirection(elevator.Dirn)
 
-					payloadFromElevator <- PayloadFromElevator{
-						Elevator:        elevator,
-						CompletedOrders: clearedRequests,
-					}
-					payloadToLights <- PayloadFromDriver{
-						CurrentFloor: elevator.CurrentFloor,
-						DoorLight:    false,
-					}
 				}
-			} 
+			}
+			payloadFromElevator <- PayloadFromElevator{
+				Elevator:        elevator,
+				CompletedOrders: clearedRequests,
+			}
 		}
 	}
 }

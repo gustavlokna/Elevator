@@ -1,6 +1,9 @@
 package timer
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 // TimerType defines the type of timer
 type TimerType int
@@ -17,44 +20,27 @@ func Timer(
 	doorTimeoutChan chan<- bool,
 	motorTimeoutChan chan<- bool,
 ) {
+	var startDoor, startMotor bool
+	var doorTimeout, motorTimeout time.Time	
 	for {
 		select {
-		case start := <-startDoorTimer:
-			if start {
-				go func() {
-					time.Sleep(3 * time.Second)
-					doorTimeoutChan <- true // Notify that door timer has expired
-				}()
+		case startDoor = <-startDoorTimer:
+			fmt.Println("RESTART TIMERS")
+			fmt.Println(startDoor)
+			doorTimeout = time.Now().Add(3 * time.Second)
+		case startMotor = <-startMotorTimer:
+			motorTimeout = time.Now().Add(3 * time.Second)
+			
+		default:
+			
+			if startDoor && time.Now().After(doorTimeout) {
+				startDoor = false 
+				doorTimeoutChan <- true // Notify that motor watchdog has expired
 			}
-
-		case start := <-startMotorTimer:
-			if start {
-				go func() {
-					time.Sleep(5 * time.Second)
-					motorTimeoutChan <- true // Notify that motor watchdog has expired
-				}()
+			if startMotor && time.Now().After(motorTimeout) {
+				motorTimeoutChan <- true // Notify that motor watchdog has expired
 			}
+			time.Sleep(10 * time.Millisecond)
 		}
 	}
 }
-
-// package elevatordriver
-// import (
-// 	"time"
-// )
-// //this folder is totaly copied
-// // TODO NOTING HERE IS BEING USED.
-// // REMOVE ?!
-// func GetCurrentTimeAsFloat() float64 {
-// 	now := time.Now()
-// 	return float64(now.Unix()) + float64(now.Nanosecond())*1e-9
-// }
-
-// var endTime float64
-// var isActive bool
-// var IsInfinite bool
-
-// func startTimer(duration float64) {
-// 	endTime = GetCurrentTimeAsFloat() + duration
-// 	isActive = true
-// }
