@@ -50,7 +50,7 @@ func ElevatorDriver(
 			motorActiveChan <- true
 			switch elevator.CurrentBehaviour {
 			case EBMoving:
-				
+
 				switch elevator.Dirn {
 				case MDUp:
 
@@ -70,6 +70,7 @@ func ElevatorDriver(
 							elevator.CurrentBehaviour = EBDoorOpen
 						}
 					}
+
 				case MDDown:
 					if elevator.Requests[elevator.CurrentFloor][BHallDown] || elevator.Requests[elevator.CurrentFloor][BCab] || !requestsBelow(elevator) {
 						if elevator.Requests[elevator.CurrentFloor][BHallDown] || elevator.Requests[elevator.CurrentFloor][BCab] {
@@ -86,7 +87,7 @@ func ElevatorDriver(
 
 						}
 					}
-
+				}
 				// -------------------------------- DUE TO INITIALIZING ERRORS --------------------------------------
 			default:
 				hwelevio.SetMotorDirection(MDStop)
