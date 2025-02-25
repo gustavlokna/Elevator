@@ -57,7 +57,7 @@ func ElevatorDriver(
 					//TODO: Understand why we are chechking for request above and below in this case?
 
 					if elevator.Requests[elevator.CurrentFloor][BHallUp] || elevator.Requests[elevator.CurrentFloor][BCab] || !requestsAbove(elevator) {
-						if elevator.Requests[elevator.CurrentFloor][BHallUp] || elevator.Requests[elevator.CurrentFloor][BCab] {
+						if requestsHere(elevator) {
 							hwelevio.SetMotorDirection(MDStop)
 							motorActiveChan <- false
 
@@ -73,7 +73,7 @@ func ElevatorDriver(
 
 				case MDDown:
 					if elevator.Requests[elevator.CurrentFloor][BHallDown] || elevator.Requests[elevator.CurrentFloor][BCab] || !requestsBelow(elevator) {
-						if elevator.Requests[elevator.CurrentFloor][BHallDown] || elevator.Requests[elevator.CurrentFloor][BCab] {
+						if requestsHere(elevator) {
 							hwelevio.SetMotorDirection(MDStop)
 							motorActiveChan <- false
 
