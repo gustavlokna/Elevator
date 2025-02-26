@@ -48,10 +48,59 @@ func ElevatorDriver(
 			switch elevator.CurrentBehaviour {
 			case EBMoving:
 
+				// switch elevator.Dirn {
+				// case MDUp:
+				// 	//If there is a request above this if statement will not be true, even if there is a request here that needs to be handeled
+				// 	if elevator.Requests[elevator.CurrentFloor][BHallUp] || elevator.Requests[elevator.CurrentFloor][BCab] || !requestsAbove(elevator) {
+				// 		if requestsHere(elevator) {
+				// 			hwelevio.SetMotorDirection(MDStop)
+				// 			motorActiveChan <- false
+
+				// 			payloadToLights <- PayloadFromDriver{
+				// 				CurrentFloor: elevator.CurrentFloor,
+				// 				DoorLight:    true,
+				// 			}
+
+				// 			doorOpenChan <- true
+				// 			elevator.CurrentBehaviour = EBDoorOpen
+				// 		}
+				// 	}
+
+				// case MDDown:
+				// 	if elevator.Requests[elevator.CurrentFloor][BHallDown] || elevator.Requests[elevator.CurrentFloor][BCab] || !requestsBelow(elevator) {
+				// 		if requestsHere(elevator) {
+				// 			hwelevio.SetMotorDirection(MDStop)
+				// 			motorActiveChan <- false
+
+				// 			payloadToLights <- PayloadFromDriver{
+				// 				CurrentFloor: elevator.CurrentFloor,
+				// 				DoorLight:    true,
+				// 			}
+
+				// 			doorOpenChan <- true
+				// 			elevator.CurrentBehaviour = EBDoorOpen
+
+				// 		}
+				// 	}
+				// }
+
 				switch elevator.Dirn {
 				case MDUp:
 					//If there is a request above this if statement will not be true, even if there is a request here that needs to be handeled
-					if elevator.Requests[elevator.CurrentFloor][BHallUp] || elevator.Requests[elevator.CurrentFloor][BCab] || !requestsAbove(elevator) {
+					switch {
+					case elevator.Requests[elevator.CurrentFloor][BHallUp] || elevator.Requests[elevator.CurrentFloor][BCab]:
+							hwelevio.SetMotorDirection(MDStop)
+							motorActiveChan <- false
+
+							payloadToLights <- PayloadFromDriver{
+								CurrentFloor: elevator.CurrentFloor,
+								DoorLight:    true,
+							}
+
+							doorOpenChan <- true
+							elevator.CurrentBehaviour = EBDoorOpen
+
+					case elevator.Requests[elevator.CurrentFloor][BHallUp] || elevator.Requests[elevator.CurrentFloor][BCab] || !requestsAbove(elevator):
 						if requestsHere(elevator) {
 							hwelevio.SetMotorDirection(MDStop)
 							motorActiveChan <- false
@@ -65,11 +114,10 @@ func ElevatorDriver(
 							elevator.CurrentBehaviour = EBDoorOpen
 						}
 					}
-
 				case MDDown:
-					if elevator.Requests[elevator.CurrentFloor][BHallDown] || elevator.Requests[elevator.CurrentFloor][BCab] || !requestsBelow(elevator) {
-						if requestsHere(elevator) {
-							hwelevio.SetMotorDirection(MDStop)
+					switch {
+					case elevator.Requests[elevator.CurrentFloor][BHallDown] || elevator.Requests[elevator.CurrentFloor][BCab]:
+						hwelevio.SetMotorDirection(MDStop)
 							motorActiveChan <- false
 
 							payloadToLights <- PayloadFromDriver{
@@ -79,10 +127,23 @@ func ElevatorDriver(
 
 							doorOpenChan <- true
 							elevator.CurrentBehaviour = EBDoorOpen
+ 
+					case elevator.Requests[elevator.CurrentFloor][BHallDown] || elevator.Requests[elevator.CurrentFloor][BCab] || !requestsBelow(elevator):
+							if requestsHere(elevator) {
+								hwelevio.SetMotorDirection(MDStop)
+								motorActiveChan <- false
 
-						}
+								payloadToLights <- PayloadFromDriver{
+									CurrentFloor: elevator.CurrentFloor,
+									DoorLight:    true,
+								}
+
+								doorOpenChan <- true
+								elevator.CurrentBehaviour = EBDoorOpen
+							}
 					}
 				}
+				
 				// -------------------------------- DUE TO INITIALIZING ERRORS --------------------------------------
 			default:
 				hwelevio.SetMotorDirection(MDStop)
