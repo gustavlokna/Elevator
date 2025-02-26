@@ -111,12 +111,18 @@ func ElevatorDriver(
 					doorOpenChan <- true
 					
 				default :
-					hwelevio.SetMotorDirection(MDStop)
+					elevator = ChooseDirection(elevator)
+					hwelevio.SetMotorDirection(elevator.Dirn)
+					payloadToLights <- PayloadFromDriver{
+						CurrentFloor: elevator.CurrentFloor,
+						DoorLight:    false,
+					}
 				}
 				
 				// -------------------------------- DUE TO INITIALIZING ERRORS --------------------------------------
 			default:
-				hwelevio.SetMotorDirection(MDStop)
+				elevator = ChooseDirection(elevator)
+				hwelevio.SetMotorDirection(elevator.Dirn)
 				//TODO: Maybe write this into a struct from the beginning to make it more clean
 				}
 				payloadToLights <- PayloadFromDriver{
