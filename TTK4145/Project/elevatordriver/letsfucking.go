@@ -51,17 +51,18 @@ func ElevatorDriver(
 				case elevator.Requests[elevator.CurrentFloor][BCab]: 
 					hwelevio.SetMotorDirection(MDStop)
 					motorActiveChan <- false
-
+					elevator.CurrentBehaviour = EBDoorOpen
 					payloadToLights <- PayloadFromDriver{
 						CurrentFloor: elevator.CurrentFloor,
 						DoorLight:    true,
 					}
 
 					doorOpenChan <- true
-					elevator.CurrentBehaviour = EBDoorOpen
+					
 
 				case elevator.Dirn==MDUp && elevator.Requests[elevator.CurrentFloor][BHallUp]:
 					hwelevio.SetMotorDirection(MDStop)
+					elevator.CurrentBehaviour = EBDoorOpen
 					motorActiveChan <- false
 
 					payloadToLights <- PayloadFromDriver{
@@ -70,60 +71,61 @@ func ElevatorDriver(
 					}
 
 					doorOpenChan <- true
-					elevator.CurrentBehaviour = EBDoorOpen
+					
 
 				case elevator.Dirn==MDUp && requestsAbove(elevator): 
 					// do nothing (no requests at floor)
 				case elevator.Dirn==MDUp && elevator.Requests[elevator.CurrentFloor][BHallDown]:
 					hwelevio.SetMotorDirection(MDStop)
 					motorActiveChan <- false
-
+					elevator.CurrentBehaviour = EBDoorOpen
 					payloadToLights <- PayloadFromDriver{
 						CurrentFloor: elevator.CurrentFloor,
 						DoorLight:    true,
 					}
 
 					doorOpenChan <- true
-					elevator.CurrentBehaviour = EBDoorOpen
+					
 
 				case elevator.Dirn==MDDown && elevator.Requests[elevator.CurrentFloor][BHallDown]: 
 					hwelevio.SetMotorDirection(MDStop)
 					motorActiveChan <- false
-
+					elevator.CurrentBehaviour = EBDoorOpen
 					payloadToLights <- PayloadFromDriver{
 						CurrentFloor: elevator.CurrentFloor,
 						DoorLight:    true,
 					}
 
 					doorOpenChan <- true
-					elevator.CurrentBehaviour = EBDoorOpen
+					
 				case elevator.Dirn==MDDown && requestsBelow(elevator): 
 					// DO NOTHING
 				case elevator.Dirn==MDDown && elevator.Requests[elevator.CurrentFloor][BHallUp]:
 					hwelevio.SetMotorDirection(MDStop)
-					motorActiveChan <- false
-
+					elevator.CurrentBehaviour = EBDoorOpen
 					payloadToLights <- PayloadFromDriver{
 						CurrentFloor: elevator.CurrentFloor,
 						DoorLight:    true,
 					}
-
+					motorActiveChan <- false
 					doorOpenChan <- true
-					elevator.CurrentBehaviour = EBDoorOpen
+					
+				default :
+					hwelevio.SetMotorDirection(MDStop)
 				}
+				
 				// -------------------------------- DUE TO INITIALIZING ERRORS --------------------------------------
 			default:
 				hwelevio.SetMotorDirection(MDStop)
 				//TODO: Maybe write this into a struct from the beginning to make it more clean
-
-				payloadFromElevator <- PayloadFromElevator{
-					Elevator:        elevator,
-					CompletedOrders: clearedRequests,
 				}
 				payloadToLights <- PayloadFromDriver{
 					CurrentFloor: elevator.CurrentFloor,
 					DoorLight:    false,
 				}
+			payloadFromElevator <- PayloadFromElevator{
+				Elevator:        elevator,
+				CompletedOrders: clearedRequests,
 				//---------------------------------------------------------------------------------------------------
 			}
 
