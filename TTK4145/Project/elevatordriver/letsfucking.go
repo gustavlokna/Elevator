@@ -30,7 +30,6 @@ func ElevatorDriver(
 	hwelevio.SetMotorDirection(elevator.Dirn)
 
 	clearedRequests := [NFloors][NButtons]bool{}
-	// var obstruction = <-obstructionChannel
 	var obstruction bool
 
 	payloadFromElevator <- PayloadFromElevator{
@@ -54,8 +53,6 @@ func ElevatorDriver(
 
 				switch elevator.Dirn {
 				case MDUp:
-
-					//TODO: Understand why we are chechking for request above and below in this case?
 
 					if elevator.Requests[elevator.CurrentFloor][BHallUp] || elevator.Requests[elevator.CurrentFloor][BCab] || !requestsAbove(elevator) {
 						if requestsHere(elevator) {
@@ -106,7 +103,6 @@ func ElevatorDriver(
 			}
 
 		case <-doorClosedChan:
-			//TODO: Might be kicking in to late if obstruction is turned on and of while the initial dooropen-timer is counting
 			if obstruction {
 				elevator.ActiveSatus = !obstruction
 				doorOpenChan <- true
@@ -116,6 +112,7 @@ func ElevatorDriver(
 				}
 				continue
 			}
+			var clearedRequests [NFloors][NButtons]bool
 			if elevator.CurrentBehaviour == EBDoorOpen {
 				if elevator.Requests[elevator.CurrentFloor][BCab] {
 					clearedRequests[elevator.CurrentFloor][BCab] = true
@@ -179,7 +176,6 @@ func ElevatorDriver(
 
 		case elevator.Requests = <-newOrderChannel:
 			//TODO: Wrte into switch-case
-			//Why does this start moving at the beggining when the state is IDLE?
 			if elevator.CurrentBehaviour == EBIdle {
 				if requestsHere(elevator) {
 					elevator.CurrentBehaviour = EBDoorOpen
