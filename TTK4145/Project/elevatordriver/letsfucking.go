@@ -4,8 +4,6 @@ import (
 	. "Project/dataenums"
 	"Project/elevatordriver/timer"
 	"Project/hwelevio"
-	//"fmt"
-	//"fmt"
 )
 
 func ElevatorDriver(
@@ -45,7 +43,6 @@ func ElevatorDriver(
 	for {
 		select {
 		case elevator.CurrentFloor = <-floorChannel:
-			ElevatorPrint(elevator)
 			elevator.ActiveSatus = true
 			motorActiveChan <- true
 			switch elevator.CurrentBehaviour {
@@ -53,7 +50,7 @@ func ElevatorDriver(
 
 				switch elevator.Dirn {
 				case MDUp:
-
+					//If there is a request above this if statement will not be true, even if there is a request here that needs to be handeled
 					if elevator.Requests[elevator.CurrentFloor][BHallUp] || elevator.Requests[elevator.CurrentFloor][BCab] || !requestsAbove(elevator) {
 						if requestsHere(elevator) {
 							hwelevio.SetMotorDirection(MDStop)
@@ -175,7 +172,11 @@ func ElevatorDriver(
 			}
 
 		case elevator.Requests = <-newOrderChannel:
-			//TODO: Wrte into switch-case
+
+			//TODO: Does not like it when two orders are placed in the same floor that they both are in
+
+			// -------------------------------------- UNSURE ABOUT THE NEED TO HANDLE THIS -------------------------------------------
+
 			if elevator.CurrentBehaviour == EBIdle {
 				switch  {
 				case elevator.Requests[elevator.CurrentFloor][BCab]:
@@ -185,7 +186,7 @@ func ElevatorDriver(
 						CurrentFloor: elevator.CurrentFloor,
 						DoorLight:    true,
 					}
-				case elevator.Requests[elevator.CurrentFloor][BHallUp] && elevator.Dirn == MDUp:
+				case elevator.Requests[elevator.CurrentFloor][BHallUp] && elevator.Dirn == MDUp: // Does one elevator know that the other is handeling this order when pressed at the same time? 
 					elevator.CurrentBehaviour = EBDoorOpen
 					doorOpenChan <- true
 					payloadToLights <- PayloadFromDriver{
@@ -222,12 +223,15 @@ func ElevatorDriver(
 					motorActiveChan <- true
 					elevator = ChooseDirection(elevator)
 					hwelevio.SetMotorDirection(elevator.Dirn)
-					
+
 				default:
 					motorActiveChan <- true
 					elevator = ChooseDirection(elevator)
 					hwelevio.SetMotorDirection(elevator.Dirn)
 				}
+
+				// ----------------------------------------------------------------------------------------------------------------
+
 				// if requestsHere(elevator) {
 				// 	elevator.CurrentBehaviour = EBDoorOpen
 				// 	doorOpenChan <- true
@@ -247,6 +251,7 @@ func ElevatorDriver(
 				Elevator:        elevator,
 				CompletedOrders: clearedRequests,
 			}
+			ElevatorPrint(elevator)
 		}
 	}
 }
