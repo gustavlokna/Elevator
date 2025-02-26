@@ -177,20 +177,47 @@ func ElevatorDriver(
 		case elevator.Requests = <-newOrderChannel:
 			//TODO: Wrte into switch-case
 			if elevator.CurrentBehaviour == EBIdle {
-				if requestsHere(elevator) {
+				switch  {
+				case elevator.Requests[elevator.CurrentFloor][BCab]:
 					elevator.CurrentBehaviour = EBDoorOpen
 					doorOpenChan <- true
 					payloadToLights <- PayloadFromDriver{
 						CurrentFloor: elevator.CurrentFloor,
 						DoorLight:    true,
 					}
-				}
-				if !requestsHere(elevator) {
+				case elevator.Requests[elevator.CurrentFloor][BHallUp] && elevator.Dirn == MDUp:
+					elevator.CurrentBehaviour = EBDoorOpen
+					doorOpenChan <- true
+					payloadToLights <- PayloadFromDriver{
+						CurrentFloor: elevator.CurrentFloor,
+						DoorLight:    true,
+					}
+				case elevator.Requests[elevator.CurrentFloor][BHallDown] && elevator.Dirn == MDDown:
+					elevator.CurrentBehaviour = EBDoorOpen
+					doorOpenChan <- true
+					payloadToLights <- PayloadFromDriver{
+						CurrentFloor: elevator.CurrentFloor,
+						DoorLight:    true,
+					}
+				default:
 					motorActiveChan <- true
 					elevator = ChooseDirection(elevator)
 					hwelevio.SetMotorDirection(elevator.Dirn)
-
 				}
+				// if requestsHere(elevator) {
+				// 	elevator.CurrentBehaviour = EBDoorOpen
+				// 	doorOpenChan <- true
+				// 	payloadToLights <- PayloadFromDriver{
+				// 		CurrentFloor: elevator.CurrentFloor,
+				// 		DoorLight:    true,
+				// 	}
+				// }
+				// if !requestsHere(elevator) {
+				// 	motorActiveChan <- true
+				// 	elevator = ChooseDirection(elevator)
+				// 	hwelevio.SetMotorDirection(elevator.Dirn)
+
+				// }
 			}
 			payloadFromElevator <- PayloadFromElevator{
 				Elevator:        elevator,
