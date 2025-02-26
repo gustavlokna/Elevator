@@ -199,6 +199,30 @@ func ElevatorDriver(
 						CurrentFloor: elevator.CurrentFloor,
 						DoorLight:    true,
 					}
+				case elevator.Requests[elevator.CurrentFloor][BHallDown] && elevator.Dirn == MDUp && !requestsAbove(elevator):
+					elevator.CurrentBehaviour = EBDoorOpen
+					doorOpenChan <- true
+					payloadToLights <- PayloadFromDriver{
+						CurrentFloor: elevator.CurrentFloor,
+						DoorLight:    true,
+					}
+				case elevator.Requests[elevator.CurrentFloor][BHallUp] && elevator.Dirn == MDDown && !requestsBelow(elevator):
+					elevator.CurrentBehaviour = EBDoorOpen
+					doorOpenChan <- true
+					payloadToLights <- PayloadFromDriver{
+						CurrentFloor: elevator.CurrentFloor,
+						DoorLight:    true,
+					}
+				case elevator.Requests[elevator.CurrentFloor][BHallDown] && elevator.Dirn == MDUp && requestsAbove(elevator):
+					motorActiveChan <- true
+					elevator = ChooseDirection(elevator)
+					hwelevio.SetMotorDirection(elevator.Dirn)
+
+				case elevator.Requests[elevator.CurrentFloor][BHallUp] && elevator.Dirn == MDDown && requestsBelow(elevator):
+					motorActiveChan <- true
+					elevator = ChooseDirection(elevator)
+					hwelevio.SetMotorDirection(elevator.Dirn)
+					
 				default:
 					motorActiveChan <- true
 					elevator = ChooseDirection(elevator)
