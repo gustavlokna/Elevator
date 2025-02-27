@@ -120,10 +120,14 @@ func ElevatorDriver(
 			default:
 				elevator = ChooseDirection(elevator)
 				hwelevio.SetMotorDirection(elevator.Dirn)
+				payloadToLights <- PayloadFromDriver{
+					CurrentFloor: elevator.CurrentFloor,
+					DoorLight:    false,
+			   }
 			}
 			// payloadToLights <- PayloadFromDriver{
-			// 	CurrentFloor: elevator.CurrentFloor,
-			// 	DoorLight:    false,
+			//  	CurrentFloor: elevator.CurrentFloor,
+			//  	DoorLight:    false,
 			// }
 			payloadFromElevator <- PayloadFromElevator{
 				Elevator:        elevator,
