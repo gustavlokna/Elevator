@@ -47,6 +47,7 @@ func ElevatorDriver(
 			elevator.ActiveSatus = true
 			motorActiveChan <- true
 			switch elevator.CurrentBehaviour {
+				//TODO: Sender vi currentfloor til lights for skjeldent? Den oppdaterer ikke etasjelys før vi er i riktig etasje
 			case EBMoving:
 				switch {
 				case elevator.Requests[elevator.CurrentFloor][BCab]:
@@ -120,11 +121,15 @@ func ElevatorDriver(
 			default:
 				elevator = ChooseDirection(elevator)
 				hwelevio.SetMotorDirection(elevator.Dirn)
+				payloadToLights <- PayloadFromDriver{
+					CurrentFloor: elevator.CurrentFloor,
+					DoorLight:    false,
+				}
 			}
-			payloadToLights <- PayloadFromDriver{
-				CurrentFloor: elevator.CurrentFloor,
-				DoorLight:    false,
-			}
+			// payloadToLights <- PayloadFromDriver{
+			// 	CurrentFloor: elevator.CurrentFloor,
+			// 	DoorLight:    false,
+			// }
 			payloadFromElevator <- PayloadFromElevator{
 				Elevator:        elevator,
 				CompletedOrders: clearedRequests,
