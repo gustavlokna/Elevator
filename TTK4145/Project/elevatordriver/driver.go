@@ -2,13 +2,10 @@ package elevatordriver
 
 import (
 	. "Project/dataenums"
-	"fmt"
 )
 
 
-
-
-
+// ----------------------------------------------- UNUSED -----------------------------------------------------------------
 
 // TODO THIS IS COPIED FROM LAST YEARS PROJECT
 // IT IS ALSO ASS
@@ -60,60 +57,62 @@ func ClearAtCurrentFloor(e Elevator) [NFloors][NButtons]bool{
 	return clearedRequests
 }
 */
-func clearAtCurrentFloor(e Elevator) ([NFloors][NButtons]bool, Elevator) {
-	clearedRequests := [NFloors][NButtons]bool{}
-	fmt.Println("WE ARE WORKING")
-	// Always clear cab order
-	if e.Requests[e.CurrentFloor][BCab] {
-		clearedRequests[e.CurrentFloor][BCab] = true
-		e.Requests[e.CurrentFloor][BCab]= false 
-	}
+// func clearAtCurrentFloor(e Elevator) ([NFloors][NButtons]bool, Elevator) {
+// 	clearedRequests := [NFloors][NButtons]bool{}
+// 	fmt.Println("WE ARE WORKING")
+// 	// Always clear cab order
+// 	if e.Requests[e.CurrentFloor][BCab] {
+// 		clearedRequests[e.CurrentFloor][BCab] = true
+// 		e.Requests[e.CurrentFloor][BCab]= false 
+// 	}
 
-	switch e.Dirn {
-	case MDUp:
-		fmt.Println("WE MOVE UP in life ")
-		if e.Requests[e.CurrentFloor][BHallUp] {
-			fmt.Println("WE CLEAR MDUP")
-			clearedRequests[e.CurrentFloor][BHallUp] = true
-			e.Requests[e.CurrentFloor][BHallUp] = false 
-		}
-	case MDDown:
-		fmt.Println("WE MOVE down in life ")
-		if e.Requests[e.CurrentFloor][BHallDown] {
-			fmt.Println("WE CLEAR MDOWN")
-			clearedRequests[e.CurrentFloor][BHallDown] = true
-			e.Requests[e.CurrentFloor][BHallDown] = false 
-		}
-	case MDStop: 
-		if e.Requests[e.CurrentFloor][BHallUp] {
-			clearedRequests[e.CurrentFloor][BHallUp] = true
-			e.Requests[e.CurrentFloor][BHallUp] = false  
-		}
-		if e.Requests[e.CurrentFloor][BHallDown] && !clearedRequests[e.CurrentFloor][BHallUp] {
-			clearedRequests[e.CurrentFloor][BHallDown] = true
-			e.Requests[e.CurrentFloor][BHallDown] = false 
-		}
-	}
+// 	switch e.Dirn {
+// 	case MDUp:
+// 		fmt.Println("WE MOVE UP in life ")
+// 		if e.Requests[e.CurrentFloor][BHallUp] {
+// 			fmt.Println("WE CLEAR MDUP")
+// 			clearedRequests[e.CurrentFloor][BHallUp] = true
+// 			e.Requests[e.CurrentFloor][BHallUp] = false 
+// 		}
+// 	case MDDown:
+// 		fmt.Println("WE MOVE down in life ")
+// 		if e.Requests[e.CurrentFloor][BHallDown] {
+// 			fmt.Println("WE CLEAR MDOWN")
+// 			clearedRequests[e.CurrentFloor][BHallDown] = true
+// 			e.Requests[e.CurrentFloor][BHallDown] = false 
+// 		}
+// 	case MDStop: 
+// 		if e.Requests[e.CurrentFloor][BHallUp] {
+// 			clearedRequests[e.CurrentFloor][BHallUp] = true
+// 			e.Requests[e.CurrentFloor][BHallUp] = false  
+// 		}
+// 		if e.Requests[e.CurrentFloor][BHallDown] && !clearedRequests[e.CurrentFloor][BHallUp] {
+// 			clearedRequests[e.CurrentFloor][BHallDown] = true
+// 			e.Requests[e.CurrentFloor][BHallDown] = false 
+// 		}
+// 	}
 
-	return clearedRequests, e
-}
+// 	return clearedRequests, e
+// }
 
 
-// TODO BELOW HERE IS COPIED FROM LAST YEARS PROJECT 
-func ShouldStop(e Elevator) bool {
-	switch e.Dirn {
-	case MDDown:
-		return e.Requests[e.CurrentFloor][BHallDown] ||
-			e.Requests[e.CurrentFloor][BCab] ||
-			!requestsBelow(e)
-	case MDUp:
-		return e.Requests[e.CurrentFloor][BHallUp] ||
-			e.Requests[e.CurrentFloor][BCab] ||
-			!requestsAbove(e)
-	default:
-		return true
-	}
-}
+// // TODO BELOW HERE IS COPIED FROM LAST YEARS PROJECT 
+// func ShouldStop(e Elevator) bool {
+// 	switch e.Dirn {
+// 	case MDDown:
+// 		return e.Requests[e.CurrentFloor][BHallDown] ||
+// 			e.Requests[e.CurrentFloor][BCab] ||
+// 			!requestsBelow(e)
+// 	case MDUp:
+// 		return e.Requests[e.CurrentFloor][BHallUp] ||
+// 			e.Requests[e.CurrentFloor][BCab] ||
+// 			!requestsAbove(e)
+// 	default:
+// 		return true
+// 	}
+// }
+
+// ---------------------------------------------------------------------------------------------------------------------
 
 func ChooseDirection(el Elevator) Elevator {
 	dirnBehaviour := decideDirection(el)

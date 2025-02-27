@@ -42,7 +42,6 @@ func ElevatorDriver(
 	}
 // -------------------------------------------------------------------------------------------------------------
 	for {
-
 		select {
 		case elevator.CurrentFloor = <-floorChannel:
 			elevator.ActiveSatus = true
