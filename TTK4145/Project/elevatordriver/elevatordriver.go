@@ -53,7 +53,6 @@ func ElevatorDriver(
 					hwelevio.SetMotorDirection(MDStop)
 					motorActiveChan <- false
 					elevator.CurrentBehaviour = EBDoorOpen
-
 					payloadToLights <- PayloadFromDriver{
 						CurrentFloor: elevator.CurrentFloor,
 						DoorLight:    true,
@@ -63,8 +62,8 @@ func ElevatorDriver(
 
 				case elevator.Dirn == MDUp && elevator.Requests[elevator.CurrentFloor][BHallUp]:
 					hwelevio.SetMotorDirection(MDStop)
-					motorActiveChan <- false
 					elevator.CurrentBehaviour = EBDoorOpen
+					motorActiveChan <- false
 
 					payloadToLights <- PayloadFromDriver{
 						CurrentFloor: elevator.CurrentFloor,
@@ -79,7 +78,6 @@ func ElevatorDriver(
 					hwelevio.SetMotorDirection(MDStop)
 					motorActiveChan <- false
 					elevator.CurrentBehaviour = EBDoorOpen
-
 					payloadToLights <- PayloadFromDriver{
 						CurrentFloor: elevator.CurrentFloor,
 						DoorLight:    true,
@@ -91,7 +89,6 @@ func ElevatorDriver(
 					hwelevio.SetMotorDirection(MDStop)
 					motorActiveChan <- false
 					elevator.CurrentBehaviour = EBDoorOpen
-
 					payloadToLights <- PayloadFromDriver{
 						CurrentFloor: elevator.CurrentFloor,
 						DoorLight:    true,
@@ -145,8 +142,8 @@ func ElevatorDriver(
 			}
 
 			var clearedRequests [NFloors][NButtons]bool //TODO: Remove
-			
-			if elevator.CurrentBehaviour == EBDoorOpen {
+
+			if elevator.CurrentBehaviour == EBDoorOpen{
 				if elevator.Requests[elevator.CurrentFloor][BCab] {
 					clearedRequests[elevator.CurrentFloor][BCab] = true
 					elevator.Requests[elevator.CurrentFloor][BCab] = false
