@@ -186,7 +186,11 @@ func ElevatorDriver(
 					motorActiveChan <- true
 				}
 			case EBDoorOpen:
-				continue
+				switch {
+				case !requestsHere(elevator):
+					doorOpenChan <- false
+					payloadToLights <- PayloadFromDriver{CurrentFloor: elevator.CurrentFloor, DoorLight: false}
+				}
 
 			case EBMoving:
 				elevator = ChooseDirection(elevator)
