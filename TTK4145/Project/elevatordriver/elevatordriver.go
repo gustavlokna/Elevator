@@ -83,9 +83,6 @@ func ElevatorDriver(
 				CurrentFloor: elevator.CurrentFloor,
 				DoorLight:    toggledoorLight,
 			}
-
-		case elevator.Requests = <-newOrderChannel:
-			ElevatorPrint(elevator)
 			elevator.ActiveSatus = true
 			motorActiveChan <- true
 			fmt.Println("FLOOR SENSOR TRIGGERED")
@@ -140,7 +137,10 @@ func ElevatorDriver(
 				elevator.CurrentBehaviour = EBDoorOpen
 				motorActiveChan <- false
 				doorOpenChan <- true
-				
+			}
+		case elevator.Requests = <-newOrderChannel:
+			ElevatorPrint(elevator)
+			
 
 		case <-doorClosedChan:
 			fmt.Println("DOR CLOSE")
@@ -217,8 +217,9 @@ func ElevatorDriver(
 				motorTimeout = time.Now().Add(3 * time.Second)
 				timerActive = true
 			}
-			/*
+
 			// bolea is copied from Ø and if sentence can just be put in case elevator.CurrentFloor = <-drv_floors:
+			/*
 			if ShouldStop(elevator) && elevator.CurrentFloor != prevelevator.CurrentFloor {
 				elevator.ActiveSatus = true
 				timerActive = false
@@ -235,7 +236,6 @@ func ElevatorDriver(
 					DoorLight:    toggledoorLight,
 				}
 				continue
-			*/
 			}
 			/*
 				case EBDoorOpen: // recive back from lights
