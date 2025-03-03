@@ -30,7 +30,7 @@ func ElevatorDriver(
 	drv_floors := make(chan int)
 	drv_obstr := make(chan bool)
 	drv_stop := make(chan bool)
-	doorClosedChan := make(chan bool)
+	doorClosedChan := make(chan bool, 1) // buffered channel
 
 	go hwelevio.PollFloorSensor(drv_floors)
 	go hwelevio.PollObstructionSwitch(drv_obstr)
@@ -133,7 +133,7 @@ func ElevatorDriver(
 				elevator.Requests[elevator.CurrentFloor][BCab] = false
 				
 			}
-			
+			fmt.Print("PENIS")
 			elevator.CurrentBehaviour = EBIdle
 			elevator = ChooseDirection(elevator)
 			//elevator.Dirn = MDStop
@@ -143,9 +143,11 @@ func ElevatorDriver(
 				DoorLight : toggledoorLight, 
 			}
 			doorOpen = false 
-
+			fmt.Print("SEND MSG TO LIGHS")
+		
 		default:
 			time.Sleep(10 * time.Millisecond)
+			
 		}
 
 		switch elevator.CurrentBehaviour {
@@ -202,6 +204,7 @@ func ElevatorDriver(
 				}
 			}  else {
 				if time.Now().After(doorTimeout){
+					fmt.Println("DOOR CLOSED")
 					doorClosedChan <- true
 					fmt.Println("DOOR CLOSED")
 					elevator.ActiveSatus = true 
