@@ -31,6 +31,7 @@ func Timer(
 		default:
 			if startDoor && time.Now().After(doorTimeout) {
 				fmt.Println("Door timeout")
+				
 				startDoor = false
 				doorClosedChan <- true
 			}

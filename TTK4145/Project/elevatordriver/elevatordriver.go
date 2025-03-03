@@ -110,8 +110,8 @@ func ElevatorDriver(
 				fmt.Println("PENIS ")
 				fmt.Println("PENIS ")
 				ElevatorPrint(elevator)
-				elevator = chooseDirection(elevator)
-				hwelevio.SetMotorDirection(elevator.Dirn)
+				//elevator = chooseDirection(elevator)
+				hwelevio.SetMotorDirection(MDStop)
 				ElevatorPrint(elevator)
 				payloadToLights <- PayloadFromDriver{CurrentFloor: elevator.CurrentFloor, DoorLight: false}
 			}
@@ -121,7 +121,8 @@ func ElevatorDriver(
 			//payloadFromElevator <- PayloadFromElevator{Elevator: elevator, CompletedOrders: clearedRequests}
 
 		case <-doorClosedChan:
-
+			fmt.Println("HELLO")
+			doorOpenChan <- false 
 			if obstruction {
 				elevator.ActiveSatus = !obstruction
 				doorOpenChan <- true
@@ -129,6 +130,7 @@ func ElevatorDriver(
 				continue
 			}
 
+			
 			switch {
 			case elevator.Dirn == MDUp && elevator.Requests[elevator.CurrentFloor][BHallUp]:
 				fmt.Println("Case 1 ")
@@ -175,6 +177,10 @@ func ElevatorDriver(
 		case <-motorInactiveChan:
 			if elevator.CurrentBehaviour == EBMoving {
 				elevator.ActiveSatus = false
+				fmt.Println("Motor Inactivety")
+				fmt.Println("Motor Inactivety")
+				fmt.Println("Motor Inactivety")
+			
 				//payloadFromElevator <- PayloadFromElevator{Elevator: elevator, CompletedOrders: clearedRequests}
 			}
 
@@ -221,17 +227,24 @@ func ElevatorDriver(
 					elevator = chooseDirection(elevator)
 					hwelevio.SetMotorDirection(elevator.Dirn)
 					ElevatorPrint(elevator)
+					payloadFromElevator <- PayloadFromElevator{Elevator: elevator, CompletedOrders: clearedRequests}
 				}
 			}
-			elevator = chooseDirection(elevator)
+			//elevator = chooseDirection(elevator)
 			//hwelevio.SetMotorDirection(elevator.Dirn)
+			ElevatorPrint(elevator)
 			fmt.Println("HELLO OUSIDE SWITCH")
 			fmt.Println("HELLO OUSIDE SWITCH")
 			fmt.Println("HELLO OUSIDE SWITCH")
 			fmt.Println("HELLO OUSIDE SWITCH")
+			ElevatorPrint(elevator)
 			//payloadFromElevator <- PayloadFromElevator{Elevator: elevator, CompletedOrders: clearedRequests}
 		}
 		if elevator != prevelevator {
+			fmt.Println("ELEVATOR CHANGED")
+			fmt.Println("ELEVATOR CHANGED")
+			fmt.Println("ELEVATOR CHANGED")
+			ElevatorPrint(elevator)
 			payloadFromElevator <- PayloadFromElevator{
 				Elevator:        elevator,
 				CompletedOrders: clearedRequests,
