@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"os/exec"
 	"fmt"
+	"sync"
 )
 
 
@@ -60,25 +61,27 @@ func assignOrders(PayloadFromNetworkToAssigner PayloadFromNetworkToAssigner,
 }
 
 
+// Define a global mutex
+var hraMutex sync.Mutex
 
 func convertPayloadToHRAInput(payload PayloadFromNetworkToAssigner, nodeID int) HRAInput {
-	
-	hraInput := InitialiseHRAInput()
-	for i, alive := range payload.AliveList {
+	hraMutex.Lock()   // Lock before modifying hraInput
+	defer hraMutex.Unlock() // Unlock after function returns (ensuring safe access)
 
+	hraInput := InitialiseHRAInput()
+	
+	for i, alive := range payload.AliveList {
 		if alive {
-			// TODO is i and elevatorID the same ? 
 			elevatorID := fmt.Sprintf("elevator_%d", i) // Convert index to string key
 			hraInput.States[elevatorID] = payload.ElevatorList[i]
 		}
 	}
-	//print("printer hra")
-	//PrintHraInput(hraInput)
+
 	// Iterate over all floors and buttons
 	for floor := 0; floor < NFloors; floor++ {
-		for btn := BHallUp; btn <= BHallDown; btn++ { 
+		for btn := BHallUp; btn <= BHallDown; btn++ {
 			allAssigned := true
-	
+
 			// Check all alive elevators for the specific button and floor
 			for i, alive := range payload.AliveList {
 				if alive {
@@ -88,16 +91,13 @@ func convertPayloadToHRAInput(payload PayloadFromNetworkToAssigner, nodeID int) 
 					}
 				}
 			}
-			if allAssigned {
-				hraInput.HallRequests[floor][btn] = true
-			} else {
-				hraInput.HallRequests[floor][btn] = false 
-			}
+			hraInput.HallRequests[floor][btn] = allAssigned
 		}
 	}
 	
 	return hraInput
 }
+
 
 // TODO DO NOT LIKE HAVING BOTH THESE TWO 
 func InitialiseHRAInput() HRAInput {
@@ -117,8 +117,13 @@ func InitialisePayloadFromassignerToNetwork() PayloadFromassignerToNetwork {
 }
 
 
-func handlePayloadFromElevator(fromElevator  PayloadFromElevator, 
-	toNetwork PayloadFromassignerToNetwork, nodeID string ) PayloadFromassignerToNetwork{
+// Declare a global mutex
+var mut1 sync.Mutex
+var mut2 sync.Mutex
+
+func handlePayloadFromElevator(fromElevator PayloadFromElevator, toNetwork PayloadFromassignerToNetwork, nodeID string) PayloadFromassignerToNetwork {
+	mut1.Lock()           // Lock before modifying shared state
+	defer mut1.Unlock()   // Unlock after function returns (ensuring safe access)
 
 	behavior, direction, cabRequests := convertElevatorState(fromElevator.Elevator)
 	toNetwork.States[nodeID] = HRAElevState{
@@ -128,35 +133,34 @@ func handlePayloadFromElevator(fromElevator  PayloadFromElevator,
 		CabRequests: cabRequests,
 	}
 	toNetwork.ActiveSatus = fromElevator.Elevator.ActiveSatus
-	// Todo we set the cabrequests twice. this is because we have to make them :=0
-	// do this smarter
+	
+	// Process completed orders safely
 	toNetwork = orderComplete(toNetwork, nodeID, fromElevator.CompletedOrders)
 
 	return toNetwork
 }
 
+// Adding a mutex for `handlePayloadFromNetwork`
+func handlePayloadFromNetwork(payload PayloadFromassignerToNetwork, netPayload PayloadFromNetworkToAssigner, nodeID int) PayloadFromassignerToNetwork {
+	mut2.Lock()          // Lock before modifying shared state
+	defer mut2.Unlock()  // Unlock after function returns
 
-// TODO DO WE NEED? 
-func handlePayloadFromNetwork(
-	payload PayloadFromassignerToNetwork, 
-	netPayload PayloadFromNetworkToAssigner,
-	nodeID int,
-) PayloadFromassignerToNetwork {
-	// TODO IS IT NECESSARY ? 
 	for f := 0; f < NFloors; f++ {
 		for b := 0; b < NButtons; b++ {
 			incomingState := netPayload.HallOrderList[nodeID][f][b]
 			localState := payload.HallRequests[f][b]
 			// If local state is OrderComplete and incoming is OrderAssigned, keep local state.
 			if localState == OrderComplete && incomingState == OrderAssigned {
-				// do nothing; stay OrderComplete.
+				// Do nothing; stay OrderComplete.
 			} else {
 				payload.HallRequests[f][b] = incomingState
 			}
 		}
 	}
+
 	return payload
 }
+
 
 func convertElevatorState(e Elevator) (string, string, []bool) {
 	behavior := EBToString(e.CurrentBehaviour)
