@@ -25,10 +25,12 @@ func ElevatorDriver(
 		doorTimeout        time.Time 
 		toggledoorLight    = false 
 		doorOpen 			= false
+
 	)
 	drv_floors := make(chan int)
 	drv_obstr := make(chan bool)
 	drv_stop := make(chan bool)
+	doorClosedChan := make(chan bool)
 
 	go hwelevio.PollFloorSensor(drv_floors)
 	go hwelevio.PollObstructionSwitch(drv_obstr)
@@ -79,9 +81,69 @@ func ElevatorDriver(
 				CurrentFloor : elevator.CurrentFloor,
 				DoorLight : toggledoorLight, 
 			}
+
+
+
+
 		case elevator.Requests = <-newOrderChannel:
 			//ElevatorPrint(elevator)
+		
+		case <-doorClosedChan:
+			fmt.Println("DOR CLOSE")
 			
+			switch {
+			case elevator.Dirn == MDUp && elevator.Requests[elevator.CurrentFloor][BHallUp]:
+				fmt.Println("Case 1 ")
+				
+				completedOrders[elevator.CurrentFloor][BHallUp] = true
+				elevator.Requests[elevator.CurrentFloor][BHallUp] = false
+			
+
+			case elevator.Dirn == MDUp && elevator.Requests[elevator.CurrentFloor][BCab] && requestsAbove(elevator):
+				fmt.Println("Case 2 ")
+				
+				//do nothing
+
+			case elevator.Dirn == MDUp && elevator.Requests[elevator.CurrentFloor][BHallDown]:
+				fmt.Println("Case 3 ")
+				completedOrders[elevator.CurrentFloor][BHallDown] = true
+				elevator.Requests[elevator.CurrentFloor][BHallDown] = false
+				
+
+			case elevator.Dirn == MDDown && elevator.Requests[elevator.CurrentFloor][BHallDown]:
+				fmt.Println("Case 4 ")
+				completedOrders[elevator.CurrentFloor][BHallDown] = true
+				elevator.Requests[elevator.CurrentFloor][BHallDown] = false
+				
+
+			case elevator.Dirn == MDDown && elevator.Requests[elevator.CurrentFloor][BCab] && requestsBelow(elevator):
+				fmt.Println("Case 5 ")
+				//do nothing
+				
+			case elevator.Dirn == MDDown && elevator.Requests[elevator.CurrentFloor][BHallUp]:
+				fmt.Println("Case 6 ")
+				completedOrders[elevator.CurrentFloor][BHallUp] = true
+				elevator.Requests[elevator.CurrentFloor][BHallUp] = false
+				
+				
+			}
+
+			if elevator.Requests[elevator.CurrentFloor][BCab] {
+				completedOrders[elevator.CurrentFloor][BCab] = true
+				elevator.Requests[elevator.CurrentFloor][BCab] = false
+				
+			}
+			
+			elevator.CurrentBehaviour = EBIdle
+			elevator = ChooseDirection(elevator)
+			//elevator.Dirn = MDStop
+			toggledoorLight = false 
+			payloadToLights <- PayloadFromDriver{
+				CurrentFloor : elevator.CurrentFloor,
+				DoorLight : toggledoorLight, 
+			}
+			doorOpen = false 
+
 		default:
 			time.Sleep(10 * time.Millisecond)
 		}
@@ -140,28 +202,10 @@ func ElevatorDriver(
 				}
 			}  else {
 				if time.Now().After(doorTimeout){
+					doorClosedChan <- true
+					fmt.Println("DOOR CLOSED")
 					elevator.ActiveSatus = true 
-					completedOrders, elevator  = clearAtCurrentFloor(elevator)
-					fmt.Println("I CLEARED THE FUCKING ORDER")
-					fmt.Println("I CLEARED THE FUCKING ORDER")
-					fmt.Println("I CLEARED THE FUCKING ORDER")
-					fmt.Println("I CLEARED THE FUCKING ORDER")
-					fmt.Println("I CLEARED THE FUCKING ORDER")
-					fmt.Println("I CLEARED THE FUCKING ORDER")
 
-					//elevator.Dirn  =  decideDirection(elevator).Dirn
-					//elevator.CurrentBehaviour =  decideDirection(elevator).CurrentBehaviour
-					// time.Sleep(3 * time.Second) // Simulate door open time
-					// SHOULD NOT BE EBIDLE ? 
-					elevator.CurrentBehaviour = EBIdle
-					elevator = ChooseDirection(elevator)
-					//elevator.Dirn = MDStop
-					toggledoorLight = false 
-					payloadToLights <- PayloadFromDriver{
-						CurrentFloor : elevator.CurrentFloor,
-						DoorLight : toggledoorLight, 
-					}
-					doorOpen = false 
 				}
 			}
 
