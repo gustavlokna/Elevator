@@ -211,7 +211,7 @@ func ElevatorDriver(
 			hwelevio.SetMotorDirection(elevator.Dirn)
 			if timerActive && time.Now().After(motorTimeout) {
 				//elevator.ActiveSatus = false
-				print("motor timeout")
+				//print("motor timeout")
 			}
 			if elevator.CurrentBehaviour == EBMoving && !timerActive {
 				motorTimeout = time.Now().Add(3 * time.Second)
@@ -219,8 +219,9 @@ func ElevatorDriver(
 			}
 
 			// bolea is copied from Ø and if sentence can just be put in case elevator.CurrentFloor = <-drv_floors:
-			/*
+			
 			if ShouldStop(elevator) && elevator.CurrentFloor != prevelevator.CurrentFloor {
+				/*
 				elevator.ActiveSatus = true
 				timerActive = false
 				hwelevio.SetMotorDirection(MDStop)
@@ -235,6 +236,7 @@ func ElevatorDriver(
 					CurrentFloor: elevator.CurrentFloor,
 					DoorLight:    toggledoorLight,
 				}
+				*/
 				continue
 			}
 			/*
