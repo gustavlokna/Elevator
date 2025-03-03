@@ -5,6 +5,7 @@ import (
 	"Project/elevatordriver/timer"
 	"Project/hwelevio"
 	"fmt"
+	"time"
 )
 
 func ElevatorDriver(
@@ -13,16 +14,16 @@ func ElevatorDriver(
 	payloadToLights chan<- PayloadFromDriver,
 ) {
 	var (
-		floorChannel = make(chan int)
+		floorChannel       = make(chan int)
 		obstructionChannel = make(chan bool)
-		doorOpenChan = make(chan bool)
-		doorClosedChan = make(chan bool)
-		motorActiveChan = make(chan bool)
-		motorInactiveChan = make(chan bool)
-		clearedRequests = [NFloors][NButtons]bool{}
-		obstruction bool
+		doorOpenChan       = make(chan bool)
+		doorClosedChan     = make(chan bool)
+		motorActiveChan    = make(chan bool)
+		motorInactiveChan  = make(chan bool)
+		clearedRequests    = [NFloors][NButtons]bool{}
+		obstruction        bool
 	)
-	
+
 	go hwelevio.PollFloorSensor(floorChannel)
 	go hwelevio.PollObstructionSwitch(obstructionChannel)
 	go timer.Timer(doorOpenChan, motorActiveChan, doorClosedChan, motorInactiveChan)
@@ -30,7 +31,7 @@ func ElevatorDriver(
 	elevator := initelevator()
 	hwelevio.SetMotorDirection(elevator.Dirn)
 
-	payloadFromElevator <- PayloadFromElevator{ Elevator: elevator, CompletedOrders: clearedRequests}
+	payloadFromElevator <- PayloadFromElevator{Elevator: elevator, CompletedOrders: clearedRequests}
 	payloadToLights <- PayloadFromDriver{CurrentFloor: elevator.CurrentFloor, DoorLight: false}
 
 	for {
@@ -102,14 +103,13 @@ func ElevatorDriver(
 			fmt.Println("COOOOOCK")
 			fmt.Println("COOOOOCK")
 			fmt.Println("COOOOOCK")
-			payloadFromElevator <- PayloadFromElevator{ Elevator: elevator, CompletedOrders: clearedRequests}
-
+			payloadFromElevator <- PayloadFromElevator{Elevator: elevator, CompletedOrders: clearedRequests}
 
 		case <-doorClosedChan:
 			if obstruction {
 				elevator.ActiveSatus = !obstruction
 				doorOpenChan <- true
-				payloadFromElevator <- PayloadFromElevator{ Elevator: elevator, CompletedOrders: clearedRequests}
+				payloadFromElevator <- PayloadFromElevator{Elevator: elevator, CompletedOrders: clearedRequests}
 				continue
 			}
 
@@ -119,23 +119,22 @@ func ElevatorDriver(
 				ElevatorPrint(elevator)
 				clearedRequests[elevator.CurrentFloor][BHallUp] = true
 				elevator.Requests[elevator.CurrentFloor][BHallUp] = false
-			
-			case elevator.Dirn == MDUp  && elevator.Requests[elevator.CurrentFloor][BCab] && requestsAbove(elevator):
+
+			case elevator.Dirn == MDUp && elevator.Requests[elevator.CurrentFloor][BCab] && requestsAbove(elevator):
 				fmt.Println("Case 2 ")
 				//do nothing
-			
+
 			case elevator.Dirn == MDUp && elevator.Requests[elevator.CurrentFloor][BHallDown]:
 				fmt.Println("Case 3 ")
 				clearedRequests[elevator.CurrentFloor][BHallDown] = true
 				elevator.Requests[elevator.CurrentFloor][BHallDown] = false
 
-
 			case elevator.Dirn == MDDown && elevator.Requests[elevator.CurrentFloor][BHallDown]:
 				fmt.Println("Case 4 ")
 				clearedRequests[elevator.CurrentFloor][BHallDown] = true
 				elevator.Requests[elevator.CurrentFloor][BHallDown] = false
-				
-			case elevator.Dirn == MDDown  && elevator.Requests[elevator.CurrentFloor][BCab]  && requestsBelow(elevator):
+
+			case elevator.Dirn == MDDown && elevator.Requests[elevator.CurrentFloor][BCab] && requestsBelow(elevator):
 				fmt.Println("Case 5 ")
 				//do nothing
 
@@ -154,13 +153,13 @@ func ElevatorDriver(
 			ElevatorPrint(elevator)
 			//hwelevio.SetMotorDirection(elevator.Dirn)
 
-			payloadFromElevator <- PayloadFromElevator{ Elevator: elevator, CompletedOrders: clearedRequests}
+			payloadFromElevator <- PayloadFromElevator{Elevator: elevator, CompletedOrders: clearedRequests}
 			payloadToLights <- PayloadFromDriver{CurrentFloor: elevator.CurrentFloor, DoorLight: false}
 
 		case <-motorInactiveChan:
 			if elevator.CurrentBehaviour == EBMoving {
 				elevator.ActiveSatus = false
-				payloadFromElevator <- PayloadFromElevator{ Elevator: elevator, CompletedOrders: clearedRequests}
+				payloadFromElevator <- PayloadFromElevator{Elevator: elevator, CompletedOrders: clearedRequests}
 			}
 
 		case obstruction = <-obstructionChannel:
@@ -168,15 +167,14 @@ func ElevatorDriver(
 				elevator.ActiveSatus = !obstruction
 				doorOpenChan <- !obstruction
 			}
-			payloadFromElevator <- PayloadFromElevator{ Elevator: elevator, CompletedOrders: clearedRequests}
-
+			payloadFromElevator <- PayloadFromElevator{Elevator: elevator, CompletedOrders: clearedRequests}
 
 		case elevator.Requests = <-newOrderChannel:
 			fmt.Println("NEW ORDER RECEIVED")
 			fmt.Println("NEW ORDER RECEIVED")
-			fmt.Println("NEW ORDER RECEIVED")		
+			fmt.Println("NEW ORDER RECEIVED")
 			ElevatorPrint(elevator)
-			if elevator.CurrentBehaviour == EBIdle && elevator.Dirn==MDStop{
+			if elevator.CurrentBehaviour == EBIdle && elevator.Dirn == MDStop {
 				switch {
 				case elevator.Requests[elevator.CurrentFloor][BHallUp]:
 					elevator.CurrentBehaviour = EBDoorOpen
@@ -211,8 +209,11 @@ func ElevatorDriver(
 			fmt.Println("HELLO OUSIDE SWITCH")
 			fmt.Println("HELLO OUSIDE SWITCH")
 			fmt.Println("HELLO OUSIDE SWITCH")
-			payloadFromElevator <- PayloadFromElevator{ Elevator: elevator, CompletedOrders: clearedRequests}
+			payloadFromElevator <- PayloadFromElevator{Elevator: elevator, CompletedOrders: clearedRequests}
+		case <-time.After(10 * time.Millisecond):
+			payloadFromElevator <- PayloadFromElevator{Elevator: elevator, CompletedOrders: clearedRequests}
 
 		}
+
 	}
 }
