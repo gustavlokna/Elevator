@@ -115,10 +115,10 @@ func ElevatorDriver(
 				fmt.Println("PENIS ")
 				fmt.Println("PENIS ")
 				fmt.Println("PENIS ")
-				ElevatorPrint(elevator)
+				
 				elevator = chooseDirection(elevator)
 				hwelevio.SetMotorDirection(elevator.Dirn)
-				ElevatorPrint(elevator)
+				
 				payloadToLights <- PayloadFromDriver{CurrentFloor: elevator.CurrentFloor, DoorLight: false}
 				payloadFromElevator <- PayloadFromElevator{Elevator: elevator, CompletedOrders: clearedRequests}
 			}
@@ -129,7 +129,7 @@ func ElevatorDriver(
 
 		case <-doorClosedChan:
 			fmt.Println("DOR CLOSE")
-			ElevatorPrint(elevator)
+			
 
 			if obstruction {
 				elevator.ActiveSatus = !obstruction
@@ -139,11 +139,11 @@ func ElevatorDriver(
 				continue
 			}
 			payloadToLights <- PayloadFromDriver{CurrentFloor: elevator.CurrentFloor, DoorLight: false}
-			
+
 			switch {
 			case elevator.Dirn == MDUp && elevator.Requests[elevator.CurrentFloor][BHallUp]:
 				fmt.Println("Case 1 ")
-				ElevatorPrint(elevator)
+				
 				clearedRequests[elevator.CurrentFloor][BHallUp] = true
 				elevator.Requests[elevator.CurrentFloor][BHallUp] = false
 				payloadFromElevator <- PayloadFromElevator{Elevator: elevator, CompletedOrders: clearedRequests}
@@ -179,12 +179,17 @@ func ElevatorDriver(
 			}
 
 			if elevator.Requests[elevator.CurrentFloor][BCab] {
+				fmt.Println("Case 7 ")
+				fmt.Println("CABS REQUESTS")
+				fmt.Println("CABS REQUESTS")
+				fmt.Println("CABS REQUESTS")
 				clearedRequests[elevator.CurrentFloor][BCab] = true
 				elevator.Requests[elevator.CurrentFloor][BCab] = false
+				payloadFromElevator <- PayloadFromElevator{Elevator: elevator, CompletedOrders: clearedRequests}
 			}
-			ElevatorPrint(elevator)
+			
 			elevator = chooseDirection(elevator)
-			ElevatorPrint(elevator)
+			
 			//hwelevio.SetMotorDirection(elevator.Dirn)
 
 			//payloadFromElevator <- PayloadFromElevator{Elevator: elevator, CompletedOrders: clearedRequests}
@@ -212,7 +217,7 @@ func ElevatorDriver(
 			fmt.Println("NEW ORDER RECEIVED")
 			fmt.Println("NEW ORDER RECEIVED")
 			fmt.Println("NEW ORDER RECEIVED")
-			ElevatorPrint(elevator)
+			
 			if elevator.CurrentBehaviour == EBIdle{
 				switch {
 				case elevator.Requests[elevator.CurrentFloor][BHallUp]:
@@ -241,10 +246,10 @@ func ElevatorDriver(
 					fmt.Println("WE ARE HERE ")
 					fmt.Println("WE ARE HERE ")
 					fmt.Println("WE ARE HERE ")
-					ElevatorPrint(elevator)
+					
 					elevator = chooseDirection(elevator)
 					hwelevio.SetMotorDirection(elevator.Dirn)
-					ElevatorPrint(elevator)
+					
 					payloadFromElevator <- PayloadFromElevator{Elevator: elevator, CompletedOrders: clearedRequests}
 				}
 			}

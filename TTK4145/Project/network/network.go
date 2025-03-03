@@ -73,12 +73,13 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 				init = true
 			}
 
-			//printHallOrderList(hallOrderList)
+			
 			aliveList[senderId] = msg.OnlineStatus
 			elevatorList[senderId] = msg.ElevatorList[senderId]
 			hallOrderList[senderId] = msg.HallOrderList[senderId]
 			hallOrderList = cyclicCounter(hallOrderList, nodeIDInt)
-
+			//printHallOrderList(hallOrderList)
+			//printElevatorList(elevatorList)
 			//TODO THIS CAN BE FUNC
 			allAcknowledged := true
 			for i := 0; i < NUM_ELEVATORS; i++ {
