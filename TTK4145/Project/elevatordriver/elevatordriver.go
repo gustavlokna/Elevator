@@ -207,6 +207,8 @@ func ElevatorDriver(
 					ElevatorPrint(elevator)
 				}
 			}
+			elevator = chooseDirection(elevator)
+			hwelevio.SetMotorDirection(elevator.Dirn)
 			fmt.Println("HELLO OUSIDE SWITCH")
 			fmt.Println("HELLO OUSIDE SWITCH")
 			fmt.Println("HELLO OUSIDE SWITCH")
