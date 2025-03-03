@@ -50,7 +50,7 @@ func assignOrders(PayloadFromNetworkToAssigner PayloadFromNetworkToAssigner,
 
 func convertPayloadToHRAInput(payload PayloadFromNetworkToAssigner, nodeID int) HRAInput {
 
-	hraInput := InitialiseHRAInput()
+	hraInput := initHRAInput()
 	for i, alive := range payload.AliveList {
 
 		if alive {
@@ -74,7 +74,7 @@ func convertPayloadToHRAInput(payload PayloadFromNetworkToAssigner, nodeID int) 
 	return hraInput
 }
 
-func InitialiseHRAInput() HRAInput {
+func initHRAInput() HRAInput {
 	hraInput := HRAInput{
 		HallRequests: [NFloors][NButtons - 1]bool{},
 		States:       make(map[string]HRAElevState),
@@ -82,7 +82,7 @@ func InitialiseHRAInput() HRAInput {
 	return hraInput
 }
 
-func InitialisePayloadFromassignerToNetwork() PayloadFromassignerToNetwork {
+func initPayloadToNetwork() PayloadFromassignerToNetwork {
 	payloadFromassignerToNetwork := PayloadFromassignerToNetwork{
 		HallRequests: [NFloors][NButtons]ButtonState{},
 		States:       make(map[string]HRAElevState),

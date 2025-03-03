@@ -14,10 +14,8 @@ func cyclicCounter(
 			origState := orders[myID][f][b]
 			myState := origState
 
-			// If I'm Initial, copy the first alive peer’s state that isn't Initial.
 			if myState == Initial {
 				for e := 0; e < NUM_ELEVATORS; e++ {
-					//if e != myID && alive[e] && orders[e][f][b] != Initial
 					if e != myID && orders[e][f][b] != Initial {
 						myState = orders[e][f][b]
 						break
@@ -27,10 +25,8 @@ func cyclicCounter(
 				continue
 			}
 
-			// Gather other elevators' states if they're alive.
 			var peers []ButtonState
 			for e := 0; e < NUM_ELEVATORS; e++ {
-				//if e != myID && alive[e]  && orders[e][f][b] != Initial
 				if e != myID && orders[e][f][b] != Initial {
 					peers = append(peers, orders[e][f][b])
 				}
@@ -55,14 +51,12 @@ func cyclicCounter(
 					myState = Idle
 				}
 			}
-			// TODO THIS IS ERROR HANDELING
-			// SHOULD BE NON ESSENTIAL BUT IT IS AT THE TIME 
 			// If no valid transition occurred, check for an illegal combination.
 			if myState == origState {
 				switch origState {
 				case Idle:
 					if !(allIn(peers, Idle, ButtonPressed) || allIn(peers, Idle, OrderComplete)) {
-						myState = Initial // Illegal combination detected.
+						myState = Initial
 
 					}
 				case ButtonPressed:

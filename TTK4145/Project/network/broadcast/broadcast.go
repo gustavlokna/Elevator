@@ -13,9 +13,6 @@ import (
 
 const bufferSize = 4 * 1024
 
-// Encodes received values from `chans` into type-tagged JSON, then broadcasts
-// it on `port`
-// TODO integrate in sender that sends every 500*
 func Sender(port int, chans ...interface{}) {
 	checkArgs(chans...)
 	typeNames := make([]string, len(chans))
@@ -49,12 +46,8 @@ func Sender(port int, chans ...interface{}) {
 	}
 }
 
-// Matches type-tagged JSON received on `port` to element types of `chans`, then
-// sends the decoded value on the corresponding channel
-// CHANGED: Modified Receiver to integrate heartbeat/node registry tracking.
-// NEW: A simplified Receiver that uses two explicit channels.
 func Receiver(port int, myID string, messageCh chan<- Message, registryCh chan<- NetworkNodeRegistry) {
-	const heartbeatInterval = 150 * time.Millisecond
+	const heartbeatInterval = 150 * time.Millisecond // todo make const 
 	const heartbeatTimeout = 3000 * time.Millisecond
 	lastSeen := make(map[string]time.Time)
 	reportedNew := make(map[string]bool)
@@ -67,7 +60,6 @@ func Receiver(port int, myID string, messageCh chan<- Message, registryCh chan<-
 		n, _, err := conn.ReadFrom(buf[0:])
 		if err != nil {
 			if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
-				// No packet received this cycle—still run heartbeat check.
 			} else {
 				fmt.Printf("Receiver error: %v\n", err)
 			}
@@ -76,18 +68,15 @@ func Receiver(port int, myID string, messageCh chan<- Message, registryCh chan<-
 			if err := json.Unmarshal(buf[:n], &ttj); err != nil {
 				fmt.Printf("Failed to unmarshal typeTaggedJSON: %v\n", err)
 			} else {
-				// Process only Message types.
 				if ttj.TypeId == reflect.TypeOf(Message{}).String() {
 					var m Message
 					if err := json.Unmarshal(ttj.JSON, &m); err != nil {
 						fmt.Printf("Failed to unmarshal Message: %v\n", err)
 					} else {
-						// Always update the heartbeat timestamp.
 						lastSeen[m.SenderId] = time.Now()
 						if _, exists := reportedNew[m.SenderId]; !exists {
 							reportedNew[m.SenderId] = false
 						}
-						// Only forward messages from other nodes.
 						if m.SenderId != myID {
 							messageCh <- m
 						}

@@ -26,9 +26,9 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 	go broadcast.Receiver(messagePort, nodeID, broadcastReceiverChannel, nodeRegistryChannel)
 
 	var (
-		//TODO THIS CAN BE A [NUM_ELEVATORS]HRAInput
+		
 		elevatorList =   initializeElevatorList()
-		//elevatorList  [NUM_ELEVATORS]HRAElevState
+		//TODO THIS CAN BE A [NUM_ELEVATORS]HRAInput
 		hallOrderList [NUM_ELEVATORS][NFloors][NButtons]ButtonState
 		aliveList     [NUM_ELEVATORS]bool
 		ackMap        [NUM_ELEVATORS]bool
@@ -72,8 +72,6 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 				elevatorList[nodeIDInt] = msg.ElevatorList[nodeIDInt]
 				init = true
 			}
-
-			//printHallOrderList(hallOrderList)
 			aliveList[senderId] = msg.OnlineStatus
 			elevatorList[senderId] = msg.ElevatorList[senderId]
 			hallOrderList[senderId] = msg.HallOrderList[senderId]
