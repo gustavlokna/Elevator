@@ -5,6 +5,7 @@ import (
 	"Project/elevatordriver/timer"
 	"Project/hwelevio"
 	"fmt"
+	"time"
 )
 
 func ElevatorDriver(
@@ -175,6 +176,8 @@ func ElevatorDriver(
 			//payloadToLights <- PayloadFromDriver{CurrentFloor: elevator.CurrentFloor, DoorLight: false}
 
 		case <-motorInactiveChan:
+			//fmt.Println("Motor Inactivety")
+			//fmt.Println("Motor Inactivety")
 			if elevator.CurrentBehaviour == EBMoving {
 				elevator.ActiveSatus = false
 				fmt.Println("Motor Inactivety")
@@ -231,6 +234,10 @@ func ElevatorDriver(
 			case EBDoorOpen:
 				payloadFromElevator <- PayloadFromElevator{Elevator: elevator, CompletedOrders: clearedRequests}
 			}
+			elevator = chooseDirection(elevator)
+			hwelevio.SetMotorDirection(elevator.Dirn)
+		default:
+			time.Sleep(10 * time.Millisecond)
 		}
 	}
 }
