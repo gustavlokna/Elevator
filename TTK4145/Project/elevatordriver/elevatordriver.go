@@ -13,12 +13,12 @@ func ElevatorDriver(
 	payloadToLights chan<- PayloadFromDriver,
 ) {
 	var (
-		floorChannel       = make(chan int)
-		obstructionChannel = make(chan bool)
-		doorOpenChan       = make(chan bool)
-		doorClosedChan     = make(chan bool)
-		motorActiveChan    = make(chan bool)
-		motorInactiveChan  = make(chan bool)
+		floorChannel       = make(chan int,10)
+		obstructionChannel = make(chan bool,10)
+		doorOpenChan       = make(chan bool,10)
+		doorClosedChan     = make(chan bool,10)
+		motorActiveChan    = make(chan bool,10)
+		motorInactiveChan  = make(chan bool,10)
 		clearedRequests    = [NFloors][NButtons]bool{}
 		obstruction        bool
 	)
