@@ -92,6 +92,7 @@ func ElevatorDriver(
 				ElevatorPrint(elevator)
 				elevator = chooseDirection(elevator)
 				hwelevio.SetMotorDirection(elevator.Dirn)
+				ElevatorPrint(elevator)
 				payloadToLights <- PayloadFromDriver{CurrentFloor: elevator.CurrentFloor, DoorLight: false}
 			}
 			payloadFromElevator <- PayloadFromElevator{ Elevator: elevator, CompletedOrders: clearedRequests}
@@ -108,6 +109,7 @@ func ElevatorDriver(
 			switch {
 			case elevator.Dirn == MDUp && elevator.Requests[elevator.CurrentFloor][BHallUp]:
 				fmt.Println("Case 1 ")
+				ElevatorPrint(elevator)
 				clearedRequests[elevator.CurrentFloor][BHallUp] = true
 				elevator.Requests[elevator.CurrentFloor][BHallUp] = false
 			
@@ -163,6 +165,10 @@ func ElevatorDriver(
 
 
 		case elevator.Requests = <-newOrderChannel:
+			fmt.Println("NEW ORDER RECEIVED")
+			fmt.Println("NEW ORDER RECEIVED")
+			fmt.Println("NEW ORDER RECEIVED")		
+			ElevatorPrint(elevator)
 			if elevator.CurrentBehaviour == EBIdle {
 				switch {
 				case elevator.Requests[elevator.CurrentFloor][BHallUp]:
@@ -191,8 +197,13 @@ func ElevatorDriver(
 					ElevatorPrint(elevator)
 					elevator = chooseDirection(elevator)
 					hwelevio.SetMotorDirection(elevator.Dirn)
+					ElevatorPrint(elevator)
 				}
 			}
+			fmt.Println("HELLO OUSIDE SWITCH")
+			fmt.Println("HELLO OUSIDE SWITCH")
+			fmt.Println("HELLO OUSIDE SWITCH")
+			fmt.Println("HELLO OUSIDE SWITCH")
 			payloadFromElevator <- PayloadFromElevator{ Elevator: elevator, CompletedOrders: clearedRequests}
 
 		}
