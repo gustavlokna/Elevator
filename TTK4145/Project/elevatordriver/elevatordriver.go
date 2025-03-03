@@ -151,7 +151,7 @@ func ElevatorDriver(
 			ElevatorPrint(elevator)
 			elevator = chooseDirection(elevator)
 			ElevatorPrint(elevator)
-			//hwelevio.SetMotorDirection(elevator.Dirn)
+			hwelevio.SetMotorDirection(elevator.Dirn)
 
 			payloadFromElevator <- PayloadFromElevator{Elevator: elevator, CompletedOrders: clearedRequests}
 			payloadToLights <- PayloadFromDriver{CurrentFloor: elevator.CurrentFloor, DoorLight: false}
