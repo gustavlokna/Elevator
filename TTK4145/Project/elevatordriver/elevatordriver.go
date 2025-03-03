@@ -210,7 +210,7 @@ func ElevatorDriver(
 		case EBMoving:
 			hwelevio.SetMotorDirection(elevator.Dirn)
 			if timerActive && time.Now().After(motorTimeout) {
-				elevator.ActiveSatus = false
+				//elevator.ActiveSatus = false
 				print("motor timeout")
 			}
 			if elevator.CurrentBehaviour == EBMoving && !timerActive {
