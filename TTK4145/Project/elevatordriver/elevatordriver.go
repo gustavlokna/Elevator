@@ -148,78 +148,46 @@ func ElevatorDriver(
 
 			var clearedRequests [NFloors][NButtons]bool //TODO: Remove
 
-			if elevator.Requests[elevator.CurrentFloor][BCab] {
-				clearedRequests[elevator.CurrentFloor][BCab] = true
-				elevator.Requests[elevator.CurrentFloor][BCab] = false
+			if elevator.CurrentBehaviour == EBDoorOpen {
+				if elevator.Requests[elevator.CurrentFloor][BCab] {
+					clearedRequests[elevator.CurrentFloor][BCab] = true
+					elevator.Requests[elevator.CurrentFloor][BCab] = false
+				}
+				switch elevator.Dirn {
+				case MDUp:
+					if !requestsAbove(elevator) && !elevator.Requests[elevator.CurrentFloor][BHallUp] {
+						if elevator.Requests[elevator.CurrentFloor][BHallDown] {
+							clearedRequests[elevator.CurrentFloor][BHallDown] = true
+							elevator.Requests[elevator.CurrentFloor][BHallDown] = false
+						}
+					}
+					if elevator.Requests[elevator.CurrentFloor][BHallUp] {
+						clearedRequests[elevator.CurrentFloor][BHallUp] = true
+						elevator.Requests[elevator.CurrentFloor][BHallUp] = false
+					}
+				case MDDown:
+					if !requestsBelow(elevator) && !elevator.Requests[elevator.CurrentFloor][BHallDown] {
+						if elevator.Requests[elevator.CurrentFloor][BHallUp] {
+							clearedRequests[elevator.CurrentFloor][BHallUp] = true
+							elevator.Requests[elevator.CurrentFloor][BHallUp] = false
+						}
+					}
+					if elevator.Requests[elevator.CurrentFloor][BHallDown] {
+						clearedRequests[elevator.CurrentFloor][BHallDown] = true
+						elevator.Requests[elevator.CurrentFloor][BHallDown] = false
+					}
+				}
+				elevator = ChooseDirection(elevator)
+				hwelevio.SetMotorDirection(elevator.Dirn)
+				payloadFromElevator <- PayloadFromElevator{
+					Elevator:        elevator,
+					CompletedOrders: clearedRequests,
+				}
+				payloadToLights <- PayloadFromDriver{
+					CurrentFloor: elevator.CurrentFloor,
+					DoorLight:    false,
+				}
 			}
-			switch {
-			case elevator.Dirn == MDUp && !requestsAbove(elevator) && !elevator.Requests[elevator.CurrentFloor][BHallUp] && elevator.Requests[elevator.CurrentFloor][BHallDown]:
-				clearedRequests[elevator.CurrentFloor][BHallDown] = true
-				elevator.Requests[elevator.CurrentFloor][BHallDown] = false
-
-			case elevator.Dirn == MDUp && elevator.Requests[elevator.CurrentFloor][BHallUp]:
-				clearedRequests[elevator.CurrentFloor][BHallUp] = true
-				elevator.Requests[elevator.CurrentFloor][BHallUp] = false
-
-			case elevator.Dirn == MDDown && !requestsBelow(elevator) && !elevator.Requests[elevator.CurrentFloor][BHallDown] && elevator.Requests[elevator.CurrentFloor][BHallUp]:
-					clearedRequests[elevator.CurrentFloor][BHallUp] = true
-					elevator.Requests[elevator.CurrentFloor][BHallUp] = false
-
-			case elevator.Dirn == MDDown && elevator.Requests[elevator.CurrentFloor][BHallDown]:
-				clearedRequests[elevator.CurrentFloor][BHallDown] = true
-				elevator.Requests[elevator.CurrentFloor][BHallDown] = false
-			}
-			elevator = ChooseDirection(elevator)
-			hwelevio.SetMotorDirection(elevator.Dirn)
-			payloadFromElevator <- PayloadFromElevator{
-				Elevator:        elevator,
-				CompletedOrders: clearedRequests,
-			}
-			payloadToLights <- PayloadFromDriver{
-				CurrentFloor: elevator.CurrentFloor,
-				DoorLight:    false,
-			}
-
-			// if elevator.CurrentBehaviour == EBDoorOpen {
-			// 	if elevator.Requests[elevator.CurrentFloor][BCab] {
-			// 		clearedRequests[elevator.CurrentFloor][BCab] = true
-			// 		elevator.Requests[elevator.CurrentFloor][BCab] = false
-			// 	}
-			// 	switch elevator.Dirn {
-			// 	case MDUp:
-			// 		if !requestsAbove(elevator) && !elevator.Requests[elevator.CurrentFloor][BHallUp] {
-			// 			if elevator.Requests[elevator.CurrentFloor][BHallDown] {
-			// 				clearedRequests[elevator.CurrentFloor][BHallDown] = true
-			// 				elevator.Requests[elevator.CurrentFloor][BHallDown] = false
-			// 			}
-			// 		}
-			// 		if elevator.Requests[elevator.CurrentFloor][BHallUp] {
-			// 			clearedRequests[elevator.CurrentFloor][BHallUp] = true
-			// 			elevator.Requests[elevator.CurrentFloor][BHallUp] = false
-			// 		}
-			// 	case MDDown:
-			// 		if !requestsBelow(elevator) && !elevator.Requests[elevator.CurrentFloor][BHallDown] {
-			// 			if elevator.Requests[elevator.CurrentFloor][BHallUp] {
-			// 				clearedRequests[elevator.CurrentFloor][BHallUp] = true
-			// 				elevator.Requests[elevator.CurrentFloor][BHallUp] = false
-			// 			}
-			// 		}
-			// 		if elevator.Requests[elevator.CurrentFloor][BHallDown] {
-			// 			clearedRequests[elevator.CurrentFloor][BHallDown] = true
-			// 			elevator.Requests[elevator.CurrentFloor][BHallDown] = false
-			// 		}
-			// 	}
-			// 	elevator = ChooseDirection(elevator)
-			// 	hwelevio.SetMotorDirection(elevator.Dirn)
-			// 	payloadFromElevator <- PayloadFromElevator{
-			// 		Elevator:        elevator,
-			// 		CompletedOrders: clearedRequests,
-			// 	}
-			// 	payloadToLights <- PayloadFromDriver{
-			// 		CurrentFloor: elevator.CurrentFloor,
-			// 		DoorLight:    false,
-			// 	}
-			// }
 
 		case <-motorInactiveChan:
 			if elevator.CurrentBehaviour == EBMoving {
