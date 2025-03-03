@@ -59,7 +59,6 @@ const (
 )
 
 // TODO find out what ClearRequestVarient is!
-// this is copied code from last project
 // TODO THIS IS ASS CODE 
 type ClearRequestVarient int
 
