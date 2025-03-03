@@ -35,6 +35,7 @@ func ElevatorDriver(
 	payloadToLights <- PayloadFromDriver{CurrentFloor: elevator.CurrentFloor, DoorLight: false}
 
 	for {
+		var clearedRequests [NFloors][NButtons]bool //TODO: Remove
 		select {
 		case elevator.CurrentFloor = <-floorChannel:
 			elevator.ActiveSatus = true
@@ -110,8 +111,6 @@ func ElevatorDriver(
 				payloadFromElevator <- PayloadFromElevator{ Elevator: elevator, CompletedOrders: clearedRequests}
 				continue
 			}
-
-			var clearedRequests [NFloors][NButtons]bool //TODO: Remove
 
 			if elevator.Requests[elevator.CurrentFloor][BCab] {
 				clearedRequests[elevator.CurrentFloor][BCab] = true

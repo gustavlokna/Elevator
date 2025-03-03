@@ -21,13 +21,9 @@ func decideDirection(el Elevator) DirnBehaviourPair {
 	case MDStop:
 		return decideDirectionStop(el)
 	default:
-		return DirnBehaviourPair{
-			MDStop,
-			EBIdle,
-		}
+		return DirnBehaviourPair{MDStop,EBIdle}
 	}
 }
-
 
 func decideDirectionUp(el Elevator) DirnBehaviourPair {
 	if requestsAbove(el) {

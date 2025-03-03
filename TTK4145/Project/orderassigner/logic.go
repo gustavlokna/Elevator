@@ -2,44 +2,34 @@ package orderassigner
 
 import (
 	. "Project/dataenums"
-	//"os"
 	"encoding/json"
-	"os/exec"
 	"fmt"
+	"os/exec"
 )
 
-
-func assignOrders(PayloadFromNetworkToAssigner PayloadFromNetworkToAssigner, 
+func assignOrders(PayloadFromNetworkToAssigner PayloadFromNetworkToAssigner,
 	nodeID int) [NFloors][NButtons]bool {
 	var orderList [NFloors][NButtons]bool
 
 	if !(PayloadFromNetworkToAssigner.AliveList[nodeID]) {
 		print("local elevator not alive")
-		// TODO make func? 
 		for floor := 0; floor < NFloors; floor++ {
 			orderList[floor][BCab] = PayloadFromNetworkToAssigner.ElevatorList[nodeID].CabRequests[floor]
 		}
 		return orderList
 	}
-	hraInput := convertPayloadToHRAInput(PayloadFromNetworkToAssigner, nodeID) 
+	hraInput := convertPayloadToHRAInput(PayloadFromNetworkToAssigner, nodeID)
 
 	jsonBytes, err := json.Marshal(hraInput)
 	if err != nil {
 		print("Failed to marshal HRAInput: %v\n", err)
 		return orderList
 	}
-	//fmt.Printf("Serialized HRAInput: %s\n", string(jsonBytes))
-
-	
-	// TODO SOME LOGIC TO MAKE THE ButtonState to bool 
-	//fmt.Println("all god here")
 	ret, err := exec.Command("hall_request_assigner", "-i", string(jsonBytes)).CombinedOutput()
 	if err != nil {
 		print("exec.Command error: %v\nOutput: %s\n", err, string(ret))
 		return orderList
 	}
-	
-	//fmt.Printf("Raw output: %s\n", string(ret))
 
 	output := make(map[string][][2]bool)
 	if err := json.Unmarshal(ret, &output); err != nil {
@@ -55,54 +45,38 @@ func assignOrders(PayloadFromNetworkToAssigner PayloadFromNetworkToAssigner,
 			orderList[floor][BCab] = hraInput.States[elevatorID].CabRequests[floor]
 		}
 	}
-	
 	return orderList
 }
 
-
-
 func convertPayloadToHRAInput(payload PayloadFromNetworkToAssigner, nodeID int) HRAInput {
-	
+
 	hraInput := InitialiseHRAInput()
 	for i, alive := range payload.AliveList {
 
 		if alive {
-			// TODO is i and elevatorID the same ? 
-			elevatorID := fmt.Sprintf("elevator_%d", i) // Convert index to string key
+			elevatorID := fmt.Sprintf("elevator_%d", i) 
 			hraInput.States[elevatorID] = payload.ElevatorList[i]
 		}
 	}
-	//print("printer hra")
-	//PrintHraInput(hraInput)
-	// Iterate over all floors and buttons
 	for floor := 0; floor < NFloors; floor++ {
-		for btn := BHallUp; btn <= BHallDown; btn++ { 
+		for btn := BHallUp; btn <= BHallDown; btn++ {
 			allAssigned := true
-	
-			// Check all alive elevators for the specific button and floor
 			for i, alive := range payload.AliveList {
-				if alive {
-					if payload.HallOrderList[i][floor][btn] != OrderAssigned {
-						allAssigned = false
-						break
-					}
+				if alive && payload.HallOrderList[i][floor][btn] != OrderAssigned {
+					allAssigned = false
+					break
 				}
 			}
-			if allAssigned {
-				hraInput.HallRequests[floor][btn] = true
-			} else {
-				hraInput.HallRequests[floor][btn] = false 
-			}
+			hraInput.HallRequests[floor][btn] = allAssigned
 		}
 	}
-	
+
 	return hraInput
 }
 
-// TODO DO NOT LIKE HAVING BOTH THESE TWO 
 func InitialiseHRAInput() HRAInput {
 	hraInput := HRAInput{
-		HallRequests: [NFloors][NButtons-1]bool{},
+		HallRequests: [NFloors][NButtons - 1]bool{},
 		States:       make(map[string]HRAElevState),
 	}
 	return hraInput
@@ -116,9 +90,8 @@ func InitialisePayloadFromassignerToNetwork() PayloadFromassignerToNetwork {
 	return payloadFromassignerToNetwork
 }
 
-
-func handlePayloadFromElevator(fromElevator  PayloadFromElevator, 
-	toNetwork PayloadFromassignerToNetwork, nodeID string ) PayloadFromassignerToNetwork{
+func handlePayloadFromElevator(fromElevator PayloadFromElevator,
+	toNetwork PayloadFromassignerToNetwork, nodeID string) PayloadFromassignerToNetwork {
 
 	behavior, direction, cabRequests := convertElevatorState(fromElevator.Elevator)
 	toNetwork.States[nodeID] = HRAElevState{
@@ -128,26 +101,21 @@ func handlePayloadFromElevator(fromElevator  PayloadFromElevator,
 		CabRequests: cabRequests,
 	}
 	toNetwork.ActiveSatus = fromElevator.Elevator.ActiveSatus
-	// Todo we set the cabrequests twice. this is because we have to make them :=0
-	// do this smarter
 	toNetwork = orderComplete(toNetwork, nodeID, fromElevator.CompletedOrders)
 
 	return toNetwork
 }
 
-
-// TODO DO WE NEED? 
 func handlePayloadFromNetwork(
-	payload PayloadFromassignerToNetwork, 
+	payload PayloadFromassignerToNetwork,
 	netPayload PayloadFromNetworkToAssigner,
 	nodeID int,
 ) PayloadFromassignerToNetwork {
-	// TODO IS IT NECESSARY ? 
 	for f := 0; f < NFloors; f++ {
 		for b := 0; b < NButtons; b++ {
 			incomingState := netPayload.HallOrderList[nodeID][f][b]
 			localState := payload.HallRequests[f][b]
-			// If local state is OrderComplete and incoming is OrderAssigned, keep local state.
+			
 			if localState == OrderComplete && incomingState == OrderAssigned {
 				// do nothing; stay OrderComplete.
 			} else {
@@ -161,26 +129,22 @@ func handlePayloadFromNetwork(
 func convertElevatorState(e Elevator) (string, string, []bool) {
 	behavior := EBToString(e.CurrentBehaviour)
 	direction := ElevDirToString(e.Dirn)
-
-	// Convert cab requests
 	cabRequests := make([]bool, NFloors)
+
 	for f := 0; f < NFloors; f++ {
 		cabRequests[f] = e.Requests[f][BCab]
 	}
 	return behavior, direction, cabRequests
 }
 
-
-
 func updateLightStates(payload PayloadFromNetworkToAssigner, myID int) [NFloors][NButtons]ButtonState {
-    var updatedLights [NFloors][NButtons]ButtonState
-    updatedLights = payload.HallOrderList[myID]
-    // Include cab calls for the local elevator
-    for floor := 0; floor < NFloors; floor++ {
-        if payload.ElevatorList[myID].CabRequests[floor] {
-            updatedLights[floor][BCab] = OrderAssigned
-        }
-    }
+	var updatedLights [NFloors][NButtons]ButtonState
+	updatedLights = payload.HallOrderList[myID]
 
-    return updatedLights
+	for floor := 0; floor < NFloors; floor++ {
+		if payload.ElevatorList[myID].CabRequests[floor] {
+			updatedLights[floor][BCab] = OrderAssigned
+		}
+	}
+	return updatedLights
 }
