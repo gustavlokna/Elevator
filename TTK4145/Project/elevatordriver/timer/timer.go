@@ -19,30 +19,29 @@ func Timer(
 	motorInactiveChan chan<- bool,
 ) {
 	var startDoor, startMotor bool
-	var motorTimeout time.Time
-	timeCounter := time.NewTimer(time.Hour)
-	timeCounter.Stop()
+	MotorTimer := time.NewTimer(time.Hour)
+	MotorTimer.Stop()
+	DoorTimer := time.NewTimer(time.Hour)
+	DoorTimer.Stop()
 
 	for {
 		select {
 		case startDoor = <-doorOpenChan:
-			timeCounter = time.NewTimer(3 * time.Second)
+			DoorTimer = time.NewTimer(3 * time.Second)
 
 		case startMotor = <-motorActiveChan:
-			motorTimeout = time.Now().Add(3 * time.Second)
+			MotorTimer = time.NewTimer(3 * time.Second)
 			
-		case <-timeCounter.C:
+		case <-DoorTimer.C:
 			if startDoor{
 				fmt.Println("Door timeout")
 				startDoor = false
 				doorClosedChan <- true
 			}
-					
-		default:
-			if startMotor && time.Now().After(motorTimeout) {
+		case <-MotorTimer.C:
+			if startMotor{
 				motorInactiveChan <- true
 			}
-			time.Sleep(3 * time.Millisecond)
 		}
 	}
 }
