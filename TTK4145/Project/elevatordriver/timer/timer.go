@@ -30,6 +30,7 @@ func Timer(
 			DoorTimer = time.NewTimer(3 * time.Second)
 
 		case startMotor = <-motorActiveChan:
+			fmt.Println("Motor timer started")
 			MotorTimer = time.NewTimer(3 * time.Second)
 			
 		case <-DoorTimer.C:
@@ -39,7 +40,13 @@ func Timer(
 				doorClosedChan <- true
 			}
 		case <-MotorTimer.C:
+			fmt.Println("Motor timeout")
 			if startMotor{
+				fmt.Println("Motor timeout")
+				fmt.Println("Motor timeout")
+				fmt.Println("Motor timeout")
+				fmt.Println("Motor timeout")
+
 				motorInactiveChan <- true
 			}
 		}

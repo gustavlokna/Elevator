@@ -2,8 +2,8 @@ package elevatordriver
 
 import (
 	. "Project/dataenums"
-	"Project/hwelevio"
 	"Project/elevatordriver/timer"
+	"Project/hwelevio"
 	"fmt"
 	"time"
 )
@@ -28,8 +28,8 @@ func ElevatorDriver(
 	drv_stop := make(chan bool)
 	doorClosedChan := make(chan bool, 1) // buffered channel
 	doorOpenChan := make(chan bool, 1)
-	motorActiveChan    := make(chan bool,10)
-	motorInactiveChan  := make(chan bool,10)
+	motorActiveChan := make(chan bool, 10)
+	motorInactiveChan := make(chan bool, 10)
 
 	go hwelevio.PollFloorSensor(drv_floors)
 	go hwelevio.PollObstructionSwitch(drv_obstr)
@@ -74,6 +74,7 @@ func ElevatorDriver(
 				doorOpenChan <- !obstruction
 			}
 		case <-motorInactiveChan:
+			fmt.Println("MOTOR INACTIVE")
 			if elevator.CurrentBehaviour == EBMoving {
 				elevator.ActiveSatus = false
 			}
@@ -95,6 +96,10 @@ func ElevatorDriver(
 				elevator.CurrentBehaviour = EBDoorOpen
 				motorActiveChan <- false
 				doorOpenChan <- true
+				payloadToLights <- PayloadFromDriver{
+					CurrentFloor: elevator.CurrentFloor,
+					DoorLight:    true,
+				}
 				continue
 
 			case elevator.Dirn == MDUp && elevator.Requests[elevator.CurrentFloor][BHallUp]:
@@ -102,6 +107,10 @@ func ElevatorDriver(
 				elevator.CurrentBehaviour = EBDoorOpen
 				motorActiveChan <- false
 				doorOpenChan <- true
+				payloadToLights <- PayloadFromDriver{
+					CurrentFloor: elevator.CurrentFloor,
+					DoorLight:    true,
+				}
 				continue
 
 			case elevator.Dirn == MDUp && requestsAbove(elevator):
@@ -111,6 +120,10 @@ func ElevatorDriver(
 				elevator.CurrentBehaviour = EBDoorOpen
 				motorActiveChan <- false
 				doorOpenChan <- true
+				payloadToLights <- PayloadFromDriver{
+					CurrentFloor: elevator.CurrentFloor,
+					DoorLight:    true,
+				}
 				continue
 
 			case elevator.Dirn == MDDown && elevator.Requests[elevator.CurrentFloor][BHallDown]:
@@ -118,6 +131,10 @@ func ElevatorDriver(
 				elevator.CurrentBehaviour = EBDoorOpen
 				motorActiveChan <- false
 				doorOpenChan <- true
+				payloadToLights <- PayloadFromDriver{
+					CurrentFloor: elevator.CurrentFloor,
+					DoorLight:    true,
+				}
 				continue
 
 			case elevator.Dirn == MDDown && requestsBelow(elevator):
@@ -127,11 +144,54 @@ func ElevatorDriver(
 				elevator.CurrentBehaviour = EBDoorOpen
 				motorActiveChan <- false
 				doorOpenChan <- true
-				continue 
+				payloadToLights <- PayloadFromDriver{
+					CurrentFloor: elevator.CurrentFloor,
+					DoorLight:    true,
+				}
+				continue
 			}
 		case elevator.Requests = <-newOrderChannel:
 			ElevatorPrint(elevator)
-			
+			fmt.Println("NEW ORDER RECEIVED")
+			fmt.Println("NEW ORDER RECEIVED")
+			fmt.Println("NEW ORDER RECEIVED")
+
+			switch elevator.CurrentBehaviour {
+			case EBIdle:
+				switch {
+				case elevator.Requests[elevator.CurrentFloor][BHallUp]:
+					elevator.CurrentBehaviour = EBDoorOpen
+					elevator.Dirn = MDUp
+					doorOpenChan <- true
+					payloadToLights <- PayloadFromDriver{CurrentFloor: elevator.CurrentFloor, DoorLight: true}
+					continue
+					// TODO CEHCK IF CONTINUE IS CORRECT
+
+				case elevator.Requests[elevator.CurrentFloor][BHallDown]:
+					elevator.CurrentBehaviour = EBDoorOpen
+					elevator.Dirn = MDDown
+					doorOpenChan <- true
+					payloadToLights <- PayloadFromDriver{CurrentFloor: elevator.CurrentFloor, DoorLight: true}
+					continue
+
+				case elevator.Requests[elevator.CurrentFloor][BCab]:
+					elevator.CurrentBehaviour = EBDoorOpen
+					doorOpenChan <- true
+					payloadToLights <- PayloadFromDriver{CurrentFloor: elevator.CurrentFloor, DoorLight: true}
+					continue
+
+				case requestsAbove(elevator) || requestsBelow(elevator):
+					elevator = ChooseDirection(elevator)
+					hwelevio.SetMotorDirection(elevator.Dirn)
+					motorActiveChan <- true
+				}
+			case EBDoorOpen:
+				continue
+
+			case EBMoving:
+				elevator = ChooseDirection(elevator)
+				hwelevio.SetMotorDirection(elevator.Dirn)
+			}
 
 		case <-doorClosedChan:
 			fmt.Println("DOR CLOSE")
@@ -178,6 +238,7 @@ func ElevatorDriver(
 
 			}
 			fmt.Print("PENIS")
+			// TODO CHECK
 			elevator.CurrentBehaviour = EBIdle
 			elevator = ChooseDirection(elevator)
 			//elevator.Dirn = MDStop
@@ -192,82 +253,79 @@ func ElevatorDriver(
 		default:
 			time.Sleep(10 * time.Millisecond)
 		}
+		/*
+			switch elevator.CurrentBehaviour {
+			case EBIdle:
+				elevator = ChooseDirection(elevator)
 
-		switch elevator.CurrentBehaviour {
-		case EBIdle:
-			elevator = ChooseDirection(elevator)
-
-		case EBMoving:
-			hwelevio.SetMotorDirection(elevator.Dirn)
-			/*
-			if timerActive && time.Now().After(motorTimeout) {
-				//elevator.ActiveSatus = false
-				//print("motor timeout")
-			}
-			if elevator.CurrentBehaviour == EBMoving && !timerActive {
-				motorTimeout = time.Now().Add(3 * time.Second)
-				timerActive = true
-			}
-			*/
-
-			// bolea is copied from Ø and if sentence can just be put in case elevator.CurrentFloor = <-drv_floors:
-			
-			if ShouldStop(elevator) && elevator.CurrentFloor != prevelevator.CurrentFloor {
+			case EBMoving:
+				hwelevio.SetMotorDirection(elevator.Dirn)
 				/*
-				fmt.Println("WHAT THE FUCk")
-				fmt.Println("WHAT THE FUCk")
-				fmt.Println("WHAT THE FUCk")
-				fmt.Println("WHAT THE FUCk")
-				elevator.ActiveSatus = true
-				timerActive = false
-				hwelevio.SetMotorDirection(MDStop)
-				// TODO TEST THIS
-				//elevator.Dirn = MDStop
-				elevator.CurrentBehaviour = EBDoorOpen
-				// send to lights boolean that doorlight shows
-				toggledoorLight = true
-				//print("SEND MSG TO LIGHS")
-				doorOpenChan <- true
-				payloadToLights <- PayloadFromDriver{
-					CurrentFloor: elevator.CurrentFloor,
-					DoorLight:    toggledoorLight,
-				}
-				
-				continue
-				*/
+					if timerActive && time.Now().After(motorTimeout) {
+						//elevator.ActiveSatus = false
+						//print("motor timeout")
+					}
+					if elevator.CurrentBehaviour == EBMoving && !timerActive {
+						motorTimeout = time.Now().Add(3 * time.Second)
+						timerActive = true
+					}
+		*/
+
+		// bolea is copied from Ø and if sentence can just be put in case elevator.CurrentFloor = <-drv_floors:
+
+		//if ShouldStop(elevator) && elevator.CurrentFloor != prevelevator.CurrentFloor {
+		/*
+			fmt.Println("WHAT THE FUCk")
+			fmt.Println("WHAT THE FUCk")
+			fmt.Println("WHAT THE FUCk")
+			fmt.Println("WHAT THE FUCk")
+			elevator.ActiveSatus = true
+			timerActive = false
+			hwelevio.SetMotorDirection(MDStop)
+			// TODO TEST THIS
+			//elevator.Dirn = MDStop
+			elevator.CurrentBehaviour = EBDoorOpen
+			// send to lights boolean that doorlight shows
+			toggledoorLight = true
+			//print("SEND MSG TO LIGHS")
+			doorOpenChan <- true
+			payloadToLights <- PayloadFromDriver{
+				CurrentFloor: elevator.CurrentFloor,
+				DoorLight:    toggledoorLight,
 			}
-			/*
-				case EBDoorOpen: // recive back from lights
-					if obstruction {
 
-						elevator.ActiveSatus = false
-						doorTimeout = time.Now().Add(3*time.Second)
-						//add state called obst ?
+			continue
+		*/
+
+		/*
+			case EBDoorOpen: // recive back from lights
+				if obstruction {
+
+					elevator.ActiveSatus = false
+					doorTimeout = time.Now().Add(3*time.Second)
+					//add state called obst ?
+
+				}
+				//This logic is copied from Ø
+				if !doorOpen{
+					fmt.Println("START TIMER")
+					doorOpen = true
+					doorTimeout = time.Now().Add(3*time.Second)
+					toggledoorLight = true
+					payloadToLights <- PayloadFromDriver{
+						CurrentFloor : elevator.CurrentFloor,
+						DoorLight : toggledoorLight,
+					}
+				}  else {
+					if time.Now().After(doorTimeout){
+						fmt.Println("DOOR CLOSED")
+						doorClosedChan <- true
+						fmt.Println("DOOR CLOSED")
+						elevator.ActiveSatus = true
 
 					}
-					//This logic is copied from Ø
-					if !doorOpen{
-						fmt.Println("START TIMER")
-						doorOpen = true
-						doorTimeout = time.Now().Add(3*time.Second)
-						toggledoorLight = true
-						payloadToLights <- PayloadFromDriver{
-							CurrentFloor : elevator.CurrentFloor,
-							DoorLight : toggledoorLight,
-						}
-					}  else {
-						if time.Now().After(doorTimeout){
-							fmt.Println("DOOR CLOSED")
-							doorClosedChan <- true
-							fmt.Println("DOOR CLOSED")
-							elevator.ActiveSatus = true
-
-						}
-					}
-			*/
-			
-
-		}
+				}
+		*/
 
 		// Update and send PayloadFromElevator if elevator state changes
 		if prevelevator != elevator {
