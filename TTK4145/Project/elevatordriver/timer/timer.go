@@ -1,6 +1,7 @@
 package timer
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -18,7 +19,7 @@ func Timer(
 	motorInactiveChan chan<- bool,
 ) {
 	var startDoor, startMotor bool
-	var doorTimeout, motorTimeout time.Time	
+	var doorTimeout, motorTimeout time.Time
 	for {
 		select {
 		case startDoor = <-doorOpenChan:
@@ -26,14 +27,15 @@ func Timer(
 
 		case startMotor = <-motorActiveChan:
 			motorTimeout = time.Now().Add(3 * time.Second)
-			
+
 		default:
 			if startDoor && time.Now().After(doorTimeout) {
-				startDoor = false 
+				fmt.Println("Door timeout")
+				startDoor = false
 				doorClosedChan <- true
 			}
 			if startMotor && time.Now().After(motorTimeout) {
-				motorInactiveChan <- true 
+				motorInactiveChan <- true
 			}
 			time.Sleep(3 * time.Millisecond)
 		}

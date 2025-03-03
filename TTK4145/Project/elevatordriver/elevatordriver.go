@@ -39,6 +39,10 @@ func ElevatorDriver(
 		case elevator.CurrentFloor = <-floorChannel:
 			elevator.ActiveSatus = true
 			motorActiveChan <- true
+			fmt.Println("FLOOR SENSOR TRIGGERED")
+			fmt.Println("FLOOR SENSOR TRIGGERED")
+			fmt.Println("FLOOR SENSOR TRIGGERED")
+			fmt.Println("FLOOR SENSOR TRIGGERED")
 			switch {
 			case elevator.Requests[elevator.CurrentFloor][BCab]:
 				hwelevio.SetMotorDirection(MDStop)
@@ -95,6 +99,9 @@ func ElevatorDriver(
 				ElevatorPrint(elevator)
 				payloadToLights <- PayloadFromDriver{CurrentFloor: elevator.CurrentFloor, DoorLight: false}
 			}
+			fmt.Println("COOOOOCK")
+			fmt.Println("COOOOOCK")
+			fmt.Println("COOOOOCK")
 			payloadFromElevator <- PayloadFromElevator{ Elevator: elevator, CompletedOrders: clearedRequests}
 
 
