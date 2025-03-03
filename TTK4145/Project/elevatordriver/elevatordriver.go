@@ -176,7 +176,7 @@ func ElevatorDriver(
 			fmt.Println("NEW ORDER RECEIVED")
 			fmt.Println("NEW ORDER RECEIVED")		
 			ElevatorPrint(elevator)
-			if elevator.CurrentBehaviour == EBIdle {
+			if elevator.CurrentBehaviour == EBIdle && elevator.Dirn==MDStop{
 				switch {
 				case elevator.Requests[elevator.CurrentFloor][BHallUp]:
 					elevator.CurrentBehaviour = EBDoorOpen
