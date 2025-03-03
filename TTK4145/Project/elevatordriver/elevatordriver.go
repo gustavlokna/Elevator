@@ -3,6 +3,7 @@ package elevatordriver
 import (
 	. "Project/dataenums"
 	"Project/hwelevio"
+	"Project/elevatordriver/timer"
 	"fmt"
 	"time"
 )
@@ -22,19 +23,20 @@ func ElevatorDriver(
 		obstruction     = false
 		timerActive     = false
 		motorTimeout    time.Time
-		//orTimeout     time.Time
 		toggledoorLight = false
-		//doorOpen        = false
 	)
 	drv_floors := make(chan int)
 	drv_obstr := make(chan bool)
 	drv_stop := make(chan bool)
 	doorClosedChan := make(chan bool, 1) // buffered channel
 	doorOpenChan := make(chan bool, 1)
+	motorActiveChan    := make(chan bool,10)
+	motorInactiveChan  := make(chan bool,10)
 
 	go hwelevio.PollFloorSensor(drv_floors)
 	go hwelevio.PollObstructionSwitch(drv_obstr)
 	go hwelevio.PollStopButton(drv_stop)
+	go timer.Timer(doorOpenChan, motorActiveChan, doorClosedChan, motorInactiveChan)
 
 	fmt.Println("HALLO")
 
@@ -87,6 +89,12 @@ func ElevatorDriver(
 
 		case <-doorClosedChan:
 			fmt.Println("DOR CLOSE")
+			
+			if obstruction {
+				elevator.ActiveSatus = !obstruction
+				doorOpenChan <- true
+				continue
+			}
 
 			switch {
 			case elevator.Dirn == MDUp && elevator.Requests[elevator.CurrentFloor][BHallUp]:
@@ -133,7 +141,7 @@ func ElevatorDriver(
 				CurrentFloor: elevator.CurrentFloor,
 				DoorLight:    toggledoorLight,
 			}
-			doorOpen = false
+			//doorOpen = false
 			fmt.Print("SEND MSG TO LIGHS")
 
 		default:
@@ -167,7 +175,6 @@ func ElevatorDriver(
 				toggledoorLight = true
 				//print("SEND MSG TO LIGHS")
 				doorOpenChan <- true
-				doorTimeout = time.Now().Add(3 * time.Second)
 				payloadToLights <- PayloadFromDriver{
 					CurrentFloor: elevator.CurrentFloor,
 					DoorLight:    toggledoorLight,
