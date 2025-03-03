@@ -37,6 +37,7 @@ func ElevatorDriver(
 		var clearedRequests [NFloors][NButtons]bool //TODO: Remove
 		select {
 		case elevator.CurrentFloor = <-floorChannel:
+			payloadFromElevator <- PayloadFromElevator{Elevator: elevator, CompletedOrders: clearedRequests}
 			elevator.ActiveSatus = true
 			motorActiveChan <- true
 			fmt.Println("FLOOR SENSOR TRIGGERED")
@@ -145,7 +146,7 @@ func ElevatorDriver(
 			}
 
 			if elevator.Requests[elevator.CurrentFloor][BCab] {
-				clearedRequests[elevator.CurrentFloor][BCab] = true
+				//clearedRequests[elevator.CurrentFloor][BCab] = true
 				elevator.Requests[elevator.CurrentFloor][BCab] = false
 			}
 			ElevatorPrint(elevator)
@@ -208,7 +209,7 @@ func ElevatorDriver(
 				}
 			}
 			elevator = chooseDirection(elevator)
-			hwelevio.SetMotorDirection(elevator.Dirn)
+			//hwelevio.SetMotorDirection(elevator.Dirn)
 			fmt.Println("HELLO OUSIDE SWITCH")
 			fmt.Println("HELLO OUSIDE SWITCH")
 			fmt.Println("HELLO OUSIDE SWITCH")
