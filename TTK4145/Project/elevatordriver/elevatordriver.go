@@ -138,7 +138,8 @@ func ElevatorDriver(
 				//payloadFromElevator <- PayloadFromElevator{Elevator: elevator, CompletedOrders: clearedRequests}
 				continue
 			}
-
+			payloadToLights <- PayloadFromDriver{CurrentFloor: elevator.CurrentFloor, DoorLight: false}
+			
 			switch {
 			case elevator.Dirn == MDUp && elevator.Requests[elevator.CurrentFloor][BHallUp]:
 				fmt.Println("Case 1 ")
@@ -174,10 +175,11 @@ func ElevatorDriver(
 				clearedRequests[elevator.CurrentFloor][BHallUp] = true
 				elevator.Requests[elevator.CurrentFloor][BHallUp] = false
 				payloadFromElevator <- PayloadFromElevator{Elevator: elevator, CompletedOrders: clearedRequests}
+				
 			}
 
 			if elevator.Requests[elevator.CurrentFloor][BCab] {
-				//clearedRequests[elevator.CurrentFloor][BCab] = true
+				clearedRequests[elevator.CurrentFloor][BCab] = true
 				elevator.Requests[elevator.CurrentFloor][BCab] = false
 			}
 			ElevatorPrint(elevator)
@@ -186,7 +188,7 @@ func ElevatorDriver(
 			//hwelevio.SetMotorDirection(elevator.Dirn)
 
 			//payloadFromElevator <- PayloadFromElevator{Elevator: elevator, CompletedOrders: clearedRequests}
-			payloadToLights <- PayloadFromDriver{CurrentFloor: elevator.CurrentFloor, DoorLight: false}
+			
 
 		case <-motorInactiveChan:
 			if elevator.CurrentBehaviour == EBMoving {
@@ -250,7 +252,7 @@ func ElevatorDriver(
 				payloadFromElevator <- PayloadFromElevator{Elevator: elevator, CompletedOrders: clearedRequests}
 				continue 
 			}
-			elevator = chooseDirection(elevator)
+			//elevator = chooseDirection(elevator)
 			//hwelevio.SetMotorDirection(elevator.Dirn)
 			fmt.Println("HELLO OUSIDE SWITCH")
 			fmt.Println("HELLO OUSIDE SWITCH")
