@@ -97,6 +97,7 @@ func ElevatorDriver(
 				elevator.CurrentBehaviour = EBDoorOpen
 				motorActiveChan <- false
 				doorOpenChan <- true
+				continue
 
 			case elevator.Dirn == MDUp && elevator.Requests[elevator.CurrentFloor][BHallUp]:
 				fmt.Println("UP REQUEST TRIGGERED")
@@ -105,6 +106,7 @@ func ElevatorDriver(
 				elevator.CurrentBehaviour = EBDoorOpen
 				motorActiveChan <- false
 				doorOpenChan <- true
+				continue
 
 			case elevator.Dirn == MDUp && requestsAbove(elevator):
 				fmt.Println("UP REQUEST ABOVE TRIGGERED")
@@ -117,6 +119,7 @@ func ElevatorDriver(
 				elevator.CurrentBehaviour = EBDoorOpen
 				motorActiveChan <- false
 				doorOpenChan <- true
+				continue
 
 			case elevator.Dirn == MDDown && elevator.Requests[elevator.CurrentFloor][BHallDown]:
 				fmt.Println("DOWN REQUEST TRIGGERED")
@@ -125,6 +128,7 @@ func ElevatorDriver(
 				elevator.CurrentBehaviour = EBDoorOpen
 				motorActiveChan <- false
 				doorOpenChan <- true
+				continue
 
 			case elevator.Dirn == MDDown && requestsBelow(elevator):
 				fmt.Println("DOWN REQUEST BELOW TRIGGERED")
@@ -137,6 +141,7 @@ func ElevatorDriver(
 				elevator.CurrentBehaviour = EBDoorOpen
 				motorActiveChan <- false
 				doorOpenChan <- true
+				continue 
 			}
 		case elevator.Requests = <-newOrderChannel:
 			ElevatorPrint(elevator)
@@ -222,6 +227,10 @@ func ElevatorDriver(
 			
 			if ShouldStop(elevator) && elevator.CurrentFloor != prevelevator.CurrentFloor {
 				/*
+				fmt.Println("WHAT THE FUCk")
+				fmt.Println("WHAT THE FUCk")
+				fmt.Println("WHAT THE FUCk")
+				fmt.Println("WHAT THE FUCk")
 				elevator.ActiveSatus = true
 				timerActive = false
 				hwelevio.SetMotorDirection(MDStop)
@@ -236,8 +245,9 @@ func ElevatorDriver(
 					CurrentFloor: elevator.CurrentFloor,
 					DoorLight:    toggledoorLight,
 				}
-				*/
+				
 				continue
+				*/
 			}
 			/*
 				case EBDoorOpen: // recive back from lights
