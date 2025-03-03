@@ -86,12 +86,67 @@ func ElevatorDriver(
 
 		case elevator.Requests = <-newOrderChannel:
 			ElevatorPrint(elevator)
+			elevator.ActiveSatus = true
+			motorActiveChan <- true
+			fmt.Println("FLOOR SENSOR TRIGGERED")
+			fmt.Println("FLOOR SENSOR TRIGGERED")
+			fmt.Println("FLOOR SENSOR TRIGGERED")
+			fmt.Println("FLOOR SENSOR TRIGGERED")
+			switch {
+			case elevator.Requests[elevator.CurrentFloor][BCab]:
+				fmt.Println("CAB REQUEST TRIGGERED")
+				fmt.Println("CAB REQUEST TRIGGERED")
+				hwelevio.SetMotorDirection(MDStop)
+				elevator.CurrentBehaviour = EBDoorOpen
+				motorActiveChan <- false
+				doorOpenChan <- true
+
+			case elevator.Dirn == MDUp && elevator.Requests[elevator.CurrentFloor][BHallUp]:
+				fmt.Println("UP REQUEST TRIGGERED")
+				fmt.Println("UP REQUEST TRIGGERED")
+				hwelevio.SetMotorDirection(MDStop)
+				elevator.CurrentBehaviour = EBDoorOpen
+				motorActiveChan <- false
+				doorOpenChan <- true
+
+			case elevator.Dirn == MDUp && requestsAbove(elevator):
+				fmt.Println("UP REQUEST ABOVE TRIGGERED")
+				fmt.Println("UP REQUEST ABOVE TRIGGERED")
+
+			case elevator.Dirn == MDUp && elevator.Requests[elevator.CurrentFloor][BHallDown]:
+				fmt.Println("MDUP DOWN REQUEST TRIGGERED")
+				fmt.Println("MDUP DOWN REQUEST TRIGGERED")
+				hwelevio.SetMotorDirection(MDStop)
+				elevator.CurrentBehaviour = EBDoorOpen
+				motorActiveChan <- false
+				doorOpenChan <- true
+
+			case elevator.Dirn == MDDown && elevator.Requests[elevator.CurrentFloor][BHallDown]:
+				fmt.Println("DOWN REQUEST TRIGGERED")
+				fmt.Println("DOWN REQUEST TRIGGERED")
+				hwelevio.SetMotorDirection(MDStop)
+				elevator.CurrentBehaviour = EBDoorOpen
+				motorActiveChan <- false
+				doorOpenChan <- true
+
+			case elevator.Dirn == MDDown && requestsBelow(elevator):
+				fmt.Println("DOWN REQUEST BELOW TRIGGERED")
+				fmt.Println("DOWN REQUEST BELOW TRIGGERED")
+
+			case elevator.Dirn == MDDown && elevator.Requests[elevator.CurrentFloor][BHallUp]:
+				fmt.Println("DOWN REQUEST UP TRIGGERED")
+				fmt.Println("DOWN REQUEST UP TRIGGERED")
+				hwelevio.SetMotorDirection(MDStop)
+				elevator.CurrentBehaviour = EBDoorOpen
+				motorActiveChan <- false
+				doorOpenChan <- true
+				
 
 		case <-doorClosedChan:
 			fmt.Println("DOR CLOSE")
-			
+
+			elevator.ActiveSatus = !obstruction
 			if obstruction {
-				elevator.ActiveSatus = !obstruction
 				doorOpenChan <- true
 				continue
 			}
@@ -162,7 +217,7 @@ func ElevatorDriver(
 				motorTimeout = time.Now().Add(3 * time.Second)
 				timerActive = true
 			}
-
+			/*
 			// bolea is copied from Ø and if sentence can just be put in case elevator.CurrentFloor = <-drv_floors:
 			if ShouldStop(elevator) && elevator.CurrentFloor != prevelevator.CurrentFloor {
 				elevator.ActiveSatus = true
@@ -180,6 +235,7 @@ func ElevatorDriver(
 					DoorLight:    toggledoorLight,
 				}
 				continue
+			*/
 			}
 			/*
 				case EBDoorOpen: // recive back from lights
