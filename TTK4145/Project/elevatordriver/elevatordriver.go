@@ -128,6 +128,8 @@ func ElevatorDriver(
 			//payloadFromElevator <- PayloadFromElevator{Elevator: elevator, CompletedOrders: clearedRequests}
 
 		case <-doorClosedChan:
+			fmt.Println("DOR CLOSE")
+			ElevatorPrint(elevator)
 
 			if obstruction {
 				elevator.ActiveSatus = !obstruction
@@ -243,6 +245,10 @@ func ElevatorDriver(
 					ElevatorPrint(elevator)
 					payloadFromElevator <- PayloadFromElevator{Elevator: elevator, CompletedOrders: clearedRequests}
 				}
+			}
+			if elevator.CurrentBehaviour == EBDoorOpen{
+				payloadFromElevator <- PayloadFromElevator{Elevator: elevator, CompletedOrders: clearedRequests}
+				continue 
 			}
 			elevator = chooseDirection(elevator)
 			//hwelevio.SetMotorDirection(elevator.Dirn)
