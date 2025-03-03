@@ -155,7 +155,7 @@ func ElevatorDriver(
 			fmt.Println("NEW ORDER RECEIVED")
 			fmt.Println("NEW ORDER RECEIVED")
 			fmt.Println("NEW ORDER RECEIVED")
-
+			
 			switch elevator.CurrentBehaviour {
 			case EBIdle:
 				switch {
@@ -184,6 +184,9 @@ func ElevatorDriver(
 					elevator = ChooseDirection(elevator)
 					hwelevio.SetMotorDirection(elevator.Dirn)
 					motorActiveChan <- true
+				case !requestsHere(elevator):
+					doorOpenChan <- false
+					payloadToLights <- PayloadFromDriver{CurrentFloor: elevator.CurrentFloor, DoorLight: false}
 				}
 			case EBDoorOpen:
 				switch {
@@ -191,11 +194,13 @@ func ElevatorDriver(
 					doorOpenChan <- false
 					payloadToLights <- PayloadFromDriver{CurrentFloor: elevator.CurrentFloor, DoorLight: false}
 				}
-
+			/*
 			case EBMoving:
 				elevator = ChooseDirection(elevator)
 				hwelevio.SetMotorDirection(elevator.Dirn)
 			}
+			*/
+			
 
 		case <-doorClosedChan:
 			fmt.Println("DOR CLOSE")
@@ -257,13 +262,14 @@ func ElevatorDriver(
 		default:
 			time.Sleep(10 * time.Millisecond)
 		}
-		/*
+		
 			switch elevator.CurrentBehaviour {
 			case EBIdle:
 				elevator = ChooseDirection(elevator)
 
 			case EBMoving:
 				hwelevio.SetMotorDirection(elevator.Dirn)
+			}
 				/*
 					if timerActive && time.Now().After(motorTimeout) {
 						//elevator.ActiveSatus = false
