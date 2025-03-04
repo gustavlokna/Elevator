@@ -34,6 +34,7 @@ func ElevatorDriver(
 	payloadToLights <- PayloadFromDriver{CurrentFloor: elevator.CurrentFloor, DoorLight: false}
 
 	for {
+		// clearedRequests = [NFloors][NButtons]bool{}
 		select {
 		case elevator.CurrentFloor = <-floorChannel:
 			elevator.ActiveSatus = true
@@ -152,7 +153,6 @@ func ElevatorDriver(
 			//hwelevio.SetMotorDirection(elevator.Dirn)
 
 			payloadFromElevator <- PayloadFromElevator{Elevator: elevator, CompletedOrders: clearedRequests}
-			clearedRequests = [NFloors][NButtons]bool{}
 			payloadToLights <- PayloadFromDriver{CurrentFloor: elevator.CurrentFloor, DoorLight: false}
 
 		case <-motorInactiveChan:
@@ -222,18 +222,6 @@ func ElevatorDriver(
 			// 	}
 			// payloadFromElevator <- PayloadFromElevator{ Elevator: elevator, CompletedOrders: clearedRequests}
 
-		default:
-		
 		}
-			switch elevator.CurrentBehaviour {
-			case EBIdle:
-				fmt.Println("IM IN IDLE")
-				elevator = chooseDirection(elevator)
-
-			case EBMoving:
-				fmt.Println("IM IN MOVING")
-				hwelevio.SetMotorDirection(elevator.Dirn)
-			}
 	}
 }
-
