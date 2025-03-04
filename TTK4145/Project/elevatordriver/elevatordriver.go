@@ -211,6 +211,13 @@ func ElevatorDriver(
 			// fmt.Println("HELLO OUSIDE SWITCH")
 			// fmt.Println("HELLO OUSIDE SWITCH")
 			// fmt.Println("HELLO OUSIDE SWITCH")
+			switch elevator.CurrentBehaviour {
+				case EBIdle:
+					elevator = chooseDirection(elevator)
+
+				case EBMoving:
+					hwelevio.SetMotorDirection(elevator.Dirn)
+				}
 			payloadFromElevator <- PayloadFromElevator{ Elevator: elevator, CompletedOrders: clearedRequests}
 
 		}
