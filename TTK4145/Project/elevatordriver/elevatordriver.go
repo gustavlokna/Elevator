@@ -5,7 +5,6 @@ import (
 	"Project/elevatordriver/timer"
 	"Project/hwelevio"
 	"fmt"
-	"time"
 )
 
 func ElevatorDriver(
@@ -35,7 +34,6 @@ func ElevatorDriver(
 	payloadToLights <- PayloadFromDriver{CurrentFloor: elevator.CurrentFloor, DoorLight: false}
 
 	for {
-		var clearedRequests [NFloors][NButtons]bool //TODO: Remove
 		select {
 		case elevator.CurrentFloor = <-floorChannel:
 			elevator.ActiveSatus = true
@@ -154,6 +152,7 @@ func ElevatorDriver(
 			//hwelevio.SetMotorDirection(elevator.Dirn)
 
 			payloadFromElevator <- PayloadFromElevator{Elevator: elevator, CompletedOrders: clearedRequests}
+			clearedRequests = [NFloors][NButtons]bool{}
 			payloadToLights <- PayloadFromDriver{CurrentFloor: elevator.CurrentFloor, DoorLight: false}
 
 		case <-motorInactiveChan:
@@ -170,7 +169,12 @@ func ElevatorDriver(
 			payloadFromElevator <- PayloadFromElevator{Elevator: elevator, CompletedOrders: clearedRequests}
 
 		case elevator.Requests = <-newOrderChannel:
-			// fmt.Println("NEW ORDER RECEIVED")
+			ElevatorPrint(elevator)
+			// if elevator.CurrentBehaviour == EBIdle {
+			// 		elevator = chooseDirection(elevator)
+			// 		hwelevio.SetMotorDirection(elevator.Dirn)
+			// }
+			// // fmt.Println("NEW ORDER RECEIVED")
 			// fmt.Println("NEW ORDER RECEIVED")
 			// fmt.Println("NEW ORDER RECEIVED")
 			// ElevatorPrint(elevator)
@@ -219,16 +223,17 @@ func ElevatorDriver(
 			// payloadFromElevator <- PayloadFromElevator{ Elevator: elevator, CompletedOrders: clearedRequests}
 
 		default:
-			time.Sleep(10 * time.Millisecond)
+		
 		}
+			switch elevator.CurrentBehaviour {
+			case EBIdle:
+				fmt.Println("IM IN IDLE")
+				elevator = chooseDirection(elevator)
 
-		switch elevator.CurrentBehaviour {
-		case EBIdle:
-			elevator = chooseDirection(elevator)
-
-		case EBMoving:
-			hwelevio.SetMotorDirection(elevator.Dirn)
-		}
-
+			case EBMoving:
+				fmt.Println("IM IN MOVING")
+				hwelevio.SetMotorDirection(elevator.Dirn)
+			}
 	}
 }
+
