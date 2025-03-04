@@ -49,6 +49,7 @@ func ElevatorDriver(
 				elevator.CurrentBehaviour = EBDoorOpen
 				motorActiveChan <- false
 				payloadToLights <- PayloadFromDriver{CurrentFloor: elevator.CurrentFloor, DoorLight: true}
+				payloadFromElevator <- PayloadFromElevator{ Elevator: elevator, CompletedOrders: clearedRequests}
 				doorOpenChan <- true
 
 			case elevator.Dirn == MDUp && elevator.Requests[elevator.CurrentFloor][BHallUp]:
@@ -56,6 +57,7 @@ func ElevatorDriver(
 				elevator.CurrentBehaviour = EBDoorOpen
 				motorActiveChan <- false
 				payloadToLights <- PayloadFromDriver{CurrentFloor: elevator.CurrentFloor, DoorLight: true}
+				payloadFromElevator <- PayloadFromElevator{ Elevator: elevator, CompletedOrders: clearedRequests}
 				doorOpenChan <- true
 
 			case elevator.Dirn == MDUp && requestsAbove(elevator):
@@ -66,6 +68,7 @@ func ElevatorDriver(
 				elevator.CurrentBehaviour = EBDoorOpen
 				motorActiveChan <- false
 				payloadToLights <- PayloadFromDriver{CurrentFloor: elevator.CurrentFloor, DoorLight: true}
+				payloadFromElevator <- PayloadFromElevator{ Elevator: elevator, CompletedOrders: clearedRequests}
 				doorOpenChan <- true
 
 			case elevator.Dirn == MDDown && elevator.Requests[elevator.CurrentFloor][BHallDown]:
@@ -73,6 +76,7 @@ func ElevatorDriver(
 				elevator.CurrentBehaviour = EBDoorOpen
 				motorActiveChan <- false
 				payloadToLights <- PayloadFromDriver{CurrentFloor: elevator.CurrentFloor, DoorLight: true}
+				payloadFromElevator <- PayloadFromElevator{ Elevator: elevator, CompletedOrders: clearedRequests}
 				doorOpenChan <- true
 
 			case elevator.Dirn == MDDown && requestsBelow(elevator):
@@ -82,26 +86,18 @@ func ElevatorDriver(
 				hwelevio.SetMotorDirection(MDStop)
 				elevator.CurrentBehaviour = EBDoorOpen
 				payloadToLights <- PayloadFromDriver{CurrentFloor: elevator.CurrentFloor, DoorLight: true}
+				payloadFromElevator <- PayloadFromElevator{ Elevator: elevator, CompletedOrders: clearedRequests}
 				motorActiveChan <- false
 				doorOpenChan <- true
 
 			default:
-				fmt.Println("PENIS ")
-				fmt.Println("PENIS ")
-				fmt.Println("PENIS ")
-				fmt.Println("PENIS ")
-				fmt.Println("PENIS ")
-				fmt.Println("PENIS ")
-				fmt.Println("PENIS ")
 				ElevatorPrint(elevator)
 				elevator = chooseDirection(elevator)
 				hwelevio.SetMotorDirection(elevator.Dirn)
 				ElevatorPrint(elevator)
 				payloadToLights <- PayloadFromDriver{CurrentFloor: elevator.CurrentFloor, DoorLight: false}
+				payloadFromElevator <- PayloadFromElevator{ Elevator: elevator, CompletedOrders: clearedRequests}
 			}
-			fmt.Println("COOOOOCK")
-			fmt.Println("COOOOOCK")
-			fmt.Println("COOOOOCK")
 			payloadFromElevator <- PayloadFromElevator{ Elevator: elevator, CompletedOrders: clearedRequests}
 
 
@@ -152,7 +148,7 @@ func ElevatorDriver(
 			ElevatorPrint(elevator)
 			elevator = chooseDirection(elevator)
 			ElevatorPrint(elevator)
-			//hwelevio.SetMotorDirection(elevator.Dirn)
+			hwelevio.SetMotorDirection(elevator.Dirn)
 
 			payloadFromElevator <- PayloadFromElevator{ Elevator: elevator, CompletedOrders: clearedRequests}
 			payloadToLights <- PayloadFromDriver{CurrentFloor: elevator.CurrentFloor, DoorLight: false}
