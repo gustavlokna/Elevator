@@ -26,7 +26,7 @@ func Timer(
 			doorTimeout = time.Now().Add(3 * time.Second)
 
 		case startMotor = <-motorActiveChan:
-			motorTimeout = time.Now().Add(3 * time.Second)
+			motorTimeout = time.Now().Add(10 * time.Second)
 
 		default:
 			if startDoor && time.Now().After(doorTimeout) {
