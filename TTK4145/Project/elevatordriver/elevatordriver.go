@@ -15,10 +15,10 @@ func ElevatorDriver(
 	var (
 		floorChannel = make(chan int)
 		obstructionChannel = make(chan bool)
-		doorOpenChan = make(chan bool)
-		doorClosedChan = make(chan bool)
-		motorActiveChan = make(chan bool)
-		motorInactiveChan = make(chan bool)
+		doorOpenChan = make(chan bool, 1)
+		doorClosedChan = make(chan bool,1)
+		motorActiveChan = make(chan bool, 10)
+		motorInactiveChan = make(chan bool, 10)
 		clearedRequests = [NFloors][NButtons]bool{}
 		obstruction bool
 	)
@@ -122,7 +122,7 @@ func ElevatorDriver(
 			
 			case elevator.Dirn == MDUp  && elevator.Requests[elevator.CurrentFloor][BCab] && requestsAbove(elevator):
 				fmt.Println("Case 2 ")
-				//do nothing
+				continue
 			
 			case elevator.Dirn == MDUp && elevator.Requests[elevator.CurrentFloor][BHallDown]:
 				fmt.Println("Case 3 ")
@@ -137,7 +137,7 @@ func ElevatorDriver(
 				
 			case elevator.Dirn == MDDown  && elevator.Requests[elevator.CurrentFloor][BCab]  && requestsBelow(elevator):
 				fmt.Println("Case 5 ")
-				//do nothing
+				continue
 
 			case elevator.Dirn == MDDown && elevator.Requests[elevator.CurrentFloor][BHallUp]:
 				fmt.Println("Case 6 ")
@@ -172,45 +172,45 @@ func ElevatorDriver(
 
 
 		case elevator.Requests = <-newOrderChannel:
-			fmt.Println("NEW ORDER RECEIVED")
-			fmt.Println("NEW ORDER RECEIVED")
-			fmt.Println("NEW ORDER RECEIVED")		
-			ElevatorPrint(elevator)
-			if elevator.CurrentBehaviour == EBIdle {
-				switch {
-				case elevator.Requests[elevator.CurrentFloor][BHallUp]:
-					elevator.CurrentBehaviour = EBDoorOpen
-					elevator.Dirn = MDUp
-					doorOpenChan <- true
-					payloadToLights <- PayloadFromDriver{CurrentFloor: elevator.CurrentFloor, DoorLight: true}
+			// fmt.Println("NEW ORDER RECEIVED")
+			// fmt.Println("NEW ORDER RECEIVED")
+			// fmt.Println("NEW ORDER RECEIVED")		
+			// ElevatorPrint(elevator)
+			// if elevator.CurrentBehaviour == EBIdle {
+			// 	switch {
+			// 	case elevator.Requests[elevator.CurrentFloor][BHallUp]:
+			// 		elevator.CurrentBehaviour = EBDoorOpen
+			// 		elevator.Dirn = MDUp
+			// 		doorOpenChan <- true
+			// 		payloadToLights <- PayloadFromDriver{CurrentFloor: elevator.CurrentFloor, DoorLight: true}
 
-				case elevator.Requests[elevator.CurrentFloor][BHallDown]:
-					elevator.CurrentBehaviour = EBDoorOpen
-					elevator.Dirn = MDDown
-					doorOpenChan <- true
-					payloadToLights <- PayloadFromDriver{CurrentFloor: elevator.CurrentFloor, DoorLight: true}
+			// 	case elevator.Requests[elevator.CurrentFloor][BHallDown]:
+			// 		elevator.CurrentBehaviour = EBDoorOpen
+			// 		elevator.Dirn = MDDown
+			// 		doorOpenChan <- true
+			// 		payloadToLights <- PayloadFromDriver{CurrentFloor: elevator.CurrentFloor, DoorLight: true}
 
-				case elevator.Requests[elevator.CurrentFloor][BCab]:
-					elevator.CurrentBehaviour = EBDoorOpen
-					doorOpenChan <- true
-					payloadToLights <- PayloadFromDriver{CurrentFloor: elevator.CurrentFloor, DoorLight: true}
+			// 	case elevator.Requests[elevator.CurrentFloor][BCab]:
+			// 		elevator.CurrentBehaviour = EBDoorOpen
+			// 		doorOpenChan <- true
+			// 		payloadToLights <- PayloadFromDriver{CurrentFloor: elevator.CurrentFloor, DoorLight: true}
 
-				default:
-					motorActiveChan <- true
-					fmt.Println("WE ARE HERE ")
-					fmt.Println("WE ARE HERE ")
-					fmt.Println("WE ARE HERE ")
-					fmt.Println("WE ARE HERE ")
-					ElevatorPrint(elevator)
-					elevator = chooseDirection(elevator)
-					hwelevio.SetMotorDirection(elevator.Dirn)
-					ElevatorPrint(elevator)
-				}
-			}
-			fmt.Println("HELLO OUSIDE SWITCH")
-			fmt.Println("HELLO OUSIDE SWITCH")
-			fmt.Println("HELLO OUSIDE SWITCH")
-			fmt.Println("HELLO OUSIDE SWITCH")
+			// 	default:
+			// 		motorActiveChan <- true
+			// 		fmt.Println("WE ARE HERE ")
+			// 		fmt.Println("WE ARE HERE ")
+			// 		fmt.Println("WE ARE HERE ")
+			// 		fmt.Println("WE ARE HERE ")
+			// 		ElevatorPrint(elevator)
+			// 		elevator = chooseDirection(elevator)
+			// 		hwelevio.SetMotorDirection(elevator.Dirn)
+			// 		ElevatorPrint(elevator)
+			// 	}
+			// }
+			// fmt.Println("HELLO OUSIDE SWITCH")
+			// fmt.Println("HELLO OUSIDE SWITCH")
+			// fmt.Println("HELLO OUSIDE SWITCH")
+			// fmt.Println("HELLO OUSIDE SWITCH")
 			payloadFromElevator <- PayloadFromElevator{ Elevator: elevator, CompletedOrders: clearedRequests}
 
 		}
