@@ -98,10 +98,18 @@ func ElevatorDriver(
 			fmt.Println("CLOSE DOOR")
 			if obstruction {
 				elevator.ActiveSatus = !obstruction
+				fmt.Println(!obstruction)
 				doorOpenChan <- true
 				payloadFromElevator <- PayloadFromElevator{Elevator: elevator, CompletedOrders: clearedRequests}
 				continue
 			}
+			fmt.Println("WE ARE CLEARING AN ORDER ")
+			fmt.Println("WE ARE CLEARING AN ORDER ")
+			fmt.Println("WE ARE CLEARING AN ORDER ")
+			fmt.Println("WE ARE CLEARING AN ORDER ")
+			fmt.Println("WE ARE CLEARING AN ORDER ")
+			fmt.Println("WE ARE CLEARING AN ORDER ")
+			fmt.Println("WE ARE CLEARING AN ORDER ")
 
 			switch {
 			case elevator.Dirn == MDUp && elevator.Requests[elevator.CurrentFloor][BHallUp]:
