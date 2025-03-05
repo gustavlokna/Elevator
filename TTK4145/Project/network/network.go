@@ -3,11 +3,23 @@ package network
 import (
 	. "Project/dataenums"
 	"Project/network/broadcast"
+	"encoding/json"
 	"fmt"
 	"reflect"
 	"strconv"
+	"sync"
 	"time"
+
+	//"github.com/google/go-cmp/cmp"
+	"github.com/cespare/xxhash/v2"
 )
+
+func hashStruct(v interface{}) uint64 {
+	b, _ := json.Marshal(v) // Convert struct to JSON
+	return xxhash.Sum64(b)  // Compute fast hash
+}
+
+var mu sync.Mutex
 
 // TODO MOVE DATA ENUMS ?
 const messagePort int = 1338
@@ -34,9 +46,11 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 		online        bool
 		init          bool
 		proession     bool
+		
 	)
-
+	oldCabRequests := make([]bool, len(elevatorList[nodeIDInt].CabRequests))
 	for {
+		
 		select {
 		case reg := <-nodeRegistryChannel:
 			// TODO THIS reg/ or it can be a double variable CAN ALSO CONTAIN THE ONLIE STATUS :)
@@ -67,16 +81,15 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 			senderId, _ := strconv.Atoi(msg.SenderId)
 			ackMap[senderId] = reflect.DeepEqual(elevatorList, msg.ElevatorList) && reflect.DeepEqual(hallOrderList, msg.HallOrderList)
 			// TODO THIS CAN BE A FUNC
-			
+
 			if !reflect.DeepEqual(hallOrderList, msg.HallOrderList) || !reflect.DeepEqual(aliveList, msg.AliveList) {
 				proession = true
 			}
 			
 			if !reflect.DeepEqual(elevatorList[senderId].CabRequests, msg.ElevatorList[senderId].CabRequests) {
-				proession =  true
+				proession = true
 			}
-		
-			
+
 			if !init {
 				elevatorList[nodeIDInt] = msg.ElevatorList[nodeIDInt]
 				init = true
@@ -97,7 +110,7 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 					break
 				}
 			}
-			if allAcknowledged  && proession {
+			if allAcknowledged && proession {
 				for i := 0; i < NUM_ELEVATORS; i++ {
 					if i != nodeIDInt {
 						ackMap[i] = false
@@ -113,14 +126,18 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 			}
 
 		case payload := <-messagefromOrderAssigner:
-			if !reflect.DeepEqual(elevatorList[nodeIDInt].CabRequests,payload.States[nodeID].CabRequests) {
-				proession = true 
-			}
 			hallOrderList[nodeIDInt] = payload.HallRequests
-			elevatorList[nodeIDInt] = payload.States[nodeID]
 			aliveList[nodeIDInt] = payload.ActiveSatus
+			elevatorList[nodeIDInt] = payload.States[nodeID]
 
-		case <-time.After(10 * time.Millisecond):
+		case <-time.After(10 * time.Millisecond):		
+			
+			if !reflect.DeepEqual(oldCabRequests, elevatorList[nodeIDInt].CabRequests){
+				copy(oldCabRequests, elevatorList[nodeIDInt].CabRequests)
+				proession = true
+				fmt.Println("HELLO")
+			}
+
 			broadcastTransmissionChannel <- Message{
 				SenderId:      nodeID,
 				ElevatorList:  elevatorList,

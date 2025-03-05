@@ -2,7 +2,8 @@ package network
 
 import (
 	. "Project/dataenums"
-    "fmt"
+	"fmt"
+	"sync"
 )
 
 func resetHallCalls() [NFloors][NButtons]ButtonState {
@@ -67,5 +68,27 @@ func printElevatorList(elevatorList [NUM_ELEVATORS]HRAElevState) {
 		fmt.Printf("    Floor: %d\n", state.Floor)
 		fmt.Printf("    Direction: %s\n", state.Direction)
 		fmt.Printf("    Cab Requests: %v\n", state.CabRequests)
+	}
+}
+
+var printLock sync.Mutex
+
+func diffByOne(a, b []bool) bool {
+	d := 0
+	for i := range a {
+		if a[i] != b[i] {
+			d++
+		}
+	}
+	return d == 1
+}
+
+func printLists(list1, list2 []bool) {
+	printLock.Lock()
+	defer printLock.Unlock()
+
+	fmt.Println("Index\tList1\tList2")
+	for i := 0; i < len(list1); i++ {
+		fmt.Printf("%d\t%t\t%t\n", i, list1[i], list2[i])
 	}
 }
