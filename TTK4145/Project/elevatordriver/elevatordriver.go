@@ -59,6 +59,7 @@ func ElevatorDriver(
 				payloadToLights <- PayloadFromDriver{CurrentFloor: elevator.CurrentFloor, DoorLight: true}
 				payloadFromElevator <- PayloadFromElevator{ Elevator: elevator, CompletedOrders: clearedRequests}
 				doorOpenChan <- true
+				ElevatorPrint(elevator)
 
 			case elevator.Dirn == MDUp && requestsAbove(elevator):
 				payloadToLights <- PayloadFromDriver{CurrentFloor: elevator.CurrentFloor, DoorLight: false}
@@ -70,6 +71,7 @@ func ElevatorDriver(
 				payloadToLights <- PayloadFromDriver{CurrentFloor: elevator.CurrentFloor, DoorLight: true}
 				payloadFromElevator <- PayloadFromElevator{ Elevator: elevator, CompletedOrders: clearedRequests}
 				doorOpenChan <- true
+				ElevatorPrint(elevator)
 
 			case elevator.Dirn == MDDown && elevator.Requests[elevator.CurrentFloor][BHallDown]:
 				hwelevio.SetMotorDirection(MDStop)
@@ -78,6 +80,7 @@ func ElevatorDriver(
 				payloadToLights <- PayloadFromDriver{CurrentFloor: elevator.CurrentFloor, DoorLight: true}
 				payloadFromElevator <- PayloadFromElevator{ Elevator: elevator, CompletedOrders: clearedRequests}
 				doorOpenChan <- true
+				ElevatorPrint(elevator)
 
 			case elevator.Dirn == MDDown && requestsBelow(elevator):
 				payloadToLights <- PayloadFromDriver{CurrentFloor: elevator.CurrentFloor, DoorLight: false}
@@ -89,6 +92,7 @@ func ElevatorDriver(
 				payloadFromElevator <- PayloadFromElevator{ Elevator: elevator, CompletedOrders: clearedRequests}
 				motorActiveChan <- false
 				doorOpenChan <- true
+				ElevatorPrint(elevator)
 
 			default:
 				ElevatorPrint(elevator)
@@ -145,9 +149,7 @@ func ElevatorDriver(
 				clearedRequests[elevator.CurrentFloor][BCab] = true
 				elevator.Requests[elevator.CurrentFloor][BCab] = false
 			}
-			ElevatorPrint(elevator)
 			elevator = chooseDirection(elevator)
-			ElevatorPrint(elevator)
 			hwelevio.SetMotorDirection(elevator.Dirn)
 
 			payloadFromElevator <- PayloadFromElevator{ Elevator: elevator, CompletedOrders: clearedRequests}
@@ -168,6 +170,7 @@ func ElevatorDriver(
 
 
 		case elevator.Requests = <-newOrderChannel:
+			ElevatorPrint(elevator)
 			fmt.Println("NEW ORDER RECEIVED")
 			fmt.Println("NEW ORDER RECEIVED")
 			fmt.Println("NEW ORDER RECEIVED")		
