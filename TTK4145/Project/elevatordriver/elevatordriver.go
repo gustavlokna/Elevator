@@ -45,6 +45,7 @@ func ElevatorDriver(
 			fmt.Println("FLOOR SENSOR TRIGGERED")
 			switch {
 			case elevator.Requests[elevator.CurrentFloor][BCab]:
+				fmt.Println("")
 				hwelevio.SetMotorDirection(MDStop)
 				elevator.CurrentBehaviour = EBDoorOpen
 				motorActiveChan <- false
@@ -87,11 +88,8 @@ func ElevatorDriver(
 				payloadToLights <- PayloadFromDriver{CurrentFloor: elevator.CurrentFloor, DoorLight: true}
 
 			default:
-				// TOOD REMOVE ?
-				ElevatorPrint(elevator)
 				elevator = chooseDirection(elevator)
 				hwelevio.SetMotorDirection(elevator.Dirn)
-				ElevatorPrint(elevator)
 				payloadToLights <- PayloadFromDriver{CurrentFloor: elevator.CurrentFloor, DoorLight: false}
 			}
 			payloadFromElevator <- PayloadFromElevator{Elevator: elevator, CompletedOrders: clearedRequests}
@@ -147,7 +145,18 @@ func ElevatorDriver(
 			payloadToLights <- PayloadFromDriver{CurrentFloor: elevator.CurrentFloor, DoorLight: false}
 
 		case <-motorInactiveChan:
+
 			if elevator.CurrentBehaviour == EBMoving {
+				fmt.Println("WE HAVE MOTOR INACTIVETY")
+				fmt.Println("WE HAVE MOTOR INACTIVETY")
+				fmt.Println("WE HAVE MOTOR INACTIVETY")
+				fmt.Println("WE HAVE MOTOR INACTIVETY")
+				fmt.Println("WE HAVE MOTOR INACTIVETY")
+				fmt.Println("WE HAVE MOTOR INACTIVETY")
+				fmt.Println("WE HAVE MOTOR INACTIVETY")
+				fmt.Println("WE HAVE MOTOR INACTIVETY")
+
+
 				elevator.ActiveSatus = false
 				payloadFromElevator <- PayloadFromElevator{Elevator: elevator, CompletedOrders: clearedRequests}
 			}
@@ -161,11 +170,10 @@ func ElevatorDriver(
 
 		case elevator.Requests = <-newOrderChannel:
 			ElevatorPrint(elevator)
-			ElevatorPrint(elevator)
 			switch elevator.CurrentBehaviour {
 			case EBIdle:
 				switch {
-				case elevator.Requests[elevator.CurrentFloor][BHallUp]:
+				case elevator.Requests[elevator.CurrentFloor][BHallUp]: // TODO ERROR HERE 
 					elevator.CurrentBehaviour = EBDoorOpen
 					elevator.Dirn = MDUp
 					doorOpenChan <- true
@@ -203,7 +211,6 @@ func ElevatorDriver(
 			case EBDoorOpen:
 				fmt.Println("NEW ORDERS IN DOOR OPEN")
 			}
-			ElevatorPrint(elevator)
 			payloadFromElevator <- PayloadFromElevator{Elevator: elevator, CompletedOrders: clearedRequests}
 		}
 	}

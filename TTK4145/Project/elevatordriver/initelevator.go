@@ -8,7 +8,7 @@ func initelevator() Elevator {
 	return Elevator{
 		CurrentFloor:     -1,
 		Dirn:             MDDown,
-		CurrentBehaviour: EBIdle,
+		CurrentBehaviour: EBMoving,
 		ActiveSatus:      true,
 		Config: ElevatorConfig{
 			ClearRequestVariant: ClearRequestVariantConfig,

@@ -11,11 +11,11 @@ func assignOrders(PayloadFromNetworkToAssigner PayloadFromNetworkToAssigner,
 	nodeID int) [NFloors][NButtons]bool {
 	var orderList [NFloors][NButtons]bool
 
+	for floor := 0; floor < NFloors; floor++ {
+		orderList[floor][BCab] = PayloadFromNetworkToAssigner.ElevatorList[nodeID].CabRequests[floor]
+	}
 	if !(PayloadFromNetworkToAssigner.AliveList[nodeID]) {
 		print("local elevator not alive")
-		for floor := 0; floor < NFloors; floor++ {
-			orderList[floor][BCab] = PayloadFromNetworkToAssigner.ElevatorList[nodeID].CabRequests[floor]
-		}
 		return orderList
 	}
 	hraInput := convertPayloadToHRAInput(PayloadFromNetworkToAssigner, nodeID)
