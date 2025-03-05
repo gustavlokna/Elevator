@@ -3,7 +3,7 @@ package elevatordriver
 import (
 	. "Project/dataenums"
 )
-// TODO DO W ENED THE CONFIG ? 
+
 func initelevator() Elevator {
 	return Elevator{
 		CurrentFloor:     -1,

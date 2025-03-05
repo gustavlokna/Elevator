@@ -12,7 +12,7 @@ import (
 )
 
 const bufferSize = 4 * 1024
-
+/*
 func Sender(port int, chans ...interface{}) {
 	checkArgs(chans...)
 	typeNames := make([]string, len(chans))
@@ -45,7 +45,85 @@ func Sender(port int, chans ...interface{}) {
 
 	}
 }
+*/
+func Sender(port int, msgCh <-chan Message) {
+	conn := conn.DialBroadcastUDP(port)
+	addr, _ := net.ResolveUDPAddr("udp4", fmt.Sprintf("255.255.255.255:%d", port))
 
+	for msg := range msgCh {
+		jsonBytes, _ := json.Marshal(msg)
+		if len(jsonBytes) > bufferSize {
+			panic("Packet too large.")
+		}
+		conn.WriteTo(jsonBytes, addr)
+	}
+}
+
+func Receiver(port int, myID string, messageCh chan<- Message, registryCh chan<- NetworkNodeRegistry) {
+	const heartbeatInterval = 150 * time.Millisecond
+	const heartbeatTimeout  = 3000 * time.Millisecond
+
+	lastSeen := make(map[string]time.Time)
+	reportedNew := make(map[string]bool)
+	var buf [bufferSize]byte
+
+	conn := conn.DialBroadcastUDP(port)
+
+	for {
+		conn.SetReadDeadline(time.Now().Add(heartbeatInterval))
+		n, _, err := conn.ReadFrom(buf[:])
+		if err != nil {
+			if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
+				// just heartbeat, carry on
+			} else {
+				fmt.Println("Receiver error:", err)
+			}
+		} else {
+			var msg Message
+			if err := json.Unmarshal(buf[:n], &msg); err != nil {
+				fmt.Println("Failed to unmarshal Message:", err)
+			} else {
+				lastSeen[msg.SenderId] = time.Now()
+				if _, exists := reportedNew[msg.SenderId]; !exists {
+					reportedNew[msg.SenderId] = false
+				}
+				if msg.SenderId != myID {
+					messageCh <- msg
+				}
+			}
+		}
+
+		// Heartbeat check
+		now := time.Now()
+		var lostNodes, activeNodes, newNodes []string
+		for id, t := range lastSeen {
+			if now.Sub(t) > heartbeatTimeout {
+				lostNodes = append(lostNodes, id)
+				delete(lastSeen, id)
+				delete(reportedNew, id)
+			} else {
+				activeNodes = append(activeNodes, id)
+			}
+		}
+		for _, id := range activeNodes {
+			if !reportedNew[id] {
+				newNodes = append(newNodes, id)
+				reportedNew[id] = true
+			}
+		}
+		if len(lostNodes) > 0 || len(newNodes) > 0 {
+			sort.Strings(activeNodes)
+			registryCh <- NetworkNodeRegistry{
+				Nodes: activeNodes,
+				New:   newNodes,
+				Lost:  lostNodes,
+			}
+		}
+	}
+}
+
+
+/*
 func Receiver(port int, myID string, messageCh chan<- Message, registryCh chan<- NetworkNodeRegistry) {
 	const heartbeatInterval = 150 * time.Millisecond // todo make const 
 	const heartbeatTimeout = 3000 * time.Millisecond
@@ -117,6 +195,7 @@ func Receiver(port int, myID string, messageCh chan<- Message, registryCh chan<-
 		
 	}
 }
+*/ 
 
 type typeTaggedJSON struct {
 	TypeId string
