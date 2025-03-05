@@ -29,7 +29,7 @@ func decideDirectionUp(elevator Elevator) DirnBehaviourPair {
 	case requestsAbove(elevator):
 		return DirnBehaviourPair{MDUp, EBMoving}
 	case requestsHere(elevator):
-		return DirnBehaviourPair{MDDown, EBIdle}
+		return DirnBehaviourPair{MDDown, EBIdle} // MDUp? 
 	case requestsBelow(elevator):
 		return DirnBehaviourPair{MDDown, EBMoving}
 	default:
@@ -42,7 +42,7 @@ func decideDirectionDown(elevator Elevator) DirnBehaviourPair {
 	case requestsBelow(elevator):
 		return DirnBehaviourPair{MDDown, EBMoving}
 	case requestsHere(elevator):
-		return DirnBehaviourPair{MDUp, EBIdle}
+		return DirnBehaviourPair{MDUp, EBIdle} // MDDown ? 
 	case requestsAbove(elevator):
 		return DirnBehaviourPair{MDUp, EBMoving}
 	default:

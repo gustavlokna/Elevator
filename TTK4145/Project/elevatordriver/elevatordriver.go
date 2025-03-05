@@ -108,6 +108,7 @@ func ElevatorDriver(
 			payloadFromElevator <- PayloadFromElevator{Elevator: elevator, CompletedOrders: clearedRequests}
 
 		case <-doorClosedChan:
+			fmt.Println("CLOSE DOOR")
 			if obstruction {
 				elevator.ActiveSatus = !obstruction
 				doorOpenChan <- true
@@ -181,18 +182,24 @@ func ElevatorDriver(
 					elevator.Dirn = MDUp
 					doorOpenChan <- true
 					payloadToLights <- PayloadFromDriver{CurrentFloor: elevator.CurrentFloor, DoorLight: true}
+
 				case elevator.Requests[elevator.CurrentFloor][BHallDown]:
 					elevator.CurrentBehaviour = EBDoorOpen
 					elevator.Dirn = MDDown
+					doorOpenChan <- true
 					payloadToLights <- PayloadFromDriver{CurrentFloor: elevator.CurrentFloor, DoorLight: true}
+
 				case elevator.Requests[elevator.CurrentFloor][BCab]:
 					elevator.CurrentBehaviour = EBDoorOpen
+					doorOpenChan <- true
 					payloadToLights <- PayloadFromDriver{CurrentFloor: elevator.CurrentFloor, DoorLight: true}
+
 				case requestsAbove(elevator):
 					motorActiveChan <- true
 					elevator.CurrentBehaviour = EBMoving
 					elevator.Dirn = MDUp
 					hwelevio.SetMotorDirection(elevator.Dirn)
+
 				case requestsBelow(elevator):
 					motorActiveChan <- true
 					elevator.CurrentBehaviour = EBMoving
@@ -201,9 +208,9 @@ func ElevatorDriver(
 					ElevatorPrint(elevator)
 				}
 			case EBMoving:
-
+				
 			case EBDoorOpen:
-
+				fmt.Println("NEW ORDERS IN DOOR OPEN")
 			}
 			payloadFromElevator <- PayloadFromElevator{Elevator: elevator, CompletedOrders: clearedRequests}
 		}
