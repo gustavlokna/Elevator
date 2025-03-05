@@ -6,6 +6,7 @@ import (
 	"Project/hwelevio"
 	"fmt"
 )
+ dhcweicsiaxsaxwe
 
 func ElevatorDriver(
 	newOrderChannel <-chan [NFloors][NButtons]bool,
@@ -182,13 +183,7 @@ func ElevatorDriver(
 
 				case elevator.Requests[elevator.CurrentFloor][BHallDown]:
 					elevator.CurrentBehaviour = EBDoorOpen
-					elevator.Dirn = MDDown
-					doorOpenChan <- true
-					payloadToLights <- PayloadFromDriver{CurrentFloor: elevator.CurrentFloor, DoorLight: true}
-
-				case elevator.Requests[elevator.CurrentFloor][BCab]:
-					elevator.CurrentBehaviour = EBDoorOpen
-					doorOpenChan <- true
+					elevator.Dirn = MDDown 
 					payloadToLights <- PayloadFromDriver{CurrentFloor: elevator.CurrentFloor, DoorLight: true}
 
 				default:
