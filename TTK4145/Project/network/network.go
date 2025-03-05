@@ -67,11 +67,16 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 			senderId, _ := strconv.Atoi(msg.SenderId)
 			ackMap[senderId] = reflect.DeepEqual(elevatorList, msg.ElevatorList) && reflect.DeepEqual(hallOrderList, msg.HallOrderList)
 			// TODO THIS CAN BE A FUNC
-
+			
 			if !reflect.DeepEqual(hallOrderList, msg.HallOrderList) || !reflect.DeepEqual(aliveList, msg.AliveList) {
 				proession = true
 			}
-
+			
+			if !reflect.DeepEqual(elevatorList[senderId].CabRequests, msg.ElevatorList[senderId].CabRequests) {
+				proession =  true
+			}
+		
+			
 			if !init {
 				elevatorList[nodeIDInt] = msg.ElevatorList[nodeIDInt]
 				init = true
@@ -92,7 +97,7 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 					break
 				}
 			}
-			if allAcknowledged && proession {
+			if allAcknowledged  && proession {
 				for i := 0; i < NUM_ELEVATORS; i++ {
 					if i != nodeIDInt {
 						ackMap[i] = false
@@ -108,6 +113,9 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 			}
 
 		case payload := <-messagefromOrderAssigner:
+			if !reflect.DeepEqual(elevatorList[nodeIDInt].CabRequests,payload.States[nodeID].CabRequests) {
+				proession = true 
+			}
 			hallOrderList[nodeIDInt] = payload.HallRequests
 			elevatorList[nodeIDInt] = payload.States[nodeID]
 			aliveList[nodeIDInt] = payload.ActiveSatus
