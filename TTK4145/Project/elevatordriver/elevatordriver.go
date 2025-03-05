@@ -6,7 +6,6 @@ import (
 	"Project/hwelevio"
 	"fmt"
 )
- dhcweicsiaxsaxwe
 
 func ElevatorDriver(
 	newOrderChannel <-chan [NFloors][NButtons]bool,
