@@ -9,10 +9,6 @@ func initelevator() Elevator {
 		CurrentFloor:     -1,
 		Dirn:             MDDown,
 		CurrentBehaviour: EBMoving,
-		ActiveSatus:      true,
-		Config: ElevatorConfig{
-			ClearRequestVariant: ClearRequestVariantConfig,
-			DoorOpenDurationS:   DoorOpenDurationSConfig,
-		},
+		ActiveSatus:      true, 
 	}
 }

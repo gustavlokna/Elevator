@@ -1,7 +1,6 @@
 package timer
 
 import (
-	"fmt"
 	"time"
 )
 
@@ -27,26 +26,21 @@ func Timer(
 	for {
 		select {
 		case startDoor = <-doorOpenChan:
+			// TODO MAKE VARIABLE IN CONFIG FILE
 			DoorTimer = time.NewTimer(3 * time.Second)
 
 		case startMotor = <-motorActiveChan:
-			fmt.Println("Motor timer started")
-			MotorTimer = time.NewTimer(3 * time.Second)
+			// WHEN WORKING ON SLOW ELEV USE 4 Sec, but should be 3
+			// TODO MAKE VARIABLE IN CONFIG FILE
+			MotorTimer = time.NewTimer(4 * time.Second)
 
 		case <-DoorTimer.C:
 			if startDoor {
-				fmt.Println("Door timeout")
 				startDoor = false
 				doorClosedChan <- true
 			}
 		case <-MotorTimer.C:
-			fmt.Println("Motor timeout")
 			if startMotor {
-				fmt.Println("Motor timeout")
-				fmt.Println("Motor timeout")
-				fmt.Println("Motor timeout")
-				fmt.Println("Motor timeout")
-
 				motorInactiveChan <- true
 			}
 		}

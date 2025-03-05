@@ -39,10 +39,6 @@ func ElevatorDriver(
 		case elevator.CurrentFloor = <-floorChannel:
 			elevator.ActiveSatus = true
 			motorActiveChan <- true
-			fmt.Println("FLOOR SENSOR TRIGGERED")
-			fmt.Println("FLOOR SENSOR TRIGGERED")
-			fmt.Println("FLOOR SENSOR TRIGGERED")
-			fmt.Println("FLOOR SENSOR TRIGGERED")
 			switch {
 			case elevator.Requests[elevator.CurrentFloor][BCab]:
 				fmt.Println("")
@@ -68,7 +64,6 @@ func ElevatorDriver(
 				motorActiveChan <- false
 				doorOpenChan <- true
 				payloadToLights <- PayloadFromDriver{CurrentFloor: elevator.CurrentFloor, DoorLight: true}
-				
 
 			case elevator.Dirn == MDDown && elevator.Requests[elevator.CurrentFloor][BHallDown]:
 				hwelevio.SetMotorDirection(MDStop)
@@ -95,7 +90,6 @@ func ElevatorDriver(
 			payloadFromElevator <- PayloadFromElevator{Elevator: elevator, CompletedOrders: clearedRequests}
 
 		case <-doorClosedChan:
-			fmt.Println("CLOSE DOOR")
 			if obstruction {
 				elevator.ActiveSatus = !obstruction
 				fmt.Println(!obstruction)
@@ -103,43 +97,35 @@ func ElevatorDriver(
 				payloadFromElevator <- PayloadFromElevator{Elevator: elevator, CompletedOrders: clearedRequests}
 				continue
 			}
-			fmt.Println("WE ARE CLEARING AN ORDER ")
-			fmt.Println("WE ARE CLEARING AN ORDER ")
-			fmt.Println("WE ARE CLEARING AN ORDER ")
-			fmt.Println("WE ARE CLEARING AN ORDER ")
-			fmt.Println("WE ARE CLEARING AN ORDER ")
-			fmt.Println("WE ARE CLEARING AN ORDER ")
-			fmt.Println("WE ARE CLEARING AN ORDER ")
 
 			switch {
 			case elevator.Dirn == MDUp && elevator.Requests[elevator.CurrentFloor][BHallUp]:
-				fmt.Println("Case 1 ")
-				ElevatorPrint(elevator)
 				clearedRequests[elevator.CurrentFloor][BHallUp] = true
 				elevator.Requests[elevator.CurrentFloor][BHallUp] = false
 
 			case elevator.Dirn == MDUp && elevator.Requests[elevator.CurrentFloor][BCab] && requestsAbove(elevator):
-				fmt.Println("Case 2 ")
-				//do nothing
 
 			case elevator.Dirn == MDUp && elevator.Requests[elevator.CurrentFloor][BHallDown]:
-				fmt.Println("Case 3 ")
 				clearedRequests[elevator.CurrentFloor][BHallDown] = true
 				elevator.Requests[elevator.CurrentFloor][BHallDown] = false
 
 			case elevator.Dirn == MDDown && elevator.Requests[elevator.CurrentFloor][BHallDown]:
-				fmt.Println("Case 4 ")
 				clearedRequests[elevator.CurrentFloor][BHallDown] = true
 				elevator.Requests[elevator.CurrentFloor][BHallDown] = false
 
 			case elevator.Dirn == MDDown && elevator.Requests[elevator.CurrentFloor][BCab] && requestsBelow(elevator):
-				fmt.Println("Case 5 ")
-				//do nothing
 
 			case elevator.Dirn == MDDown && elevator.Requests[elevator.CurrentFloor][BHallUp]:
-				fmt.Println("Case 6 ")
 				clearedRequests[elevator.CurrentFloor][BHallUp] = true
 				elevator.Requests[elevator.CurrentFloor][BHallUp] = false
+
+			//case elevator.Requests[elevator.CurrentFloor][BCab]: 
+			// This case was not necessary after changing chooseDirection
+			// but this can have induced other errors. I have not tried yet. 
+
+			default: 
+				elevator = chooseDirection(elevator)
+				hwelevio.SetMotorDirection(elevator.Dirn)		
 			}
 
 			if elevator.Requests[elevator.CurrentFloor][BCab] {
@@ -155,16 +141,6 @@ func ElevatorDriver(
 		case <-motorInactiveChan:
 
 			if elevator.CurrentBehaviour == EBMoving {
-				fmt.Println("WE HAVE MOTOR INACTIVETY")
-				fmt.Println("WE HAVE MOTOR INACTIVETY")
-				fmt.Println("WE HAVE MOTOR INACTIVETY")
-				fmt.Println("WE HAVE MOTOR INACTIVETY")
-				fmt.Println("WE HAVE MOTOR INACTIVETY")
-				fmt.Println("WE HAVE MOTOR INACTIVETY")
-				fmt.Println("WE HAVE MOTOR INACTIVETY")
-				fmt.Println("WE HAVE MOTOR INACTIVETY")
-
-
 				elevator.ActiveSatus = false
 				payloadFromElevator <- PayloadFromElevator{Elevator: elevator, CompletedOrders: clearedRequests}
 			}
@@ -177,11 +153,10 @@ func ElevatorDriver(
 			payloadFromElevator <- PayloadFromElevator{Elevator: elevator, CompletedOrders: clearedRequests}
 
 		case elevator.Requests = <-newOrderChannel:
-			ElevatorPrint(elevator)
 			switch elevator.CurrentBehaviour {
 			case EBIdle:
 				switch {
-				case elevator.Requests[elevator.CurrentFloor][BHallUp]: // TODO ERROR HERE 
+				case elevator.Requests[elevator.CurrentFloor][BHallUp]: 
 					elevator.CurrentBehaviour = EBDoorOpen
 					elevator.Dirn = MDUp
 					doorOpenChan <- true
@@ -197,8 +172,9 @@ func ElevatorDriver(
 					elevator.CurrentBehaviour = EBDoorOpen
 					doorOpenChan <- true
 					payloadToLights <- PayloadFromDriver{CurrentFloor: elevator.CurrentFloor, DoorLight: true}
-
-				case requestsAbove(elevator): // TODO THE CASES BELOW ARE WRONG They should be in combination and use choose and set motor dir
+				
+				// TODO THE CASES BELOW ARE WRONG They should be in combination and use choose and set motor dir
+				case requestsAbove(elevator): 
 					motorActiveChan <- true
 					elevator.CurrentBehaviour = EBMoving
 					elevator.Dirn = MDUp
@@ -213,11 +189,8 @@ func ElevatorDriver(
 					elevator.Dirn = MDStop
 				}
 
-
 			case EBMoving:
-
 			case EBDoorOpen:
-				fmt.Println("NEW ORDERS IN DOOR OPEN")
 			}
 			payloadFromElevator <- PayloadFromElevator{Elevator: elevator, CompletedOrders: clearedRequests}
 		}
