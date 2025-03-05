@@ -6,27 +6,17 @@ import (
 
 func buttonPressed(payload PayloadFromassignerToNetwork, ElevatorName string,
 	btnEvent ButtonEvent) PayloadFromassignerToNetwork {
-	// Note did something like this ?
-	//
-	//	if requests.ShouldClearImmediately(elevator, btnFloor, btn) && (elevator.CurrentBehaviour == elev.EBDoorOpen) {
-	//
-	// er.Start(elevator.Config.DoorOpenDurationS)
-	// Send dir to driver ?
-	// else :
-	// TODO CHECK IF WE ARE ORDER ASS, IF NOT SET ButtonPressed
 	switch btnEvent.Button {
 	case BHallUp:
-		if payload.HallRequests[btnEvent.Floor][BHallUp] != OrderComplete {
-			payload.HallRequests[btnEvent.Floor][BHallUp] = ButtonPressed
+		if payload.Orders[btnEvent.Floor][BHallUp] != OrderComplete {
+			payload.Orders[btnEvent.Floor][BHallUp] = ButtonPressed
 		}
 	case BHallDown:
-		if payload.HallRequests[btnEvent.Floor][BHallDown] != OrderComplete {
-			payload.HallRequests[btnEvent.Floor][BHallDown] = ButtonPressed
+		if payload.Orders[btnEvent.Floor][BHallDown] != OrderComplete {
+			payload.Orders[btnEvent.Floor][BHallDown] = ButtonPressed
 		}
-
 	case BCab:
-		payload.States[ElevatorName].CabRequests[btnEvent.Floor] = true
-
+		payload.Orders[btnEvent.Floor][BCab] = OrderAssigned
 	}
 	return payload
 }
@@ -38,11 +28,11 @@ func orderComplete(payload PayloadFromassignerToNetwork, elevatorName string,
 			if completedOrders[floor][btn] {
 				switch btn {
 				case BHallUp:
-					payload.HallRequests[floor][BHallUp] = OrderComplete
+					payload.Orders[floor][BHallUp] = OrderComplete
 				case BHallDown:
-					payload.HallRequests[floor][BHallDown] = OrderComplete
+					payload.Orders[floor][BHallDown] = OrderComplete
 				case BCab:
-					payload.States[elevatorName].CabRequests[floor] = false
+					payload.Orders[floor][BCab] = OrderComplete
 				}
 			}
 		}

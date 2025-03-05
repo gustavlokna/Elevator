@@ -69,7 +69,7 @@ func PrintPayloadFromElevator(payload PayloadFromElevator) {
 func PrintPayloadFromassignerToNetwork(payload PayloadFromassignerToNetwork) {
     fmt.Println("HRAInput:")
     fmt.Println("Hall Requests:")
-    for floor, requests := range payload.HallRequests {
+    for floor, requests := range payload.Orders {
         fmt.Printf("  Floor %d: [Up: %s, Down: %s]\n",
             floor,
             buttonStateToString(requests[BHallUp]),

@@ -58,6 +58,7 @@ const (
 	EBMoving
 )
 
+
 // TODO find out what ClearRequestVarient is!
 // TODO THIS IS ASS CODE 
 type ClearRequestVarient int
@@ -84,7 +85,7 @@ type Elevator struct {
 	Requests         [NFloors][NButtons]bool
 	CurrentBehaviour ElevatorBehaviour
 	//what is this condfig++
-	ActiveSatus 	bool 
+	ActiveSatus 	 bool 
 	Config           ElevatorConfig
 }
 
@@ -96,8 +97,8 @@ type HRAElevState struct {
 }
 
 type HRAInput struct {
-	//TODO:  Make variabels HallRequests        [][2]ButtonState `json:"hallRequests"` 
-	//HallRequests        [NFloors][NButtons]bool `json:"hallRequests"` 
+
+	// Requests        	[NFloors][NButtons]bool `json:"hallRequests"` 
 	HallRequests        [NFloors][2]bool `json:"hallRequests"` 
 	//NOTE THIS WAS BOOL AND TO USE ASSIGNER MUST BE CONVERTED TO INTEGER 
 	//Coul BE SIMPLE IN ASSIGNER IF HallRequests == OrderAssigned then 1, else 0 
@@ -120,16 +121,18 @@ type PayloadFromElevator struct {
 
 type PayloadFromassignerToNetwork struct{
 	//TODO Is not just hallRequests. Name does not fit is also cab 
-	HallRequests        [NFloors][NButtons]ButtonState `json:"hallRequests"` 
+	//HallRequests        [NFloors][NButtons]ButtonState `json:"hallRequests"` 
 	States              map[string]HRAElevState `json:"states"`
-	ActiveSatus 		bool 
+	ActiveSatus 		bool
+	Orders 				[NFloors][NButtons]ButtonState `json:"hallRequests"` 
 }
 
 type PayloadFromNetworkToAssigner struct {
 	AliveList     [NUM_ELEVATORS]bool
 	ElevatorList  [NUM_ELEVATORS]HRAElevState
 	//TODO IS NOT just HallORders ? 
-	HallOrderList [NUM_ELEVATORS][NFloors][NButtons]ButtonState
+	//HallOrderList [NUM_ELEVATORS][NFloors][NButtons]ButtonState
+	Orders [NUM_ELEVATORS][NFloors][NButtons]ButtonState
 }
 
 type PayloadFromDriver struct {

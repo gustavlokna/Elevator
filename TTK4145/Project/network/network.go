@@ -26,8 +26,9 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 	go broadcast.Receiver(messagePort, nodeID, broadcastReceiverChannel, nodeRegistryChannel)
 
 	var (
-		elevatorList = initializeElevatorList()
 		//TODO THIS CAN BE A [NUM_ELEVATORS]HRAInput
+		elevatorList = initializeElevatorList()
+		
 		hallOrderList [NUM_ELEVATORS][NFloors][NButtons]ButtonState
 		aliveList     [NUM_ELEVATORS]bool
 		ackMap        [NUM_ELEVATORS]bool
@@ -102,13 +103,13 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 				messagetoOrderAssignerChannel <- PayloadFromNetworkToAssigner{
 					AliveList:     aliveList,
 					ElevatorList:  elevatorList,
-					HallOrderList: hallOrderList,
+					Orders: hallOrderList,
 				}
 				proession = false
 			}
 
 		case payload := <-messagefromOrderAssigner:
-			hallOrderList[nodeIDInt] = payload.HallRequests
+			hallOrderList[nodeIDInt] = payload.Orders
 			elevatorList[nodeIDInt] = payload.States[nodeID]
 			aliveList[nodeIDInt] = payload.ActiveSatus
 
@@ -127,7 +128,7 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 				messagetoOrderAssignerChannel <- PayloadFromNetworkToAssigner{
 					AliveList:     newAliveList,
 					ElevatorList:  elevatorList,
-					HallOrderList: hallOrderList,
+					Orders: hallOrderList,
 				}
 
 			}

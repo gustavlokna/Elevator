@@ -12,6 +12,8 @@ func ElevatorDriver(
 	payloadFromElevator chan<- PayloadFromElevator,
 	payloadToLights chan<- PayloadFromDriver,
 ) {
+	fmt.Println("FLOOR SENSOR TRIGGERED")
+
 	var (
 		floorChannel = make(chan int)
 		obstructionChannel = make(chan bool)
@@ -22,7 +24,8 @@ func ElevatorDriver(
 		clearedRequests = [NFloors][NButtons]bool{}
 		obstruction bool
 	)
-	
+
+
 	go hwelevio.PollFloorSensor(floorChannel)
 	go hwelevio.PollObstructionSwitch(obstructionChannel)
 	go timer.Timer(doorOpenChan, motorActiveChan, doorClosedChan, motorInactiveChan)
@@ -152,8 +155,6 @@ func ElevatorDriver(
 				clearedRequests[elevator.CurrentFloor][BCab] = true
 				elevator.Requests[elevator.CurrentFloor][BCab] = false
 			}
-			elevator = chooseDirection(elevator)
-			hwelevio.SetMotorDirection(elevator.Dirn)
 
 			payloadFromElevator <- PayloadFromElevator{ Elevator: elevator, CompletedOrders: clearedRequests}
 			payloadToLights <- PayloadFromDriver{CurrentFloor: elevator.CurrentFloor, DoorLight: false}
