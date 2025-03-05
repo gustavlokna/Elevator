@@ -6,14 +6,6 @@ import (
 
 func buttonPressed(payload PayloadFromassignerToNetwork, ElevatorName string,
 	btnEvent ButtonEvent) PayloadFromassignerToNetwork {
-	// Note did something like this ?
-	//
-	//	if requests.ShouldClearImmediately(elevator, btnFloor, btn) && (elevator.CurrentBehaviour == elev.EBDoorOpen) {
-	//
-	// er.Start(elevator.Config.DoorOpenDurationS)
-	// Send dir to driver ?
-	// else :
-	// TODO CHECK IF WE ARE ORDER ASS, IF NOT SET ButtonPressed
 	switch btnEvent.Button {
 	case BHallUp:
 		if payload.HallRequests[btnEvent.Floor][BHallUp] != OrderComplete {

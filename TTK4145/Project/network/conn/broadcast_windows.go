@@ -49,7 +49,7 @@ import (
 	"net"
 	"syscall"
 )
-
+// TODO ALEX + JAKOB 
 func DialBroadcastUDP(port int) net.PacketConn {
 	config := &net.ListenConfig{Control: func(network, address string, conn syscall.RawConn) error {
 		return conn.Control(func(descriptor uintptr) {

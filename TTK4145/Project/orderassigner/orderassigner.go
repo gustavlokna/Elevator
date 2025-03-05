@@ -38,7 +38,6 @@ func OrderAssigner(
 	for {
 		select {
 		case btnEvent := <-drv_buttons:
-			fmt.Println("button pressed")
 			PayloadFromassignerToNetwork = buttonPressed(PayloadFromassignerToNetwork,
 				nodeID, btnEvent)
 			toNetworkChannel <- PayloadFromassignerToNetwork

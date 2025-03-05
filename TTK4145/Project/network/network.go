@@ -66,7 +66,6 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 			}
 
 		case msg := <-broadcastReceiverChannel:
-			fmt.Println("HELLO")
 			senderId, _ := strconv.Atoi(msg.SenderId)
 			ackMap[senderId] = reflect.DeepEqual(elevatorList, msg.ElevatorList) && reflect.DeepEqual(hallOrderList, msg.HallOrderList)
 

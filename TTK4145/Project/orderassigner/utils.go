@@ -11,16 +11,16 @@ func initPayloadToNetwork() PayloadFromassignerToNetwork {
 	}
 	return payload
 }
-
 func updateLightStates(payload PayloadFromNetworkToAssigner, myID int) [NFloors][NButtons]ButtonState {
 	var updatedLights [NFloors][NButtons]ButtonState
 	updatedLights = payload.HallOrderList[myID]
-
+	// Include cab calls for the local elevator
 	for floor := 0; floor < NFloors; floor++ {
 		if payload.ElevatorList[myID].CabRequests[floor] {
 			updatedLights[floor][BCab] = OrderAssigned
 		}
 	}
+
 	return updatedLights
 }
 
