@@ -140,8 +140,9 @@ func ElevatorDriver(
 				clearedRequests[elevator.CurrentFloor][BCab] = true
 				elevator.Requests[elevator.CurrentFloor][BCab] = false
 			}
-			
+
 			elevator.CurrentBehaviour = EBIdle
+
 			payloadFromElevator <- PayloadFromElevator{Elevator: elevator, CompletedOrders: clearedRequests}
 			payloadToLights <- PayloadFromDriver{CurrentFloor: elevator.CurrentFloor, DoorLight: false}
 
@@ -181,7 +182,7 @@ func ElevatorDriver(
 					doorOpenChan <- true
 					payloadToLights <- PayloadFromDriver{CurrentFloor: elevator.CurrentFloor, DoorLight: true}
 
-				case requestsAbove(elevator):
+				case requestsAbove(elevator): // TODO THE CASES BELOW ARE WRONG They should be in combination and use choose and set motor dir
 					motorActiveChan <- true
 					elevator.CurrentBehaviour = EBMoving
 					elevator.Dirn = MDUp
@@ -192,13 +193,17 @@ func ElevatorDriver(
 					elevator.CurrentBehaviour = EBMoving
 					elevator.Dirn = MDDown
 					hwelevio.SetMotorDirection(elevator.Dirn)
-					ElevatorPrint(elevator)
+				default:
+					elevator.Dirn = MDStop
 				}
+
+
 			case EBMoving:
 
 			case EBDoorOpen:
 				fmt.Println("NEW ORDERS IN DOOR OPEN")
 			}
+			ElevatorPrint(elevator)
 			payloadFromElevator <- PayloadFromElevator{Elevator: elevator, CompletedOrders: clearedRequests}
 		}
 	}
