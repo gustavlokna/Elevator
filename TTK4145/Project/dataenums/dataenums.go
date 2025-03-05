@@ -76,6 +76,7 @@ type HRAInput struct {
 	States map[string]HRAElevState `json:"states"`
 }
 
+// TODO MUST GIVE NEW NAMES 
 type Message struct {
 	//TODO: Make int
 	SenderId      string // IPv4
