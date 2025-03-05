@@ -153,6 +153,7 @@ func ElevatorDriver(
 			payloadFromElevator <- PayloadFromElevator{Elevator: elevator, CompletedOrders: clearedRequests}
 
 		case elevator.Requests = <-newOrderChannel:
+			ElevatorPrint(elevator)
 			switch elevator.CurrentBehaviour {
 			case EBIdle:
 				switch {

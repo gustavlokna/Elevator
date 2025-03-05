@@ -33,7 +33,7 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 		ackMap        [NUM_ELEVATORS]bool
 		online        bool
 		init          bool
-		proession     bool
+		newOrder      bool
 	)
 	oldCabRequests := make([]bool, len(elevatorList[nodeIDInt].CabRequests))
 	for {
@@ -50,6 +50,7 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 					online = false
 				} else {
 					fmt.Println("WE SET AN ELEVATOR INACTIVE")
+					// check if newOrder = true must be set (but i do not think so)
 					aliveList[lostNodeInt] = false
 					hallOrderList[lostNodeInt] = resetHallCalls()
 				}
@@ -71,11 +72,11 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 
 			// TODO THIS CAN BE A FUNC
 			if !reflect.DeepEqual(hallOrderList, msg.HallOrderList) || !reflect.DeepEqual(aliveList, msg.AliveList) {
-				proession = true
+				newOrder = true
 			}
 
 			if !reflect.DeepEqual(elevatorList[senderId].CabRequests, msg.ElevatorList[senderId].CabRequests) {
-				proession = true
+				newOrder = true
 			}
 
 			if !init {
@@ -99,7 +100,7 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 					break
 				}
 			}
-			if allAcknowledged && proession {
+			if allAcknowledged && newOrder {
 				for i := 0; i < NUM_ELEVATORS; i++ {
 					if i != nodeIDInt {
 						ackMap[i] = false
@@ -111,7 +112,7 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 					ElevatorList:  elevatorList,
 					HallOrderList: hallOrderList,
 				}
-				proession = false
+				newOrder = false
 			}
 
 		case payload := <-messagefromOrderAssigner:
@@ -124,7 +125,7 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 			// TODO MAKE THIS REDUNDANT
 			if !reflect.DeepEqual(oldCabRequests, elevatorList[nodeIDInt].CabRequests) {
 				oldCabRequests = elevatorList[nodeIDInt].CabRequests
-				proession = true
+				newOrder = true
 			}
 
 			broadcastTransmissionChannel <- Message{
