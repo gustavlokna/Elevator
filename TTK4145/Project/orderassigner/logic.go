@@ -121,6 +121,7 @@ func handlePayloadFromNetwork(
 			} else {
 				payload.HallRequests[f][b] = incomingState
 			}
+			
 		}
 	}
 	return payload

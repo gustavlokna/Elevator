@@ -46,11 +46,11 @@ func OrderAssigner(
 		case payload := <-payloadFromElevator:
 			PayloadFromassignerToNetwork = handlePayloadFromElevator(payload,
 				PayloadFromassignerToNetwork, nodeID)
-		
+
 			toNetworkChannel <- PayloadFromassignerToNetwork
 
 		case PayloadFromNetwork := <-fromNetworkChannel:
-			
+
 			PayloadFromassignerToNetwork = handlePayloadFromNetwork(PayloadFromassignerToNetwork,
 				PayloadFromNetwork, myID)
 

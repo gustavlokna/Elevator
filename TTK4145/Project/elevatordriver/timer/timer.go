@@ -25,6 +25,7 @@ func Timer(
 		case startDoor = <-doorOpenChan:
 			doorTimeout = time.Now().Add(3 * time.Second)
 
+
 		case startMotor = <-motorActiveChan:
 			motorTimeout = time.Now().Add(3 * time.Second)
 

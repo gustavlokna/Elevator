@@ -110,6 +110,7 @@ type Message struct {
 	ElevatorList  [NUM_ELEVATORS]HRAElevState
 	HallOrderList [NUM_ELEVATORS][NFloors][NButtons]ButtonState
 	OnlineStatus bool
+	AliveList  [NUM_ELEVATORS]bool
 }
 
 type PayloadFromElevator struct {

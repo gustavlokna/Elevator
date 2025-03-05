@@ -26,14 +26,14 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 	go broadcast.Receiver(messagePort, nodeID, broadcastReceiverChannel, nodeRegistryChannel)
 
 	var (
-		
-		elevatorList =   initializeElevatorList()
+		elevatorList = initializeElevatorList()
 		//TODO THIS CAN BE A [NUM_ELEVATORS]HRAInput
 		hallOrderList [NUM_ELEVATORS][NFloors][NButtons]ButtonState
 		aliveList     [NUM_ELEVATORS]bool
 		ackMap        [NUM_ELEVATORS]bool
 		online        bool
 		init          bool
+		proession     bool
 	)
 
 	for {
@@ -68,6 +68,10 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 			ackMap[senderId] = reflect.DeepEqual(elevatorList, msg.ElevatorList) && reflect.DeepEqual(hallOrderList, msg.HallOrderList)
 			// TODO THIS CAN BE A FUNC
 
+			if !reflect.DeepEqual(hallOrderList, msg.HallOrderList) || !reflect.DeepEqual(aliveList, msg.AliveList) {
+				proession = true
+			}
+
 			if !init {
 				elevatorList[nodeIDInt] = msg.ElevatorList[nodeIDInt]
 				init = true
@@ -88,17 +92,19 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 					break
 				}
 			}
-			if allAcknowledged {
+			if allAcknowledged && proession {
 				for i := 0; i < NUM_ELEVATORS; i++ {
 					if i != nodeIDInt {
 						ackMap[i] = false
 					}
 				}
+
 				messagetoOrderAssignerChannel <- PayloadFromNetworkToAssigner{
 					AliveList:     aliveList,
 					ElevatorList:  elevatorList,
 					HallOrderList: hallOrderList,
 				}
+				proession = false
 			}
 
 		case payload := <-messagefromOrderAssigner:
@@ -112,6 +118,7 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 				ElevatorList:  elevatorList,
 				HallOrderList: hallOrderList,
 				OnlineStatus:  aliveList[nodeIDInt],
+				AliveList:     aliveList,
 			}
 
 			if !online {
