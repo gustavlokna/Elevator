@@ -30,6 +30,7 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 		elevatorList = initializeElevatorList()
 		
 		hallOrderList [NUM_ELEVATORS][NFloors][NButtons]ButtonState
+		// CabOrderList
 		aliveList     [NUM_ELEVATORS]bool
 		ackMap        [NUM_ELEVATORS]bool
 		online        bool
@@ -69,7 +70,7 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 			ackMap[senderId] = reflect.DeepEqual(elevatorList, msg.ElevatorList) && reflect.DeepEqual(hallOrderList, msg.HallOrderList)
 			// TODO THIS CAN BE A FUNC
 
-			if !reflect.DeepEqual(hallOrderList, msg.HallOrderList) || !reflect.DeepEqual(aliveList, msg.AliveList) {
+			if !reflect.DeepEqual(hallOrderList, msg.HallOrderList) || !reflect.DeepEqual(aliveList, msg.AliveList){ 
 				proession = true
 			}
 
@@ -79,7 +80,7 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 			}
 			aliveList[senderId] = msg.OnlineStatus
 			elevatorList[senderId] = msg.ElevatorList[senderId]
-			hallOrderList[senderId] = msg.HallOrderList[senderId]
+			hallOrderList[senderId] = msg.HallOrderList[senderId] // TODO NOT CABS 
 			hallOrderList = cyclicCounter(hallOrderList, nodeIDInt)
 
 			//TODO THIS CAN BE FUNC
