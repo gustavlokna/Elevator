@@ -26,16 +26,16 @@ func Network(messagefromOrderAssigner <-chan FromAssignerToNetwork,
 	go broadcast.Receiver(messagePort, nodeID, broadcastReceiverChannel, nodeRegistryChannel)
 
 	var (
-		elevatorList = initializeElevatorList()
-		//TODO THIS CAN BE A [NElevators]HRAInput
-		hallOrderList [NElevators][NFloors][NButtons]ButtonState
-		aliveList     [NElevators]bool
-		ackMap        [NElevators]bool
-		online        bool
-		init          bool
-		newOrder      bool
+		elevatorList   = initializeElevatorList()
+		oldCabRequests = make([]bool, len(elevatorList[nodeIDInt].CabRequests))
+		hallOrderList  [NElevators][NFloors][NButtons]ButtonState
+		aliveList      [NElevators]bool
+		ackMap         [NElevators]bool
+		online         bool
+		init           bool
+		newOrder       bool
 	)
-	oldCabRequests := make([]bool, len(elevatorList[nodeIDInt].CabRequests))
+
 	for {
 
 		select {
