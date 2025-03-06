@@ -7,7 +7,7 @@ import (
 
 func LightsHandler(
 	orderList <-chan [NFloors][NButtons]ButtonState,
-	payloadFromDriver <-chan PayloadFromDriver,
+	payloadFromDriver <-chan FromDriverToLight,
 ) {
 	for {
 		select {

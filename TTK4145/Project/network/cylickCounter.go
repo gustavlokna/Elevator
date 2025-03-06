@@ -5,9 +5,9 @@ import (
 )
 
 func cyclicCounter(
-	orders [NUM_ELEVATORS][NFloors][NButtons]ButtonState,
+	orders [NElevators][NFloors][NButtons]ButtonState,
 	myID int,
-) [NUM_ELEVATORS][NFloors][NButtons]ButtonState {
+) [NElevators][NFloors][NButtons]ButtonState {
 
 	for f := 0; f < NFloors; f++ {
 		for b := 0; b < NButtons; b++ {
@@ -15,7 +15,7 @@ func cyclicCounter(
 			myState := origState
 
 			if myState == Initial {
-				for e := 0; e < NUM_ELEVATORS; e++ {
+				for e := 0; e < NElevators; e++ {
 					if e != myID && orders[e][f][b] != Initial {
 						myState = orders[e][f][b]
 						break
@@ -26,7 +26,7 @@ func cyclicCounter(
 			}
 
 			var peers []ButtonState
-			for e := 0; e < NUM_ELEVATORS; e++ {
+			for e := 0; e < NElevators; e++ {
 				if e != myID && orders[e][f][b] != Initial {
 					peers = append(peers, orders[e][f][b])
 				}

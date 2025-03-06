@@ -1,12 +1,12 @@
 package dataenums
 
 const (
-	NFloors                 int = 4
-	NButtons                int = 3
-	PollRateMS                  = 20
-	NUM_ELEVATORS           int = 3
-	DoorOpenDurationSConfig int = 3
-	MotorTimeoutS           int = 4 // TODO MAKE 3 s (worked on slow elevs)
+	NFloors           int = 4
+	NButtons          int = 3
+	PollRateMS            = 20
+	NElevators        int = 3
+	DoorOpenDurationS int = 3
+	MotorTimeoutS     int = 4 // TODO MAKE 3 s (worked on slow elevs)
 )
 
 // THE addr used to int helwvio
@@ -72,42 +72,41 @@ type HRAElevState struct {
 }
 
 type HRAInput struct {
-	HallRequests [NFloors][2]bool `json:"hallRequests"`
-	States map[string]HRAElevState `json:"states"`
+	HallRequests [NFloors][2]bool        `json:"hallRequests"`
+	States       map[string]HRAElevState `json:"states"`
 }
 
-// TODO MUST GIVE NEW NAMES 
 type Message struct {
 	//TODO: Make int
-	SenderId      string // IPv4
-	ElevatorList  [NUM_ELEVATORS]HRAElevState
-	HallOrderList [NUM_ELEVATORS][NFloors][NButtons]ButtonState
+	SenderId      string
+	ElevatorList  [NElevators]HRAElevState
+	HallOrderList [NElevators][NFloors][NButtons]ButtonState
 	OnlineStatus  bool
-	AliveList     [NUM_ELEVATORS]bool
+	AliveList     [NElevators]bool
 }
 
-type PayloadFromElevator struct {
-	Elevator        Elevator
-	CompletedOrders [NFloors][NButtons]bool
-}
 
-type PayloadFromassignerToNetwork struct {
-	//TODO Is not just hallRequests. Name does not fit is also cab
-	HallRequests [NFloors][NButtons]ButtonState `json:"hallRequests"`
-	States       map[string]HRAElevState        `json:"states"`
+
+type FromAssignerToNetwork struct {
+	HallRequests [NFloors][NButtons]ButtonState
+	States       map[string]HRAElevState
 	ActiveSatus  bool
 }
 
-type PayloadFromNetworkToAssigner struct {
-	AliveList    [NUM_ELEVATORS]bool
-	ElevatorList [NUM_ELEVATORS]HRAElevState
-	//TODO IS NOT just HallORders ?
-	HallOrderList [NUM_ELEVATORS][NFloors][NButtons]ButtonState
+type FromNetworkToAssigner struct {
+	AliveList     [NElevators]bool
+	ElevatorList  [NElevators]HRAElevState
+	HallOrderList [NElevators][NFloors][NButtons]ButtonState
 }
 
-type PayloadFromDriver struct {
+type FromDriverToLight struct {
 	CurrentFloor int
 	DoorLight    bool
+}
+
+type FromDriverToAssigner struct {
+	Elevator        Elevator
+	CompletedOrders [NFloors][NButtons]bool
 }
 
 type NetworkNodeRegistry struct {

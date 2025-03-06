@@ -14,9 +14,9 @@ func resetHallCalls() [NFloors][NButtons]ButtonState {
 	return hallOrderList
 }
 
-func initializeElevatorList() [NUM_ELEVATORS]HRAElevState {
-	var list [NUM_ELEVATORS]HRAElevState
-	for i := 0; i < NUM_ELEVATORS; i++ {
+func initializeElevatorList() [NElevators]HRAElevState {
+	var list [NElevators]HRAElevState
+	for i := 0; i < NElevators; i++ {
 		list[i] = HRAElevState{
 			Behavior:    "EBIdle",
 			Floor:       0,

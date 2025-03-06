@@ -34,9 +34,10 @@ mv ~/Downloads/hall_request_assigner ./orderassigner/
 ```
 
 ### Build and Run
+*Note: The ID must be in the range 0 to NElevators-1.*
 ```bash
 chmod +x run.sh
-./run.sh
+./run.sh <ID> 
 ```
 ### Terminate Terminal
 

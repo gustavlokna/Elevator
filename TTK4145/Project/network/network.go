@@ -12,8 +12,8 @@ import (
 // TODO MOVE DATA ENUMS ?
 const messagePort int = 1338
 
-func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
-	messagetoOrderAssignerChannel chan<- PayloadFromNetworkToAssigner,
+func Network(messagefromOrderAssigner <-chan FromAssignerToNetwork,
+	messagetoOrderAssignerChannel chan<- FromNetworkToAssigner,
 	nodeID string) {
 
 	// TODO MAKE CODE COMPATIBLE WITHOUT THIS "STR TO INT CONV"
@@ -27,10 +27,10 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 
 	var (
 		elevatorList = initializeElevatorList()
-		//TODO THIS CAN BE A [NUM_ELEVATORS]HRAInput
-		hallOrderList [NUM_ELEVATORS][NFloors][NButtons]ButtonState
-		aliveList     [NUM_ELEVATORS]bool
-		ackMap        [NUM_ELEVATORS]bool
+		//TODO THIS CAN BE A [NElevators]HRAInput
+		hallOrderList [NElevators][NFloors][NButtons]ButtonState
+		aliveList     [NElevators]bool
+		ackMap        [NElevators]bool
 		online        bool
 		init          bool
 		newOrder      bool
@@ -91,7 +91,7 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 
 			//TODO THIS CAN BE FUNC
 			allAcknowledged := true
-			for i := 0; i < NUM_ELEVATORS; i++ {
+			for i := 0; i < NElevators; i++ {
 				if nodeIDInt == i {
 					continue
 				}
@@ -101,13 +101,13 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 				}
 			}
 			if allAcknowledged && newOrder {
-				for i := 0; i < NUM_ELEVATORS; i++ {
+				for i := 0; i < NElevators; i++ {
 					if i != nodeIDInt {
 						ackMap[i] = false
 					}
 				}
 
-				messagetoOrderAssignerChannel <- PayloadFromNetworkToAssigner{
+				messagetoOrderAssignerChannel <- FromNetworkToAssigner{
 					AliveList:     aliveList,
 					ElevatorList:  elevatorList,
 					HallOrderList: hallOrderList,
@@ -137,9 +137,9 @@ func Network(messagefromOrderAssigner <-chan PayloadFromassignerToNetwork,
 			}
 
 			if !online {
-				newAliveList := [NUM_ELEVATORS]bool{}
+				newAliveList := [NElevators]bool{}
 				newAliveList[nodeIDInt] = aliveList[nodeIDInt]
-				messagetoOrderAssignerChannel <- PayloadFromNetworkToAssigner{
+				messagetoOrderAssignerChannel <- FromNetworkToAssigner{
 					AliveList:     newAliveList,
 					ElevatorList:  elevatorList,
 					HallOrderList: hallOrderList,

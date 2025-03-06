@@ -1,17 +1,17 @@
-package orderassigner
+package assigner
 
 import (
 	. "Project/dataenums"
 )
 
-func initPayloadToNetwork() PayloadFromassignerToNetwork {
-	payload := PayloadFromassignerToNetwork{
+func initPayloadToNetwork() FromAssignerToNetwork {
+	payload := FromAssignerToNetwork{
 		HallRequests: [NFloors][NButtons]ButtonState{},
 		States:       make(map[string]HRAElevState),
 	}
 	return payload
 }
-func updateLightStates(payload PayloadFromNetworkToAssigner, myID int) [NFloors][NButtons]ButtonState {
+func updateLightStates(payload FromNetworkToAssigner, myID int) [NFloors][NButtons]ButtonState {
 	var updatedLights [NFloors][NButtons]ButtonState
 	updatedLights = payload.HallOrderList[myID]
 	// Include cab calls for the local elevator
@@ -25,10 +25,10 @@ func updateLightStates(payload PayloadFromNetworkToAssigner, myID int) [NFloors]
 }
 
 func handlePayloadFromNetwork(
-	payload PayloadFromassignerToNetwork,
-	netPayload PayloadFromNetworkToAssigner,
+	payload FromAssignerToNetwork,
+	netPayload FromNetworkToAssigner,
 	nodeID int,
-) PayloadFromassignerToNetwork {
+) FromAssignerToNetwork {
 	for f := 0; f < NFloors; f++ {
 		for b := 0; b < NButtons; b++ {
 			incomingState := netPayload.HallOrderList[nodeID][f][b]
@@ -45,8 +45,8 @@ func handlePayloadFromNetwork(
 	return payload
 }
 
-func handlePayloadFromElevator(fromElevator PayloadFromElevator,
-	toNetwork PayloadFromassignerToNetwork, nodeID string) PayloadFromassignerToNetwork {
+func handlePayloadFromElevator(fromElevator FromDriverToAssigner,
+	toNetwork FromAssignerToNetwork, nodeID string) FromAssignerToNetwork {
 
 	behavior, direction, cabRequests := convertElevatorState(fromElevator.Elevator)
 	toNetwork.States[nodeID] = HRAElevState{

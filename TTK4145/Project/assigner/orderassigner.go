@@ -1,18 +1,17 @@
-package orderassigner
+package assigner
 
 import (
 	. "Project/dataenums"
 	"Project/hwelevio"
 	"fmt"
 	"strconv"
-	//"time"
 )
 
-func OrderAssigner(
+func Assigner(
 	newOrderChannel chan<- [NFloors][NButtons]bool,
-	payloadFromElevator <-chan PayloadFromElevator,
-	toNetworkChannel chan<- PayloadFromassignerToNetwork,
-	fromNetworkChannel <-chan PayloadFromNetworkToAssigner,
+	payloadFromElevator <-chan FromDriverToAssigner,
+	toNetworkChannel chan<- FromAssignerToNetwork,
+	fromNetworkChannel <-chan FromNetworkToAssigner,
 	fromAsstoLight chan<- [NFloors][NButtons]ButtonState,
 	nodeID string,
 ) {

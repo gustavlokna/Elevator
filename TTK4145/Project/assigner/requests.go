@@ -1,11 +1,11 @@
-package orderassigner
+package assigner
 
 import (
 	. "Project/dataenums"
 )
 
-func buttonPressed(payload PayloadFromassignerToNetwork, ElevatorName string,
-	btnEvent ButtonEvent) PayloadFromassignerToNetwork {
+func buttonPressed(payload FromAssignerToNetwork, ElevatorName string,
+	btnEvent ButtonEvent) FromAssignerToNetwork {
 	switch btnEvent.Button {
 	case BHallUp:
 		if payload.HallRequests[btnEvent.Floor][BHallUp] != OrderComplete {
@@ -23,8 +23,8 @@ func buttonPressed(payload PayloadFromassignerToNetwork, ElevatorName string,
 	return payload
 }
 
-func orderComplete(payload PayloadFromassignerToNetwork, elevatorName string,
-	completedOrders [NFloors][NButtons]bool) PayloadFromassignerToNetwork {
+func orderComplete(payload FromAssignerToNetwork, elevatorName string,
+	completedOrders [NFloors][NButtons]bool) FromAssignerToNetwork {
 	for floor := 0; floor < NFloors; floor++ {
 		for btn := BHallUp; btn <= BCab; btn++ {
 			if completedOrders[floor][btn] {

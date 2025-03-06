@@ -1,6 +1,4 @@
-package orderassigner
-
-// TODO ALEX + JAKOB 
+package assigner
 
 import (
 	. "Project/dataenums"
@@ -9,7 +7,7 @@ import (
 	"os/exec"
 )
 
-func assignOrders(payload PayloadFromNetworkToAssigner,
+func assignOrders(payload FromNetworkToAssigner,
 	nodeID int) [NFloors][NButtons]bool {
 	var orderList [NFloors][NButtons]bool
 

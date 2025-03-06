@@ -1,12 +1,12 @@
 package main
 
 import (
+	"Project/assigner"
 	. "Project/dataenums"
-	"Project/elevatordriver"
+	"Project/driver"
 	"Project/hwelevio"
 	"Project/lights"
 	"Project/network"
-	"Project/orderassigner"
 	"flag"
 	"strconv"
 )
@@ -18,38 +18,37 @@ func main() {
 	hwelevio.Init(Addr)
 
 	var (
-		newOrderChannel     = make(chan [NFloors][NButtons]bool, 100)
-		payloadFromElevator = make(chan PayloadFromElevator, 100)
-		toNetworkChannel    = make(chan PayloadFromassignerToNetwork, 100)
-		fromNetworkChannel  = make(chan PayloadFromNetworkToAssigner, 100)
-		fromDriverToLight   = make(chan PayloadFromDriver, 100)
-		fromAsstoLight      = make(chan [NFloors][NButtons]ButtonState, 100)
+		newOrderChannel       = make(chan [NFloors][NButtons]bool, 100)
+		fromDriverToAssigner  = make(chan FromDriverToAssigner, 100)
+		fromAssignerToNetwork = make(chan FromAssignerToNetwork, 100)
+		fromNetworkToAssigner = make(chan FromNetworkToAssigner, 100)
+		fromDriverToLight     = make(chan FromDriverToLight, 100)
+		fromAssignertoLight   = make(chan [NFloors][NButtons]ButtonState, 100)
 	)
 
-	go elevatordriver.ElevatorDriver(
+	go assigner.Assigner(
 		newOrderChannel,
-		payloadFromElevator,
-		fromDriverToLight,
-		//nodeID,
-	)
-
-	go orderassigner.OrderAssigner(
-		newOrderChannel,
-		payloadFromElevator,
-		toNetworkChannel,
-		fromNetworkChannel,
-		fromAsstoLight,
+		fromDriverToAssigner,
+		fromAssignerToNetwork,
+		fromNetworkToAssigner,
+		fromAssignertoLight,
 		nodeID,
 	)
 
+	go driver.ElevatorDriver(
+		newOrderChannel,
+		fromDriverToAssigner,
+		fromDriverToLight,
+	)
+
 	go network.Network(
-		toNetworkChannel,
-		fromNetworkChannel,
+		fromAssignerToNetwork,
+		fromNetworkToAssigner,
 		nodeID,
 	)
 
 	go lights.LightsHandler(
-		fromAsstoLight,
+		fromAssignertoLight,
 		fromDriverToLight,
 	)
 	// TODO is the select needed ?
