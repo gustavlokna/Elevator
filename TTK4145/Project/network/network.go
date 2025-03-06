@@ -41,8 +41,6 @@ func Network(messagefromOrderAssigner <-chan FromAssignerToNetwork,
 		select {
 		case reg := <-nodeRegistryChannel:
 			// TODO THIS reg/ or it can be a double variable CAN ALSO CONTAIN THE ONLIE STATUS :)
-			fmt.Println("HALLO")
-
 			for _, lostNode := range reg.Lost {
 				fmt.Printf("Node lost connection: %s\n", lostNode)
 				lostNodeInt, _ := strconv.Atoi(lostNode)
@@ -122,7 +120,6 @@ func Network(messagefromOrderAssigner <-chan FromAssignerToNetwork,
 
 		case <-time.After(10 * time.Millisecond):
 
-			// TODO MAKE THIS REDUNDANT
 			if !reflect.DeepEqual(oldCabRequests, elevatorList[nodeIDInt].CabRequests) {
 				oldCabRequests = elevatorList[nodeIDInt].CabRequests
 				newOrder = true
