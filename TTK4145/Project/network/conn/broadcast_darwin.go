@@ -1,8 +1,5 @@
-//go:build darwin
-// +build darwin
-
 package conn
-// TODO ALEX + JAKOB 
+
 import (
 	"fmt"
 	"net"

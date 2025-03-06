@@ -119,13 +119,13 @@ func ElevatorDriver(
 				clearedRequests[elevator.CurrentFloor][BHallUp] = true
 				elevator.Requests[elevator.CurrentFloor][BHallUp] = false
 
-			//case elevator.Requests[elevator.CurrentFloor][BCab]: 
+			//case elevator.Requests[elevator.CurrentFloor][BCab]:
 			// This case was not necessary after changing chooseDirection
-			// but this can have induced other errors. I have not tried yet. 
+			// but this can have induced other errors. I have not tried yet.
 
-			default: 
+			default:
 				elevator = chooseDirection(elevator)
-				hwelevio.SetMotorDirection(elevator.Dirn)		
+				hwelevio.SetMotorDirection(elevator.Dirn)
 			}
 
 			if elevator.Requests[elevator.CurrentFloor][BCab] {
@@ -157,7 +157,7 @@ func ElevatorDriver(
 			switch elevator.CurrentBehaviour {
 			case EBIdle:
 				switch {
-				case elevator.Requests[elevator.CurrentFloor][BHallUp]: 
+				case elevator.Requests[elevator.CurrentFloor][BHallUp]:
 					elevator.CurrentBehaviour = EBDoorOpen
 					elevator.Dirn = MDUp
 					doorOpenChan <- true
@@ -173,9 +173,9 @@ func ElevatorDriver(
 					elevator.CurrentBehaviour = EBDoorOpen
 					doorOpenChan <- true
 					payloadToLights <- PayloadFromDriver{CurrentFloor: elevator.CurrentFloor, DoorLight: true}
-				
-				// TODO THE CASES BELOW ARE WRONG They should be in combination and use choose and set motor dir
-				case requestsAbove(elevator): 
+
+				// TODO Combine CASES BELOW
+				case requestsAbove(elevator):
 					motorActiveChan <- true
 					elevator.CurrentBehaviour = EBMoving
 					elevator.Dirn = MDUp

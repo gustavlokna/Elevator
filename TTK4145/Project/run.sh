@@ -1,14 +1,11 @@
-#!/bin/bash
+ID=$1 
 
-ID=$1  # Get ID from argument
-
-# Check if ID is provided, otherwise exit with usage instructions
 if [ -z "$ID" ]; then
     echo "Usage: ./run.sh <ID>"
     exit 1
 fi
 
-trap 'echo "Ignoring Ctrl+C...";' SIGINT  # Prevents manual termination with ^C
+trap 'echo "Ignoring Ctrl+C...";' SIGINT 
 
 while true; do
     echo "Building the project..."
@@ -19,10 +16,7 @@ while true; do
 
     echo "Program crashed or terminal closed. Restarting in a new window..."
     
-    sleep 1  # Prevents rapid restart loop
-
-    # Open a new terminal and restart the script with the same ID
+    sleep 1 
     gnome-terminal -- bash -c "cd $(pwd); ./run.sh $ID; exec bash"
-
-    exit  # Exit the current instance so the new terminal takes over
+    exit 
 done

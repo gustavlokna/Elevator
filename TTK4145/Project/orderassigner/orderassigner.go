@@ -13,7 +13,6 @@ func OrderAssigner(
 	payloadFromElevator <-chan PayloadFromElevator,
 	toNetworkChannel chan<- PayloadFromassignerToNetwork,
 	fromNetworkChannel <-chan PayloadFromNetworkToAssigner,
-	// TODO: use this fromAsstoLight
 	fromAsstoLight chan<- [NFloors][NButtons]ButtonState,
 	nodeID string,
 ) {
@@ -31,7 +30,7 @@ func OrderAssigner(
 	payload := <-payloadFromElevator
 	PayloadFromassignerToNetwork = handlePayloadFromElevator(payload,
 		PayloadFromassignerToNetwork, nodeID)
-	//check if it creates error by sending to network here
+
 	toNetworkChannel <- PayloadFromassignerToNetwork
 
 	go hwelevio.PollButtons(drv_buttons)

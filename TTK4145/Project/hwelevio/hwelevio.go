@@ -1,5 +1,6 @@
 package hwelevio
-// TODO ALEX + JAKOB 
+
+// TODO ALEX + JAKOB
 import (
 	. "Project/dataenums"
 	"fmt"
@@ -8,23 +9,23 @@ import (
 	"time"
 )
 
-var initialised bool = false
-var mtx sync.Mutex
-var conn net.Conn
+var _initialize bool = false
+var _mtx sync.Mutex
+var _conn net.Conn
 
 func Init(addr string) {
-	print("initialised", initialised)
-	if initialised {
-		fmt.Println("Driver already initialised!")
+	print("_initialize", _initialize)
+	if _initialize {
+		fmt.Println("Driver already _initialize!")
 		return
 	}
-	mtx = sync.Mutex{}
+	_mtx = sync.Mutex{}
 	var err error
-	conn, err = net.Dial("tcp", addr)
+	_conn, err = net.Dial("tcp", addr)
 	if err != nil {
 		panic(err.Error())
 	}
-	initialised = true
+	_initialize = true
 }
 
 func SetMotorDirection(dir HWMotorDirection) {
@@ -43,10 +44,6 @@ func SetDoorOpenLamp(value bool) {
 	write([4]byte{4, toByte(value), 0, 0})
 }
 
-func SetStopLamp(value bool) {
-	write([4]byte{5, toByte(value), 0, 0})
-}
-
 func GetButton(button Button, floor int) bool {
 	a := read([4]byte{6, byte(button), byte(floor), 0})
 	return toBool(a[1])
@@ -61,27 +58,22 @@ func GetFloor() int {
 	}
 }
 
-func GetStop() bool {
-	a := read([4]byte{8, 0, 0, 0})
-	return toBool(a[1])
-}
-
 func GetObstruction() bool {
 	a := read([4]byte{9, 0, 0, 0})
 	return toBool(a[1])
 }
 
 func read(in [4]byte) [4]byte {
-	mtx.Lock()
-	defer mtx.Unlock()
+	_mtx.Lock()
+	defer _mtx.Unlock()
 
-	_, err := conn.Write(in[:])
+	_, err := _conn.Write(in[:])
 	if err != nil {
 		panic("Lost connection to Elevator Server")
 	}
 
 	var out [4]byte
-	_, err = conn.Read(out[:])
+	_, err = _conn.Read(out[:])
 	if err != nil {
 		panic("Lost connection to Elevator Server")
 	}
@@ -90,10 +82,10 @@ func read(in [4]byte) [4]byte {
 }
 
 func write(in [4]byte) {
-	mtx.Lock()
-	defer mtx.Unlock()
+	_mtx.Lock()
+	defer _mtx.Unlock()
 
-	_, err := conn.Write(in[:])
+	_, err := _conn.Write(in[:])
 	if err != nil {
 		panic("Lost connection to Elevator Server")
 	}
@@ -137,18 +129,6 @@ func PollFloorSensor(receiver chan<- int) {
 		time.Sleep(PollRateMS * time.Millisecond)
 		v := GetFloor()
 		if v != prev && v != -1 {
-			receiver <- v
-		}
-		prev = v
-	}
-}
-
-func PollStopButton(receiver chan<- bool) {
-	prev := false
-	for {
-		time.Sleep(PollRateMS * time.Millisecond)
-		v := GetStop()
-		if v != prev {
 			receiver <- v
 		}
 		prev = v
