@@ -1,16 +1,20 @@
 package dataenums
 
-const (
-	NFloors           int = 4
-	NButtons          int = 3
-	PollRateMS            = 20
-	NElevators        int = 3
-	DoorOpenDurationS int = 3
-	MotorTimeoutS     int = 4 // TODO MAKE 3 s (worked on slow elevs)
-)
+import "time"
 
-// THE addr used to int helwvio
-const Addr string = "localhost:15657"
+// TODO PUT ALL CONSTS IN A CONFIG FILE
+const (
+	NFloors           int    = 4
+	NButtons          int    = 3
+	NElevators        int    = 3
+	PollRateMS               = 20 * time.Millisecond
+	DoorOpenDurationS        = 3 * time.Second
+	MotorTimeoutS            = 4 * time.Second // TODO MAKE 3s (worked on slow elevs)
+	BufferSize               = 4 * 1024
+	HeartbeatInterval        = 150 * time.Millisecond  // TODO REDUCE
+	HeartbeatTimeout         = 3000 * time.Millisecond // TODO REDUCE
+	Addr              string = "localhost:15657"
+)
 
 type Button int
 
@@ -84,8 +88,6 @@ type Message struct {
 	OnlineStatus  bool
 	AliveList     [NElevators]bool
 }
-
-
 
 type FromAssignerToNetwork struct {
 	HallRequests [NFloors][NButtons]ButtonState

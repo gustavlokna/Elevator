@@ -1,6 +1,5 @@
 package hwelevio
 
-// TODO ALEX + JAKOB
 import (
 	. "Project/dataenums"
 	"fmt"
@@ -44,12 +43,52 @@ func SetDoorOpenLamp(value bool) {
 	write([4]byte{4, toByte(value), 0, 0})
 }
 
-func GetButton(button Button, floor int) bool {
+func PollButtons(receiver chan<- ButtonEvent) {
+	prev := make([][3]bool, NFloors)
+	for {
+		time.Sleep(PollRateMS * time.Millisecond)
+		for f := 0; f < NFloors; f++ {
+			for b := BHallUp; b <= BCab; b++ {
+				v := getButton(b, f)
+				if v != prev[f][b] && v {
+					receiver <- ButtonEvent{f, Button(b)}
+				}
+				prev[f][b] = v
+			}
+		}
+	}
+}
+
+func PollFloorSensor(receiver chan<- int) {
+	prev := -1
+	for {
+		time.Sleep(PollRateMS)
+		v := getFloor()
+		if v != prev && v != -1 {
+			receiver <- v
+		}
+		prev = v
+	}
+}
+
+func PollObstructionSwitch(receiver chan<- bool) {
+	prev := false
+	for {
+		time.Sleep(PollRateMS)
+		v := getObstruction()
+		if v != prev {
+			receiver <- v
+		}
+		prev = v
+	}
+}
+
+func getButton(button Button, floor int) bool {
 	a := read([4]byte{6, byte(button), byte(floor), 0})
 	return toBool(a[1])
 }
 
-func GetFloor() int {
+func getFloor() int {
 	a := read([4]byte{7, 0, 0, 0})
 	if a[1] != 0 {
 		return int(a[2])
@@ -58,7 +97,7 @@ func GetFloor() int {
 	}
 }
 
-func GetObstruction() bool {
+func getObstruction() bool {
 	a := read([4]byte{9, 0, 0, 0})
 	return toBool(a[1])
 }
@@ -105,44 +144,4 @@ func toBool(a byte) bool {
 		b = true
 	}
 	return b
-}
-
-func PollButtons(receiver chan<- ButtonEvent) {
-	prev := make([][3]bool, NFloors)
-	for {
-		time.Sleep(PollRateMS * time.Millisecond)
-		for f := 0; f < NFloors; f++ {
-			for b := BHallUp; b <= BCab; b++ {
-				v := GetButton(b, f)
-				if v != prev[f][b] && v {
-					receiver <- ButtonEvent{f, Button(b)}
-				}
-				prev[f][b] = v
-			}
-		}
-	}
-}
-
-func PollFloorSensor(receiver chan<- int) {
-	prev := -1
-	for {
-		time.Sleep(PollRateMS * time.Millisecond)
-		v := GetFloor()
-		if v != prev && v != -1 {
-			receiver <- v
-		}
-		prev = v
-	}
-}
-
-func PollObstructionSwitch(receiver chan<- bool) {
-	prev := false
-	for {
-		time.Sleep(PollRateMS * time.Millisecond)
-		v := GetObstruction()
-		if v != prev {
-			receiver <- v
-		}
-		prev = v
-	}
 }

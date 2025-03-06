@@ -10,18 +10,13 @@ import (
 	"time"
 )
 
-// TODO MOVE CONFIG
-const bufferSize = 4 * 1024
-const heartbeatInterval = 150 * time.Millisecond
-const heartbeatTimeout = 3000 * time.Millisecond // TODO REDUCE 
-
 func Sender(port int, msgCh <-chan Message) {
 	conn := conn.DialBroadcastUDP(port)
 	addr, _ := net.ResolveUDPAddr("udp4", fmt.Sprintf("255.255.255.255:%d", port))
 
 	for msg := range msgCh {
 		jsonBytes, _ := json.Marshal(msg)
-		if len(jsonBytes) > bufferSize {
+		if len(jsonBytes) > BufferSize {
 			panic("Packet too large.")
 		}
 		conn.WriteTo(jsonBytes, addr)
@@ -31,12 +26,12 @@ func Sender(port int, msgCh <-chan Message) {
 func Receiver(port int, myID string, messageCh chan<- Message, registryCh chan<- NetworkNodeRegistry) {
 	lastSeen := make(map[string]time.Time)
 	reportedNew := make(map[string]bool)
-	var buf [bufferSize]byte
+	var buf [BufferSize]byte
 
 	conn := conn.DialBroadcastUDP(port)
 
 	for {
-		conn.SetReadDeadline(time.Now().Add(heartbeatInterval))
+		conn.SetReadDeadline(time.Now().Add(HeartbeatInterval))
 		n, _, err := conn.ReadFrom(buf[:])
 		if err != nil {
 			if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
@@ -63,7 +58,7 @@ func Receiver(port int, myID string, messageCh chan<- Message, registryCh chan<-
 		now := time.Now()
 		var lostNodes, activeNodes, newNodes []string
 		for id, t := range lastSeen {
-			if now.Sub(t) > heartbeatTimeout {
+			if now.Sub(t) > HeartbeatTimeout {
 				lostNodes = append(lostNodes, id)
 				delete(lastSeen, id)
 				delete(reportedNew, id)

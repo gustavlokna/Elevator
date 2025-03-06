@@ -137,6 +137,7 @@ func ElevatorDriver(
 
 			payloadFromElevator <- FromDriverToAssigner{Elevator: elevator, CompletedOrders: clearedRequests}
 			payloadToLights <- FromDriverToLight{CurrentFloor: elevator.CurrentFloor, DoorLight: false}
+			
 
 		case <-motorInactiveChan:
 
