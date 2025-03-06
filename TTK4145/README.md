@@ -1,8 +1,18 @@
-# TTK4145 Group 61
+# TTK4145 Group 32
+### Project Description 
+The program is a pure peer-to-peer, UDP-based system that utilizes a mesh network.
 
-This repository contains code for exercises and the elevator project for the NTNU course [Real-time Programming](https://www.ntnu.edu/studies/courses/TTK4145) as part of the master programmes Cybernetics and Robotics, and Electronics Systems Design and Innovation.
+The system consist of four independent modules. For detailed relationship see the class diagram.
 
-## Getting Started
+Driver: Manages all elevator sensors (floor and obstruction) and calculates the elevator’s current state. It propagates this state to the Assigner module and sets the motor direction as instructed by the Assigner. 
+
+Assigner: Assigns confirmed orders received from the Network module and forwards these to the Lights and Driver modules. It also forwards new and completed orders to the Network module, as well as an updated elevator state.
+
+Lights: Handles all button, floor and door lights based on input from the Assigner and Driver modules.
+
+Network: Maintains the state of all elevators, propagates the cyclic counter, and transmits the local elevator state across the network. 
+
+![Demo Image](images/ClassDiagram.png)
 
 ### Pre-requisites
 * [Go](https://go.dev/dl/) (v1.21.7 or higher)
@@ -15,60 +25,22 @@ Download the source repository as zip, and extract in desired directory.
 Navigate into the project directory
 
 ```bash
-cd <yourpath>/TTK4145-main/Project
+cd <yourpath>/Project
 ```
 
-Add HRA dependency to the `elevator` module
+Add HRA dependency to the `orderassigner` module
 
 ```bash
-mv ~/Downloads/hall_request_assigner ./elevator/
+mv ~/Downloads/hall_request_assigner ./orderassigner/
 ```
 
 ### Build and Run
-
-Build the project with:
+```bash
+chmod +x run.sh
+./run.sh
+```
+### Terminate Terminal
 
 ```bash
-# Nagivate to module
-cd ./init
-
-# elevator argument strictly required
-go build -o elevator
+pkill -f run.sh
 ```
-
-Run the executable
-```bash
-./elevator
-```
-
-
-
-### Remaining problems
-elevatordriver 
-- lights
-- obstruction
-- motorinactivity 
-
-Add activ channel on PayloadFromElevator
- if obst or motorinactivity we set value = false
-
-In orderassigner have list of active nodes, only assign to elevs that are active in that list :-)
-
-
-Project Pairs 
-
-
-
-Network 
-We are yet not able to preprosses incoming data
-- sol copy from old way
-- if we should use argpass we need to overwrite curret checking 
-
-
-//TO RUN 
-//chmod +x run.sh
-//./run.sh
-
-//TO KILL 
-// pkill -f run.sh
-
