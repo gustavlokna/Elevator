@@ -15,7 +15,6 @@ Network: Maintains the state of all elevators, propagates the cyclic counter, an
 ![Demo Image](images/ClassDiagram.png)
 
 ### Pre-requisites
-* [Go](https://go.dev/dl/) (v1.21.7 or higher)
 * [hall_request_assigner (HRA)](https://github.com/TTK4145/Project-resources/releases/tag/v1.1.1) (v1.1.1) by [@klasbo](https://github.com/klasbo)
 
 ### Installation
