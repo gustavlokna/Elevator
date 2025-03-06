@@ -9,21 +9,17 @@ import (
 	"time"
 )
 
-// TODO MOVE DATA ENUMS ?
-const messagePort int = 1338
-
 func Network(messagefromOrderAssigner <-chan FromAssignerToNetwork,
 	messagetoOrderAssignerChannel chan<- FromNetworkToAssigner,
 	nodeID string) {
 
-	// TODO MAKE CODE COMPATIBLE WITHOUT THIS "STR TO INT CONV"
 	nodeIDInt, _ := strconv.Atoi(nodeID)
 
 	nodeRegistryChannel := make(chan NetworkNodeRegistry)
 	broadcastTransmissionChannel := make(chan Message)
 	broadcastReceiverChannel := make(chan Message)
-	go broadcast.Sender(messagePort, broadcastTransmissionChannel)
-	go broadcast.Receiver(messagePort, nodeID, broadcastReceiverChannel, nodeRegistryChannel)
+	go broadcast.Sender(MessagePort, broadcastTransmissionChannel)
+	go broadcast.Receiver(MessagePort, nodeID, broadcastReceiverChannel, nodeRegistryChannel)
 
 	var (
 		elevatorList   = initializeElevatorList()
@@ -40,15 +36,12 @@ func Network(messagefromOrderAssigner <-chan FromAssignerToNetwork,
 
 		select {
 		case reg := <-nodeRegistryChannel:
-			// TODO THIS reg/ or it can be a double variable CAN ALSO CONTAIN THE ONLIE STATUS :)
 			for _, lostNode := range reg.Lost {
 				fmt.Printf("Node lost connection: %s\n", lostNode)
 				lostNodeInt, _ := strconv.Atoi(lostNode)
 				if lostNodeInt == nodeIDInt {
 					online = false
 				} else {
-					fmt.Println("WE SET AN ELEVATOR INACTIVE")
-					// check if newOrder = true must be set (but i do not think so)
 					aliveList[lostNodeInt] = false
 					hallOrderList[lostNodeInt] = resetHallCalls()
 				}
@@ -68,7 +61,6 @@ func Network(messagefromOrderAssigner <-chan FromAssignerToNetwork,
 			senderId, _ := strconv.Atoi(msg.SenderId)
 			ackMap[senderId] = reflect.DeepEqual(elevatorList, msg.ElevatorList) && reflect.DeepEqual(hallOrderList, msg.HallOrderList)
 
-			// TODO THIS CAN BE A FUNC
 			if !reflect.DeepEqual(hallOrderList, msg.HallOrderList) || !reflect.DeepEqual(aliveList, msg.AliveList) {
 				newOrder = true
 			}
@@ -87,7 +79,6 @@ func Network(messagefromOrderAssigner <-chan FromAssignerToNetwork,
 			hallOrderList[senderId] = msg.HallOrderList[senderId]
 			hallOrderList = cyclicCounter(hallOrderList, nodeIDInt)
 
-			//TODO THIS CAN BE FUNC
 			allAcknowledged := true
 			for i := 0; i < NElevators; i++ {
 				if nodeIDInt == i {

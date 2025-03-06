@@ -35,7 +35,6 @@ func Receiver(port int, myID string, messageCh chan<- Message, registryCh chan<-
 		n, _, err := conn.ReadFrom(buf[:])
 		if err != nil {
 			if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
-				// just heartbeat, carry on
 			} else {
 				fmt.Println("Receiver error:", err)
 			}

@@ -34,7 +34,7 @@ func ElevatorDriver(
 	payloadToLights <- FromDriverToLight{CurrentFloor: elevator.CurrentFloor, DoorLight: false}
 
 	for {
-		var clearedRequests [NFloors][NButtons]bool //TODO: Remove
+		var clearedRequests [NFloors][NButtons]bool 
 		select {
 		case elevator.CurrentFloor = <-floorChannel:
 			elevator.ActiveSatus = true
@@ -119,10 +119,6 @@ func ElevatorDriver(
 				clearedRequests[elevator.CurrentFloor][BHallUp] = true
 				elevator.Requests[elevator.CurrentFloor][BHallUp] = false
 
-			//case elevator.Requests[elevator.CurrentFloor][BCab]:
-			// This case was not necessary after changing chooseDirection
-			// but this can have induced other errors. I have not tried yet.
-
 			default:
 				elevator = chooseDirection(elevator)
 				hwelevio.SetMotorDirection(elevator.Dirn)
@@ -137,7 +133,7 @@ func ElevatorDriver(
 
 			payloadFromElevator <- FromDriverToAssigner{Elevator: elevator, CompletedOrders: clearedRequests}
 			payloadToLights <- FromDriverToLight{CurrentFloor: elevator.CurrentFloor, DoorLight: false}
-			
+
 
 		case <-motorInactiveChan:
 
@@ -175,7 +171,6 @@ func ElevatorDriver(
 					doorOpenChan <- true
 					payloadToLights <- FromDriverToLight{CurrentFloor: elevator.CurrentFloor, DoorLight: true}
 
-				// TODO Combine CASES BELOW
 				case requestsAbove(elevator):
 					motorActiveChan <- true
 					elevator.CurrentBehaviour = EBMoving

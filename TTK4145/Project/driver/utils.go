@@ -1,4 +1,4 @@
-package elevatordriver
+package driver
 
 import (
 	. "Project/dataenums"
@@ -30,7 +30,7 @@ func decideDirectionUp(elevator Elevator) DirnBehaviourPair {
 	case requestsAbove(elevator):
 		return DirnBehaviourPair{MDUp, EBMoving}
 	case requestsHere(elevator):
-		return DirnBehaviourPair{MDStop, EBIdle} // Was MDDown
+		return DirnBehaviourPair{MDStop, EBIdle} 
 	case requestsBelow(elevator):
 		return DirnBehaviourPair{MDDown, EBMoving}
 	default:
@@ -43,7 +43,7 @@ func decideDirectionDown(elevator Elevator) DirnBehaviourPair {
 	case requestsBelow(elevator):
 		return DirnBehaviourPair{MDDown, EBMoving}
 	case requestsHere(elevator):
-		return DirnBehaviourPair{MDStop, EBIdle} //WAS MDUp
+		return DirnBehaviourPair{MDStop, EBIdle} 
 	case requestsAbove(elevator):
 		return DirnBehaviourPair{MDUp, EBMoving}
 	default:

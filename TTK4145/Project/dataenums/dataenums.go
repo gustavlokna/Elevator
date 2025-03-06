@@ -2,17 +2,17 @@ package dataenums
 
 import "time"
 
-// TODO PUT ALL CONSTS IN A CONFIG FILE
 const (
 	NFloors           int    = 4
 	NButtons          int    = 3
 	NElevators        int    = 3
 	PollRateMS               = 20 * time.Millisecond
 	DoorOpenDurationS        = 3 * time.Second
-	MotorTimeoutS            = 4 * time.Second // TODO MAKE 3s (worked on slow elevs)
+	MotorTimeoutS            = 4 * time.Second 
 	BufferSize               = 4 * 1024
-	HeartbeatInterval        = 150 * time.Millisecond  // TODO REDUCE
-	HeartbeatTimeout         = 3000 * time.Millisecond // TODO REDUCE
+	HeartbeatInterval        = 150 * time.Millisecond  
+	HeartbeatTimeout         = 3000 * time.Millisecond 
+	MessagePort       int    = 1338
 	Addr              string = "localhost:15657"
 )
 
