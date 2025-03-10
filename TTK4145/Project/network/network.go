@@ -9,9 +9,6 @@ import (
 	"time"
 )
 
-// TODO MOVE DATA ENUMS ?
-const messagePort int = 1338
-
 func Network(messagefromOrderAssigner <-chan FromAssignerToNetwork,
 	messagetoOrderAssignerChannel chan<- FromNetworkToAssigner,
 	nodeID string) {
@@ -22,8 +19,8 @@ func Network(messagefromOrderAssigner <-chan FromAssignerToNetwork,
 	nodeRegistryChannel := make(chan NetworkNodeRegistry)
 	broadcastTransmissionChannel := make(chan Message)
 	broadcastReceiverChannel := make(chan Message)
-	go broadcast.Sender(messagePort, broadcastTransmissionChannel)
-	go broadcast.Receiver(messagePort, nodeID, broadcastReceiverChannel, nodeRegistryChannel)
+	go broadcast.Sender(MessagePort, broadcastTransmissionChannel)
+	go broadcast.Receiver(MessagePort, nodeID, broadcastReceiverChannel, nodeRegistryChannel)
 
 	var (
 		elevatorList   = initializeElevatorList()

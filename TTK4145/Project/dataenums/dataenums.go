@@ -14,6 +14,7 @@ const (
 	HeartbeatInterval        = 150 * time.Millisecond  // TODO REDUCE
 	HeartbeatTimeout         = 3000 * time.Millisecond // TODO REDUCE
 	Addr              string = "localhost:15657"
+	MessagePort int = 1338
 )
 
 type Button int
