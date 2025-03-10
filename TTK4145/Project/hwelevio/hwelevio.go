@@ -46,7 +46,7 @@ func SetDoorOpenLamp(value bool) {
 func PollButtons(receiver chan<- ButtonEvent) {
 	prev := make([][3]bool, NFloors)
 	for {
-		time.Sleep(PollRateMS * time.Millisecond)
+		time.Sleep(PollRateMS)
 		for f := 0; f < NFloors; f++ {
 			for b := BHallUp; b <= BCab; b++ {
 				v := getButton(b, f)
