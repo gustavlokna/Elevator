@@ -187,28 +187,21 @@ func ElevatorDriver(
 					hwelevio.SetMotorDirection(elevator.Dirn)
 					motorActiveChan <- true
 				
-				case  requestsHere(elevator):
-					
-					/*
-					// TODO JAOKB + ALEX
-					check if necessary, if elevator does not work as intended
-					dirnBehaviour := decideDirection(elevator)
-					elevator.Dirn = dirnBehaviour.Dirn
-					*/
+				case  elevator.Requests[elevator.CurrentFloor][BHallUp]:
 					elevator.CurrentBehaviour = EBDoorOpen
+					elevator.Dirn = MDUp
 					doorOpenChan <- true
 					payloadToLights <- FromDriverToLight{CurrentFloor: elevator.CurrentFloor, DoorLight: true}
-				default:	
-					/*
-					// TODO JAOKB + ALEX
-					check if correct
-					dirnBehaviour := decideDirection(elevator)
-					elevator.Dirn = dirnBehaviour.Dirn
 
-					Was 
-					//elevator.Dirn = MDStop
-					But i belive that was wrong
-					*/
+				case  elevator.Requests[elevator.CurrentFloor][BHallDown]:
+					elevator.CurrentBehaviour = EBDoorOpen
+					elevator.Dirn = MDDown
+					doorOpenChan <- true
+					payloadToLights <- FromDriverToLight{CurrentFloor: elevator.CurrentFloor, DoorLight: true}
+
+				//Assuming we wont need a case for BCab since it should clear that order aswell given the if statement in the doorClosedChan case.
+				
+				default:	
 					elevator = chooseDirection(elevator)
 					hwelevio.SetMotorDirection(elevator.Dirn)
 				}
