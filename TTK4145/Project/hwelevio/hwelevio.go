@@ -1,37 +1,60 @@
 package hwelevio
 
 import (
-	. "Project/dataenums"
 	"fmt"
 	"net"
 	"sync"
 	"time"
 )
 
-var _initialize bool = false
+const _pollRate = 20 * time.Millisecond
+
+var _initialized bool = false
+var _numFloors int = 4
 var _mtx sync.Mutex
 var _conn net.Conn
 
-func Init(addr string) {
-	print("_initialize", _initialize)
-	if _initialize {
-		fmt.Println("Driver already _initialize!")
+type MotorDirection int
+
+const (
+	MD_Up   MotorDirection = 1
+	MD_Down                = -1
+	MD_Stop                = 0
+)
+
+type ButtonType int
+
+const (
+	BT_HallUp   ButtonType = 0
+	BT_HallDown            = 1
+	BT_Cab                 = 2
+)
+
+type ButtonEvent struct {
+	Floor  int
+	Button ButtonType
+}
+
+func Init(addr string, numFloors int) {
+	if _initialized {
+		fmt.Println("Driver already initialized!")
 		return
 	}
+	_numFloors = numFloors
 	_mtx = sync.Mutex{}
 	var err error
 	_conn, err = net.Dial("tcp", addr)
 	if err != nil {
 		panic(err.Error())
 	}
-	_initialize = true
+	_initialized = true
 }
 
-func SetMotorDirection(dir HWMotorDirection) {
+func SetMotorDirection(dir MotorDirection) {
 	write([4]byte{1, byte(dir), 0, 0})
 }
 
-func SetButtonLamp(button Button, floor int, value bool) {
+func SetButtonLamp(button ButtonType, floor int, value bool) {
 	write([4]byte{2, byte(button), byte(floor), toByte(value)})
 }
 
@@ -43,15 +66,19 @@ func SetDoorOpenLamp(value bool) {
 	write([4]byte{4, toByte(value), 0, 0})
 }
 
+func SetStopLamp(value bool) {
+	write([4]byte{5, toByte(value), 0, 0})
+}
+
 func PollButtons(receiver chan<- ButtonEvent) {
-	prev := make([][3]bool, NFloors)
+	prev := make([][3]bool, _numFloors)
 	for {
-		time.Sleep(PollRateMS)
-		for f := 0; f < NFloors; f++ {
-			for b := BHallUp; b <= BCab; b++ {
-				v := getButton(b, f)
-				if v != prev[f][b] && v {
-					receiver <- ButtonEvent{f, Button(b)}
+		time.Sleep(_pollRate)
+		for f := 0; f < _numFloors; f++ {
+			for b := ButtonType(0); b < 3; b++ {
+				v := GetButton(b, f)
+				if v != prev[f][b] && v != false {
+					receiver <- ButtonEvent{f, ButtonType(b)}
 				}
 				prev[f][b] = v
 			}
@@ -62,9 +89,21 @@ func PollButtons(receiver chan<- ButtonEvent) {
 func PollFloorSensor(receiver chan<- int) {
 	prev := -1
 	for {
-		time.Sleep(PollRateMS)
-		v := getFloor()
+		time.Sleep(_pollRate)
+		v := GetFloor()
 		if v != prev && v != -1 {
+			receiver <- v
+		}
+		prev = v
+	}
+}
+
+func PollStopButton(receiver chan<- bool) {
+	prev := false
+	for {
+		time.Sleep(_pollRate)
+		v := GetStop()
+		if v != prev {
 			receiver <- v
 		}
 		prev = v
@@ -74,8 +113,8 @@ func PollFloorSensor(receiver chan<- int) {
 func PollObstructionSwitch(receiver chan<- bool) {
 	prev := false
 	for {
-		time.Sleep(PollRateMS)
-		v := getObstruction()
+		time.Sleep(_pollRate)
+		v := GetObstruction()
 		if v != prev {
 			receiver <- v
 		}
@@ -83,12 +122,12 @@ func PollObstructionSwitch(receiver chan<- bool) {
 	}
 }
 
-func getButton(button Button, floor int) bool {
+func GetButton(button ButtonType, floor int) bool {
 	a := read([4]byte{6, byte(button), byte(floor), 0})
 	return toBool(a[1])
 }
 
-func getFloor() int {
+func GetFloor() int {
 	a := read([4]byte{7, 0, 0, 0})
 	if a[1] != 0 {
 		return int(a[2])
@@ -97,7 +136,12 @@ func getFloor() int {
 	}
 }
 
-func getObstruction() bool {
+func GetStop() bool {
+	a := read([4]byte{8, 0, 0, 0})
+	return toBool(a[1])
+}
+
+func GetObstruction() bool {
 	a := read([4]byte{9, 0, 0, 0})
 	return toBool(a[1])
 }

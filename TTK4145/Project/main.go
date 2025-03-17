@@ -1,63 +1,20 @@
 package main
 
 import (
-	"Project/assigner"
-	. "Project/dataenums"
-	"Project/driver"
 	"Project/hwelevio"
-	"Project/lights"
-	"Project/network"
-	"flag"
-	"strconv"
+	"Project/elev"
 )
 
 func main() {
 
-	nodeID := parseArgs()
+	numFloors := 4
 
-	hwelevio.Init(Addr)
+	hwelevio.Init("localhost:15657", numFloors)
 
-	var (
-		newOrderChannel       = make(chan [NFloors][NButtons]bool, 100)
-		fromDriverToAssigner  = make(chan FromDriverToAssigner, 100)
-		fromAssignerToNetwork = make(chan FromAssignerToNetwork, 100)
-		fromNetworkToAssigner = make(chan FromNetworkToAssigner, 100)
-		fromDriverToLight     = make(chan FromDriverToLight, 100)
-		fromAssignertoLight   = make(chan [NFloors][NButtons]ButtonState, 100)
-	)
+	var d hwelevio.MotorDirection = hwelevio.MD_Up
+	//hwelevio.SetMotorDirection(d)
 
-	go assigner.Assigner(
-		newOrderChannel,
-		fromDriverToAssigner,
-		fromAssignerToNetwork,
-		fromNetworkToAssigner,
-		fromAssignertoLight,
-		nodeID,
-	)
+	elevator.Init_elevator_logic(numFloors, d)
 
-	go driver.ElevatorDriver(
-		newOrderChannel,
-		fromDriverToAssigner,
-		fromDriverToLight,
-	)
-
-	go network.Network(
-		fromAssignerToNetwork,
-		fromNetworkToAssigner,
-		nodeID,
-	)
-
-	go lights.LightsHandler(
-		fromAssignertoLight,
-		fromDriverToLight,
-	)
-	// TODO is the select needed ?
 	select {}
-}
-
-func parseArgs() string {
-	var nodeID int
-	flag.IntVar(&nodeID, "id", 0, "Node ID")
-	flag.Parse()
-	return strconv.Itoa(nodeID)
 }
