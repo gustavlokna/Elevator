@@ -16,14 +16,23 @@ func setMotorDir(dir HWMotorDirection) Button {
 	}
 }
 
-func setMotorOppositeDir(dir HWMotorDirection) HWMotorDirection {
-	switch dir {
+func setMotorOppositeDir(e Elevator) HWMotorDirection {
+	switch e.Dirn {
 	case MDUp:
 		return MDDown
 	case MDDown:
 		return MDUp
-	default:
-		return MDStop
+	case MDStop:
+		switch {
+		case requestsAbove(e) || e.Requests[e.CurrentFloor][BHallUp]:
+			return MDDown
+		case requestsBelow(e) || e.Requests[e.CurrentFloor][BHallDown]:
+			return MDUp
+		default:
+			return MDStop
+		}
+	default: 
+		panic("invalid direction")
 	}
 }
 
@@ -34,7 +43,7 @@ func orderAtCurrentFloorInDir(e Elevator) bool {
 	case MDDown:
 		return e.Requests[e.CurrentFloor][BHallDown] || e.Requests[e.CurrentFloor][BCab]
 	default:
-		return false
+		return e.Requests[e.CurrentFloor][BHallUp] || e.Requests[e.CurrentFloor][BHallDown] || e.Requests[e.CurrentFloor][BCab]
 	}
 }
 
@@ -45,7 +54,7 @@ func orderAtCurrentFloorOppositeDir(e Elevator) bool {
 	case MDDown:
 		return e.Requests[e.CurrentFloor][BHallUp] || e.Requests[e.CurrentFloor][BCab]
 	default:
-		return false
+		return e.Requests[e.CurrentFloor][BHallUp] || e.Requests[e.CurrentFloor][BHallDown] || e.Requests[e.CurrentFloor][BCab] //?
 	}
 }
 
@@ -65,8 +74,10 @@ func orderOppositeDir(e Elevator) bool {
 		return requestsBelow(e)
 	case MDDown:
 		return requestsAbove(e)
+	default:
+		return requestsBelow(e) || requestsAbove(e)
+
 	}
-	return false
 }
 
 func requestsAbove(elevator Elevator) bool {
@@ -90,7 +101,6 @@ func requestsBelow(elevator Elevator) bool {
 	}
 	return false
 }
-
 
 // TODO REMOVE
 func ElevatorPrint(e Elevator) {

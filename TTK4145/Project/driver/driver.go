@@ -91,7 +91,7 @@ func ElevatorDriver(
 				*/
 
 			case orderAtCurrentFloorOppositeDir(elevator): 
-				elevator.Dirn = setMotorOppositeDir(elevator.Dirn)
+				elevator.Dirn = setMotorOppositeDir(elevator)
 				clearedRequests[elevator.CurrentFloor][setMotorDir(elevator.Dirn)] = true
 				elevator.Requests[elevator.CurrentFloor][setMotorDir(elevator.Dirn)] = false
 
@@ -103,6 +103,8 @@ func ElevatorDriver(
 				motorActiveChan <- true
 				*/
 			default:
+				elevator.Dirn = MDStop
+				hwelevio.SetMotorDirection(MDStop)
 			}
 
 			if elevator.Requests[elevator.CurrentFloor][BCab] {
@@ -132,6 +134,7 @@ func ElevatorDriver(
 			payloadFromElevator <- FromDriverToAssigner{Elevator: elevator, CompletedOrders: clearedRequests}
 
 		case elevator.Requests = <-newOrderChannel:
+			ElevatorPrint(elevator)
 			switch elevator.CurrentBehaviour {
 			case EBIdle:
 				switch {
@@ -146,14 +149,14 @@ func ElevatorDriver(
 					motorActiveChan <- true
 				
 				case orderAtCurrentFloorOppositeDir(elevator): 
-					elevator.Dirn = setMotorOppositeDir(elevator.Dirn)
+					elevator.Dirn = setMotorOppositeDir(elevator)
 					elevator.CurrentBehaviour = EBDoorOpen
 					doorOpenChan <- true
 					payloadToLights <- FromDriverToLight{CurrentFloor: elevator.CurrentFloor, DoorLight: true}
 					
 				case orderOppositeDir(elevator): 
 					elevator.CurrentBehaviour = EBMoving
-					elevator.Dirn = setMotorOppositeDir(elevator.Dirn)
+					elevator.Dirn = setMotorOppositeDir(elevator)
 					hwelevio.SetMotorDirection(elevator.Dirn)
 					motorActiveChan <- true
 				default:	
