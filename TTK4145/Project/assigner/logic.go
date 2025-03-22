@@ -44,18 +44,18 @@ func assignOrders(payload FromNetworkToAssigner,
 
 	jsonBytes, err := json.Marshal(hraInput)
 	if err != nil {
-		print("Failed to marshal HRAInput: %v\n", err)
+		//print("Failed to marshal HRAInput: %v\n", err)
 		return orderList
 	}
 	ret, err := exec.Command("hall_request_assigner", "-i", string(jsonBytes)).CombinedOutput()
 	if err != nil {
-		print("exec.Command error: %v\nOutput: %s\n", err, string(ret))
+		//print("exec.Command error: %v\nOutput: %s\n", err, string(ret))
 		return orderList
 	}
 
 	output := make(map[string][][2]bool)
 	if err := json.Unmarshal(ret, &output); err != nil {
-		print("json.Unmarshal error: %v\n", err)
+		//print("json.Unmarshal error: %v\n", err)
 		return orderList
 	}
 	elevatorID := fmt.Sprintf("elevator_%d", nodeID)

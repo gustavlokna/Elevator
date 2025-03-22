@@ -30,9 +30,6 @@ func ElevatorDriver(
 	elevator := initelevator()
 	hwelevio.SetMotorDirection(elevator.Dirn)
 
-	payloadFromElevator <- FromDriverToAssigner{Elevator: elevator, CompletedOrders: clearedRequests}
-	payloadToLights <- FromDriverToLight{CurrentFloor: elevator.CurrentFloor, DoorLight: false}
-
 	for {
 
 		select {
