@@ -87,6 +87,7 @@ func ElevatorDriver(
 			switch {
 			case orderAtCurrentFloorInDir(elevator):
 				clearedRequests[elevator.CurrentFloor][dirToBtn(elevator.Dirn)] = true
+				// TODO REMOVE BELLOW ? THOUGH I DID BUT DO NOT DEER NOW 
 				elevator.Requests[elevator.CurrentFloor][dirToBtn(elevator.Dirn)] = false
 
 			case orderInCurrentDir(elevator):
@@ -94,6 +95,7 @@ func ElevatorDriver(
 			case orderAtCurrentFloorOppositeDir(elevator):
 				elevator.Dirn = setMotorOppositeDir(elevator)
 				clearedRequests[elevator.CurrentFloor][dirToBtn(elevator.Dirn)] = true
+				// TODO REMOVE BELLOW ? THOUGH I DID BUT DO NOT DEER NOW 
 				elevator.Requests[elevator.CurrentFloor][dirToBtn(elevator.Dirn)] = false
 
 			case orderOppositeDir(elevator):
@@ -166,7 +168,9 @@ func ElevatorDriver(
 				}
 
 			case Moving:
+				// TODO TURN OFF LIGHTS? 
 			case DoorOpen:
+				// TODO CHECK IF ORDERS HERE AND START TIMER ? 
 			}
 			ElevatorPrint(elevator)
 			payloadFromElevator <- FromDriverToAssigner{Elevator: elevator, CompletedOrders: clearedRequests}

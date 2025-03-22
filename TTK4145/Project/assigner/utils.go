@@ -23,6 +23,7 @@ func updateLightStates(payload FromNetworkToAssigner,
 	return updatedLights
 }
 
+// TODO ALEX WRITE BETTER 
 func handlePayloadFromNetwork(
 	payload FromAssignerToNetwork,
 	netPayload FromNetworkToAssigner,
