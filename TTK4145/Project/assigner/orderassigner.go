@@ -18,10 +18,9 @@ func Assigner(
 ) {
 	var (
 		PayloadFromassignerToNetwork = initPayloadToNetwork()
-		prevAssignedOrders           [NFloors][NButtons]bool
 		drv_buttons                  = make(chan ButtonEvent)
 		prevMsg                      FromNetworkToAssigner
-		newOrder                     bool
+		shouldAss                     bool
 	)
 	// Convert nodeID to int
 	myID, err := strconv.Atoi(nodeID)
@@ -52,24 +51,23 @@ func Assigner(
 		case msg := <-fromNetworkChannel:
 
 			if !reflect.DeepEqual(prevMsg.HallOrderList, msg.HallOrderList) || !reflect.DeepEqual(prevMsg, msg.AliveList) {
-				newOrder = true
+				shouldAss = true
 			}
 
 			for i := 0; i < NElevators; i++ {
 				if !reflect.DeepEqual(prevMsg.ElevatorList[i].CabRequests, msg.ElevatorList[i].CabRequests) {
-					newOrder = true
+					shouldAss = true
 					break
 				}
 			}			
 			
 			PayloadFromassignerToNetwork = handlePayloadFromNetwork(PayloadFromassignerToNetwork,
 				msg, myID)
-			if newOrder{
+			
+			if shouldAss {
 				newOrders := assignOrders(msg, myID)
-				if newOrders != prevAssignedOrders {
-					newOrderChannel <- newOrders
-					prevAssignedOrders = newOrders
-				}
+				newOrderChannel <- newOrders
+				prevMsg = msg
 			}
 			fromAsstoLight <- updateLightStates(msg, myID)
 
