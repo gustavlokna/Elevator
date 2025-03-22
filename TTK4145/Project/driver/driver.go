@@ -29,7 +29,7 @@ func ElevatorDriver(
 
 	elevator := initelevator()
 	hwelevio.SetMotorDirection(elevator.Dirn)
-	
+
 	for {
 
 		select {
@@ -138,21 +138,18 @@ func ElevatorDriver(
 					elevator.CurrentBehaviour = DoorOpen
 					doorOpenChan <- true
 					payloadToLights <- FromDriverToLight{CurrentFloor: elevator.CurrentFloor, DoorLight: true}
-					payloadFromElevator <- FromDriverToAssigner{Elevator: elevator, CompletedOrders: clearedRequests}
 
 				case orderInCurrentDir(elevator):
 					elevator.CurrentBehaviour = Moving
 					hwelevio.SetMotorDirection(elevator.Dirn)
 					motorActiveChan <- true
 					payloadToLights <- FromDriverToLight{CurrentFloor: elevator.CurrentFloor, DoorLight: false}
-					payloadFromElevator <- FromDriverToAssigner{Elevator: elevator, CompletedOrders: clearedRequests}
 
 				case orderAtCurrentFloorOppositeDir(elevator):
 					elevator.Dirn = setMotorOppositeDir(elevator)
 					elevator.CurrentBehaviour = DoorOpen
 					doorOpenChan <- true
 					payloadToLights <- FromDriverToLight{CurrentFloor: elevator.CurrentFloor, DoorLight: true}
-					payloadFromElevator <- FromDriverToAssigner{Elevator: elevator, CompletedOrders: clearedRequests}
 
 				case orderOppositeDir(elevator):
 					elevator.CurrentBehaviour = Moving
@@ -160,18 +157,19 @@ func ElevatorDriver(
 					hwelevio.SetMotorDirection(elevator.Dirn)
 					motorActiveChan <- true
 					payloadToLights <- FromDriverToLight{CurrentFloor: elevator.CurrentFloor, DoorLight: false}
-					payloadFromElevator <- FromDriverToAssigner{Elevator: elevator, CompletedOrders: clearedRequests}
+
 				default:
 					elevator.Dirn = MDStop
 					hwelevio.SetMotorDirection(MDStop)
 					payloadToLights <- FromDriverToLight{CurrentFloor: elevator.CurrentFloor, DoorLight: false}
-					payloadFromElevator <- FromDriverToAssigner{Elevator: elevator, CompletedOrders: clearedRequests}
+
 				}
 
 			case Moving:
 			case DoorOpen:
 			}
-			
+			payloadFromElevator <- FromDriverToAssigner{Elevator: elevator, CompletedOrders: clearedRequests}
+
 		}
 	}
 }

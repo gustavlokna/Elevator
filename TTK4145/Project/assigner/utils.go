@@ -2,7 +2,6 @@ package assigner
 
 import (
 	. "Project/dataenums"
-	"fmt"
 )
 
 func initPayloadToNetwork() FromAssignerToNetwork {
@@ -12,16 +11,15 @@ func initPayloadToNetwork() FromAssignerToNetwork {
 	}
 	return payload
 }
-func updateLightStates(payload FromNetworkToAssigner, myID int) [NFloors][NButtons]ButtonState {
-	var updatedLights [NFloors][NButtons]ButtonState
-	updatedLights = payload.HallOrderList[myID]
-	// Include cab calls for the local elevator
+func updateLightStates(payload FromNetworkToAssigner,
+	myID int) [NFloors][NButtons]ButtonState {
+
+	updatedLights := payload.HallOrderList[myID]
 	for floor := 0; floor < NFloors; floor++ {
 		if payload.ElevatorList[myID].CabRequests[floor] {
 			updatedLights[floor][BCab] = OrderAssigned
 		}
 	}
-
 	return updatedLights
 }
 
@@ -46,31 +44,25 @@ func handlePayloadFromNetwork(
 	return payload
 }
 
-func handlePayloadFromElevator(fromElevator FromDriverToAssigner,
+// TODO BETTER NAME THAN msg REQUIRED
+func handlePayloadFromElevator(msg FromDriverToAssigner,
 	toNetwork FromAssignerToNetwork, nodeID string) FromAssignerToNetwork {
 
-	behavior, direction, cabRequests := convertElevatorState(fromElevator.Elevator)
+	cabRequests := make([]bool, NFloors)
+	for f := 0; f < NFloors; f++ {
+		cabRequests[f] = msg.Elevator.Requests[f][BCab]
+	}
+
 	toNetwork.States[nodeID] = HRAElevState{
-		Behaviour:    behavior,
-		Floor:       fromElevator.Elevator.CurrentFloor,
-		Direction:   direction,
+		Behaviour:   ebToString(msg.Elevator.CurrentBehaviour),
+		Floor:       msg.Elevator.CurrentFloor,
+		Direction:   elevDirToString(msg.Elevator.Dirn),
 		CabRequests: cabRequests,
 	}
-	toNetwork.ActiveSatus = fromElevator.Elevator.ActiveSatus
-	toNetwork = orderComplete(toNetwork, nodeID, fromElevator.CompletedOrders)
+	toNetwork.ActiveSatus = msg.Elevator.ActiveSatus
+	toNetwork = orderComplete(toNetwork, nodeID, msg.CompletedOrders)
 
 	return toNetwork
-}
-
-func convertElevatorState(e Elevator) (string, string, []bool) {
-	behavior := ebToString(e.CurrentBehaviour)
-	direction := elevDirToString(e.Dirn)
-	cabRequests := make([]bool, NFloors)
-
-	for f := 0; f < NFloors; f++ {
-		cabRequests[f] = e.Requests[f][BCab]
-	}
-	return behavior, direction, cabRequests
 }
 
 func ebToString(behaviour ElevatorBehaviour) string {
@@ -96,16 +88,5 @@ func elevDirToString(d HWMotorDirection) string {
 		return "up"
 	default:
 		return "DirUnknown"
-	}
-}
-
-// TODO REMOVE
-func PrintOrders(orders [NFloors][NButtons]bool) {
-	for floor := 0; floor < NFloors; floor++ {
-		for btn := 0; btn < NButtons; btn++ {
-			if orders[floor][btn] {
-				fmt.Printf("Order at floor %d, button %d: true\n", floor, btn)
-			}
-		}
 	}
 }
