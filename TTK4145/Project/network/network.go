@@ -94,7 +94,7 @@ func Network(messagefromOrderAssigner <-chan FromAssignerToNetwork,
 						ackMap[i] = false
 					}
 				}
-
+				printHallOrderList(hallOrderList)
 				messagetoOrderAssignerChannel <- FromNetworkToAssigner{
 					AliveList:     aliveList,
 					ElevatorList:  elevatorList,

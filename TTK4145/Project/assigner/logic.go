@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os/exec"
-	"strconv"
 )
 
 func assignOrders(payload FromNetworkToAssigner,
@@ -25,7 +24,8 @@ func assignOrders(payload FromNetworkToAssigner,
 	}
 	for i, alive := range payload.AliveList {
 		if alive {
-			hraInput.States[strconv.Itoa(i)] = payload.ElevatorList[i]
+			elevatorID := fmt.Sprintf("elevator_%d", i)
+			hraInput.States[elevatorID] = payload.ElevatorList[i]
 		}
 	}
 
