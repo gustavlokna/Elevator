@@ -45,11 +45,12 @@ func ElevatorDriver(
 				hwelevio.SetMotorDirection(MDStop)
 				elevator.CurrentBehaviour = EBDoorOpen
 				motorActiveChan <- false
-				payloadToLights <- FromDriverToLight{CurrentFloor: elevator.CurrentFloor, DoorLight: true}
 				doorOpenChan <- true
+				payloadToLights <- FromDriverToLight{CurrentFloor: elevator.CurrentFloor, DoorLight: true}
 
 			case orderInCurrentDir(elevator):
 				payloadToLights <- FromDriverToLight{CurrentFloor: elevator.CurrentFloor, DoorLight: false}
+				payloadFromElevator <- FromDriverToAssigner{Elevator: elevator, CompletedOrders: clearedRequests}
 
 			case orderAtCurrentFloorOppositeDir(elevator): 
 				hwelevio.SetMotorDirection(MDStop)
@@ -60,14 +61,16 @@ func ElevatorDriver(
 
 			case orderOppositeDir(elevator): 
 				payloadToLights <- FromDriverToLight{CurrentFloor: elevator.CurrentFloor, DoorLight: false}
+				payloadFromElevator <- FromDriverToAssigner{Elevator: elevator, CompletedOrders: clearedRequests}
 
 			default:
 				elevator.Dirn = MDStop
 				hwelevio.SetMotorDirection(MDStop)
 				elevator.CurrentBehaviour = EBIdle
 				payloadToLights <- FromDriverToLight{CurrentFloor: elevator.CurrentFloor, DoorLight: false}
+				payloadFromElevator <- FromDriverToAssigner{Elevator: elevator, CompletedOrders: clearedRequests}
 			}
-			payloadFromElevator <- FromDriverToAssigner{Elevator: elevator, CompletedOrders: clearedRequests}
+			
 
 		case <-doorClosedChan:
 

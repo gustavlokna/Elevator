@@ -24,13 +24,11 @@ func Network(messagefromOrderAssigner <-chan FromAssignerToNetwork,
 
 	var (
 		elevatorList   = initializeElevatorList()
-		oldCabRequests = make([]bool, len(elevatorList[nodeIDInt].CabRequests))
 		hallOrderList  [NElevators][NFloors][NButtons]ButtonState
 		aliveList      [NElevators]bool
 		ackMap         [NElevators]bool
 		online         bool
 		init           bool
-		newOrder       bool
 	)
 
 	for {
@@ -65,15 +63,6 @@ func Network(messagefromOrderAssigner <-chan FromAssignerToNetwork,
 			senderId, _ := strconv.Atoi(msg.SenderId)
 			ackMap[senderId] = reflect.DeepEqual(elevatorList, msg.ElevatorList) && reflect.DeepEqual(hallOrderList, msg.HallOrderList)
 
-			// TODO THIS CAN BE A FUNC
-			if !reflect.DeepEqual(hallOrderList, msg.HallOrderList) || !reflect.DeepEqual(aliveList, msg.AliveList) {
-				newOrder = true
-			}
-
-			if !reflect.DeepEqual(elevatorList[senderId].CabRequests, msg.ElevatorList[senderId].CabRequests) {
-				newOrder = true
-			}
-
 			if !init {
 				elevatorList[nodeIDInt] = msg.ElevatorList[nodeIDInt]
 				init = true
@@ -95,7 +84,7 @@ func Network(messagefromOrderAssigner <-chan FromAssignerToNetwork,
 					break
 				}
 			}
-			if allAcknowledged && newOrder {
+			if allAcknowledged{
 				for i := 0; i < NElevators; i++ {
 					if i != nodeIDInt {
 						ackMap[i] = false
@@ -107,7 +96,6 @@ func Network(messagefromOrderAssigner <-chan FromAssignerToNetwork,
 					ElevatorList:  elevatorList,
 					HallOrderList: hallOrderList,
 				}
-				newOrder = false
 			}
 
 		case payload := <-messagefromOrderAssigner:
@@ -116,12 +104,6 @@ func Network(messagefromOrderAssigner <-chan FromAssignerToNetwork,
 			elevatorList[nodeIDInt] = payload.States[nodeID]
 
 		case <-time.After(10 * time.Millisecond):
-
-			if !reflect.DeepEqual(oldCabRequests, elevatorList[nodeIDInt].CabRequests) {
-				oldCabRequests = elevatorList[nodeIDInt].CabRequests
-				newOrder = true
-			}
-
 			broadcastTransmissionChannel <- Message{
 				SenderId:      nodeID,
 				ElevatorList:  elevatorList,
