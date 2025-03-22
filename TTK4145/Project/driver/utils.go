@@ -5,64 +5,68 @@ import (
 	"fmt"
 )
 
-func chooseDirection(elevator Elevator) Elevator {
-	dirnBehaviour := decideDirection(elevator)
-	elevator.Dirn = dirnBehaviour.Dirn
-	elevator.CurrentBehaviour = dirnBehaviour.Behaviour
-	return elevator
-}
-
-func decideDirection(elevator Elevator) DirnBehaviourPair {
-	switch elevator.Dirn {
+func setMotorDir(dir HWMotorDirection) Button {
+	switch dir {
 	case MDUp:
-		return decideDirectionUp(elevator)
+		return BHallUp
 	case MDDown:
-		return decideDirectionDown(elevator)
-	case MDStop:
-		return decideDirectionStop(elevator)
+		return BHallDown
 	default:
-		return DirnBehaviourPair{MDStop, EBIdle}
+		panic("invalid direction")
 	}
 }
 
-func decideDirectionUp(elevator Elevator) DirnBehaviourPair {
-	switch {
-	case requestsAbove(elevator):
-		return DirnBehaviourPair{MDUp, EBMoving}
-	case requestsHere(elevator):
-		return DirnBehaviourPair{MDStop, EBIdle} // Was MDDown
-	case requestsBelow(elevator):
-		return DirnBehaviourPair{MDDown, EBMoving}
+func setMotorOppositeDir(dir HWMotorDirection) HWMotorDirection {
+	switch dir {
+	case MDUp:
+		return MDDown
+	case MDDown:
+		return MDUp
 	default:
-		return DirnBehaviourPair{MDStop, EBIdle}
+		return MDStop
 	}
 }
 
-func decideDirectionDown(elevator Elevator) DirnBehaviourPair {
-	switch {
-	case requestsBelow(elevator):
-		return DirnBehaviourPair{MDDown, EBMoving}
-	case requestsHere(elevator):
-		return DirnBehaviourPair{MDStop, EBIdle} //WAS MDUp
-	case requestsAbove(elevator):
-		return DirnBehaviourPair{MDUp, EBMoving}
+func orderAtCurrentFloorInDir(e Elevator) bool {
+	switch e.Dirn {
+	case MDUp:
+		return e.Requests[e.CurrentFloor][BHallUp] || e.Requests[e.CurrentFloor][BCab]
+	case MDDown:
+		return e.Requests[e.CurrentFloor][BHallDown] || e.Requests[e.CurrentFloor][BCab]
 	default:
-		return DirnBehaviourPair{MDStop, EBIdle}
+		return false
 	}
-
 }
 
-func decideDirectionStop(elevator Elevator) DirnBehaviourPair {
-	switch {
-	case requestsHere(elevator):
-		return DirnBehaviourPair{MDStop, EBIdle}
-	case requestsAbove(elevator):
-		return DirnBehaviourPair{MDUp, EBMoving}
-	case requestsBelow(elevator):
-		return DirnBehaviourPair{MDDown, EBMoving}
+func orderAtCurrentFloorOppositeDir(e Elevator) bool {
+	switch e.Dirn {
+	case MDUp:
+		return e.Requests[e.CurrentFloor][BHallDown] || e.Requests[e.CurrentFloor][BCab]
+	case MDDown:
+		return e.Requests[e.CurrentFloor][BHallUp] || e.Requests[e.CurrentFloor][BCab]
 	default:
-		return DirnBehaviourPair{MDStop, EBIdle}
+		return false
 	}
+}
+
+func orderInCurrentDir(e Elevator) bool {
+	switch e.Dirn {
+	case MDUp:
+		return requestsAbove(e)
+	case MDDown:
+		return requestsBelow(e)
+	}
+	return false
+}
+
+func orderOppositeDir(e Elevator) bool {
+	switch e.Dirn {
+	case MDUp:
+		return requestsBelow(e)
+	case MDDown:
+		return requestsAbove(e)
+	}
+	return false
 }
 
 func requestsAbove(elevator Elevator) bool {

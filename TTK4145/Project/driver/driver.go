@@ -39,57 +39,37 @@ func ElevatorDriver(
 		case elevator.CurrentFloor = <-floorChannel:
 			elevator.ActiveSatus = true
 			motorActiveChan <- true
+
 			switch {
-			case elevator.Requests[elevator.CurrentFloor][BCab]:
-				fmt.Println("")
+			case orderAtCurrentFloorInDir(elevator):
 				hwelevio.SetMotorDirection(MDStop)
 				elevator.CurrentBehaviour = EBDoorOpen
 				motorActiveChan <- false
 				payloadToLights <- FromDriverToLight{CurrentFloor: elevator.CurrentFloor, DoorLight: true}
 				doorOpenChan <- true
 
-			case elevator.Dirn == MDUp && elevator.Requests[elevator.CurrentFloor][BHallUp]:
-				hwelevio.SetMotorDirection(MDStop)
-				elevator.CurrentBehaviour = EBDoorOpen
-				motorActiveChan <- false
-				doorOpenChan <- true
-				payloadToLights <- FromDriverToLight{CurrentFloor: elevator.CurrentFloor, DoorLight: true}
-
-			case elevator.Dirn == MDUp && requestsAbove(elevator):
+			case orderInCurrentDir(elevator):
 				payloadToLights <- FromDriverToLight{CurrentFloor: elevator.CurrentFloor, DoorLight: false}
 
-			case elevator.Dirn == MDUp && elevator.Requests[elevator.CurrentFloor][BHallDown]:
+			case orderAtCurrentFloorOppositeDir(elevator): 
 				hwelevio.SetMotorDirection(MDStop)
 				elevator.CurrentBehaviour = EBDoorOpen
 				motorActiveChan <- false
 				doorOpenChan <- true
 				payloadToLights <- FromDriverToLight{CurrentFloor: elevator.CurrentFloor, DoorLight: true}
 
-			case elevator.Dirn == MDDown && elevator.Requests[elevator.CurrentFloor][BHallDown]:
-				hwelevio.SetMotorDirection(MDStop)
-				elevator.CurrentBehaviour = EBDoorOpen
-				motorActiveChan <- false
-				doorOpenChan <- true
-				payloadToLights <- FromDriverToLight{CurrentFloor: elevator.CurrentFloor, DoorLight: true}
-
-			case elevator.Dirn == MDDown && requestsBelow(elevator):
+			case orderOppositeDir(elevator): 
 				payloadToLights <- FromDriverToLight{CurrentFloor: elevator.CurrentFloor, DoorLight: false}
-
-			case elevator.Dirn == MDDown && elevator.Requests[elevator.CurrentFloor][BHallUp]:
-				hwelevio.SetMotorDirection(MDStop)
-				elevator.CurrentBehaviour = EBDoorOpen
-				motorActiveChan <- false
-				doorOpenChan <- true
-				payloadToLights <- FromDriverToLight{CurrentFloor: elevator.CurrentFloor, DoorLight: true}
 
 			default:
-				elevator = chooseDirection(elevator)
-				hwelevio.SetMotorDirection(elevator.Dirn)
+				hwelevio.SetMotorDirection(MDStop)
+				elevator.CurrentBehaviour = EBIdle
 				payloadToLights <- FromDriverToLight{CurrentFloor: elevator.CurrentFloor, DoorLight: false}
 			}
 			payloadFromElevator <- FromDriverToAssigner{Elevator: elevator, CompletedOrders: clearedRequests}
 
 		case <-doorClosedChan:
+			
 			if obstruction {
 				elevator.ActiveSatus = !obstruction
 				fmt.Println(!obstruction)
@@ -99,40 +79,37 @@ func ElevatorDriver(
 			}
 
 			switch {
-			case elevator.Dirn == MDUp && elevator.Requests[elevator.CurrentFloor][BHallUp]:
-				clearedRequests[elevator.CurrentFloor][BHallUp] = true
-				elevator.Requests[elevator.CurrentFloor][BHallUp] = false
+			case orderAtCurrentFloorInDir(elevator):
+				clearedRequests[elevator.CurrentFloor][setMotorDir(elevator.Dirn)] = true
+				elevator.Requests[elevator.CurrentFloor][setMotorDir(elevator.Dirn)] = false
 
-			case elevator.Dirn == MDUp && elevator.Requests[elevator.CurrentFloor][BCab] && requestsAbove(elevator):
-
-			case elevator.Dirn == MDUp && elevator.Requests[elevator.CurrentFloor][BHallDown]:
-				clearedRequests[elevator.CurrentFloor][BHallDown] = true
-				elevator.Requests[elevator.CurrentFloor][BHallDown] = false
-
-			case elevator.Dirn == MDDown && elevator.Requests[elevator.CurrentFloor][BHallDown]:
-				clearedRequests[elevator.CurrentFloor][BHallDown] = true
-				elevator.Requests[elevator.CurrentFloor][BHallDown] = false
-
-			case elevator.Dirn == MDDown && elevator.Requests[elevator.CurrentFloor][BCab] && requestsBelow(elevator):
-
-			case elevator.Dirn == MDDown && elevator.Requests[elevator.CurrentFloor][BHallUp]:
-				clearedRequests[elevator.CurrentFloor][BHallUp] = true
-				elevator.Requests[elevator.CurrentFloor][BHallUp] = false
-
-			//case elevator.Requests[elevator.CurrentFloor][BCab]:
-			// This case was not necessary after changing chooseDirection
-			// but this can have induced other errors. I have not tried yet.
-
-			default:
-				elevator = chooseDirection(elevator)
+			case orderInCurrentDir(elevator):
+				/*
+				elevator.CurrentBehaviour = EBMoving
 				hwelevio.SetMotorDirection(elevator.Dirn)
+				motorActiveChan <- true
+				*/
+
+			case orderAtCurrentFloorOppositeDir(elevator): 
+				elevator.Dirn = setMotorOppositeDir(elevator.Dirn)
+				clearedRequests[elevator.CurrentFloor][setMotorDir(elevator.Dirn)] = true
+				elevator.Requests[elevator.CurrentFloor][setMotorDir(elevator.Dirn)] = false
+
+			case orderOppositeDir(elevator): 
+				/*
+				elevator.CurrentBehaviour = EBMoving
+				elevator.Dirn = setMotorOppositeDir(elevator.Dirn)
+				hwelevio.SetMotorDirection(elevator.Dirn)
+				motorActiveChan <- true
+				*/
+			default:
 			}
 
 			if elevator.Requests[elevator.CurrentFloor][BCab] {
 				clearedRequests[elevator.CurrentFloor][BCab] = true
 				elevator.Requests[elevator.CurrentFloor][BCab] = false
 			}
-
+			// if move itpo reevant cases 
 			elevator.CurrentBehaviour = EBIdle
 
 			payloadFromElevator <- FromDriverToAssigner{Elevator: elevator, CompletedOrders: clearedRequests}
@@ -155,62 +132,33 @@ func ElevatorDriver(
 			payloadFromElevator <- FromDriverToAssigner{Elevator: elevator, CompletedOrders: clearedRequests}
 
 		case elevator.Requests = <-newOrderChannel:
-			ElevatorPrint(elevator)
-			// TODO JAKOB + ALEX 
-			// CHECK THE LOGIC HERE UNDER FAT
-			// THis perhaps make messy code 
-			// Se if we can emulate 
 			switch elevator.CurrentBehaviour {
 			case EBIdle:
 				switch {
-				case elevator.Dirn == MDUp && (elevator.Requests[elevator.CurrentFloor][BHallUp] || elevator.Requests[elevator.CurrentFloor][BCab]):
+				case orderAtCurrentFloorInDir(elevator):
 					elevator.CurrentBehaviour = EBDoorOpen
-					elevator.Dirn = MDUp
 					doorOpenChan <- true
 					payloadToLights <- FromDriverToLight{CurrentFloor: elevator.CurrentFloor, DoorLight: true}
 				
-				case elevator.Dirn == MDUp && requestsAbove(elevator):
+				case orderInCurrentDir(elevator):
 					elevator.CurrentBehaviour = EBMoving
 					elevator.Dirn = MDUp
 					hwelevio.SetMotorDirection(elevator.Dirn)
 					motorActiveChan <- true
-
-				case elevator.Dirn == MDDown && (elevator.Requests[elevator.CurrentFloor][BHallDown] || elevator.Requests[elevator.CurrentFloor][BCab]):
+				
+				case orderAtCurrentFloorOppositeDir(elevator): 
+					elevator.Dirn = setMotorOppositeDir(elevator.Dirn)
 					elevator.CurrentBehaviour = EBDoorOpen
-					elevator.Dirn = MDDown
 					doorOpenChan <- true
 					payloadToLights <- FromDriverToLight{CurrentFloor: elevator.CurrentFloor, DoorLight: true}
-				
-				case  elevator.Dirn == MDDown && requestsBelow(elevator):
-					elevator.CurrentBehaviour = EBMoving
-					elevator.Dirn = MDDown
-					hwelevio.SetMotorDirection(elevator.Dirn)
-					motorActiveChan <- true
-				
-				case  requestsHere(elevator):
 					
-					/*
-					// TODO JAOKB + ALEX
-					check if necessary, if elevator does not work as intended
-					dirnBehaviour := decideDirection(elevator)
-					elevator.Dirn = dirnBehaviour.Dirn
-					*/
-					elevator.CurrentBehaviour = EBDoorOpen
-					doorOpenChan <- true
-					payloadToLights <- FromDriverToLight{CurrentFloor: elevator.CurrentFloor, DoorLight: true}
-				default:	
-					/*
-					// TODO JAOKB + ALEX
-					check if correct
-					dirnBehaviour := decideDirection(elevator)
-					elevator.Dirn = dirnBehaviour.Dirn
-
-					Was 
-					//elevator.Dirn = MDStop
-					But i belive that was wrong
-					*/
-					elevator = chooseDirection(elevator)
+				case orderOppositeDir(elevator): 
+					elevator.CurrentBehaviour = EBMoving
+					elevator.Dirn = setMotorOppositeDir(elevator.Dirn)
 					hwelevio.SetMotorDirection(elevator.Dirn)
+					motorActiveChan <- true
+				default:	
+
 				}
 
 			case EBMoving:
