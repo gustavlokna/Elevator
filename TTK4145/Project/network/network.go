@@ -30,9 +30,13 @@ func Network(messagefromOrderAssigner <-chan FromAssignerToNetwork,
 		online         bool
 		init           bool
 	)
+	//INIT
+	payload := <-messagefromOrderAssigner
+	hallOrderList[nodeIDInt] = payload.HallRequests
+	aliveList[nodeIDInt] = payload.ActiveSatus
+	elevatorList[nodeIDInt] = payload.States[nodeID]
 
 	for {
-
 		select {
 		case reg := <-nodeRegistryChannel:
 			// TODO THIS reg/ or it can be a double variable CAN ALSO CONTAIN THE ONLIE STATUS :)
