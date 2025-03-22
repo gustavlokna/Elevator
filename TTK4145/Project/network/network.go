@@ -23,19 +23,20 @@ func Network(messagefromOrderAssigner <-chan FromAssignerToNetwork,
 	go broadcast.Receiver(MessagePort, nodeID, broadcastReceiverChannel, nodeRegistryChannel)
 
 	var (
-		elevatorList   = initializeElevatorList()
-		hallOrderList  [NElevators][NFloors][NButtons]ButtonState
-		aliveList      [NElevators]bool
-		ackMap         [NElevators]bool
-		online         bool
-		init           bool
+		elevatorList  = initializeElevatorList()
+		hallOrderList [NElevators][NFloors][NButtons]ButtonState
+		aliveList     [NElevators]bool
+		ackMap        [NElevators]bool
+		online        bool
+		init          bool
 	)
 	//INIT
-	payload := <-messagefromOrderAssigner
-	hallOrderList[nodeIDInt] = payload.HallRequests
-	aliveList[nodeIDInt] = payload.ActiveSatus
-	elevatorList[nodeIDInt] = payload.States[nodeID]
-
+	/*
+		payload := <-messagefromOrderAssigner
+		hallOrderList[nodeIDInt] = payload.HallRequests
+		aliveList[nodeIDInt] = payload.ActiveSatus
+		elevatorList[nodeIDInt] = payload.States[nodeID]
+	*/
 	for {
 		select {
 		case reg := <-nodeRegistryChannel:
@@ -88,7 +89,7 @@ func Network(messagefromOrderAssigner <-chan FromAssignerToNetwork,
 					break
 				}
 			}
-			if allAcknowledged{
+			if allAcknowledged {
 				for i := 0; i < NElevators; i++ {
 					if i != nodeIDInt {
 						ackMap[i] = false
