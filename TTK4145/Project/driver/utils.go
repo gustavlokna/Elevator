@@ -25,9 +25,9 @@ func setMotorOppositeDir(e Elevator) HWMotorDirection {
 	case MDStop:
 		switch {
 		case requestsAbove(e) || e.Requests[e.CurrentFloor][BHallUp]:
-			return MDDown
-		case requestsBelow(e) || e.Requests[e.CurrentFloor][BHallDown]:
 			return MDUp
+		case requestsBelow(e) || e.Requests[e.CurrentFloor][BHallDown]:
+			return MDDown
 		default:
 			return MDStop
 		}
