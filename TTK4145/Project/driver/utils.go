@@ -5,14 +5,25 @@ import (
 	"fmt"
 )
 
-func setMotorDir(dir HWMotorDirection) Button {
+func dirToBtn(dir HWMotorDirection) Button {
 	switch dir {
 	case MDUp:
 		return BHallUp
 	case MDDown:
 		return BHallDown
 	default:
-		panic("invalid direction")
+		panic("invalid direction in dirToEnum ")
+	}
+}
+
+func btnToDirn(e Elevator) HWMotorDirection {
+	switch {
+	case e.Requests[e.CurrentFloor][BHallUp]:
+		return MDUp
+	case e.Requests[e.CurrentFloor][BHallDown]:
+		return MDDown
+	default:
+		return MDStop 
 	}
 }
 
@@ -22,7 +33,7 @@ func setMotorOppositeDir(e Elevator) HWMotorDirection {
 		return MDDown
 	case MDDown:
 		return MDUp
-	case MDStop:
+	default:
 		switch {
 		case requestsAbove(e) || e.Requests[e.CurrentFloor][BHallUp]:
 			return MDUp
@@ -31,30 +42,28 @@ func setMotorOppositeDir(e Elevator) HWMotorDirection {
 		default:
 			return MDStop
 		}
-	default: 
-		panic("invalid direction")
 	}
 }
 
 func orderAtCurrentFloorInDir(e Elevator) bool {
 	switch e.Dirn {
 	case MDUp:
-		return e.Requests[e.CurrentFloor][BHallUp] || e.Requests[e.CurrentFloor][BCab]
+		return e.Requests[e.CurrentFloor][BHallUp]
 	case MDDown:
-		return e.Requests[e.CurrentFloor][BHallDown] || e.Requests[e.CurrentFloor][BCab]
+		return e.Requests[e.CurrentFloor][BHallDown]
 	default:
-		return e.Requests[e.CurrentFloor][BHallUp] || e.Requests[e.CurrentFloor][BHallDown] || e.Requests[e.CurrentFloor][BCab]
+		return e.Requests[e.CurrentFloor][BHallUp] || e.Requests[e.CurrentFloor][BHallDown]
 	}
 }
 
 func orderAtCurrentFloorOppositeDir(e Elevator) bool {
 	switch e.Dirn {
 	case MDUp:
-		return e.Requests[e.CurrentFloor][BHallDown] || e.Requests[e.CurrentFloor][BCab]
+		return e.Requests[e.CurrentFloor][BHallDown]
 	case MDDown:
-		return e.Requests[e.CurrentFloor][BHallUp] || e.Requests[e.CurrentFloor][BCab]
+		return e.Requests[e.CurrentFloor][BHallUp]
 	default:
-		return e.Requests[e.CurrentFloor][BHallUp] || e.Requests[e.CurrentFloor][BHallDown] || e.Requests[e.CurrentFloor][BCab] //?
+		return e.Requests[e.CurrentFloor][BHallUp] || e.Requests[e.CurrentFloor][BHallDown]
 	}
 }
 
