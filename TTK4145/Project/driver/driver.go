@@ -115,9 +115,7 @@ func ElevatorDriver(
 			}
 
 			if elevator.Requests[elevator.CurrentFloor][BCab] {
-				fmt.Println("WAIRD ?")
 				clearedRequests[elevator.CurrentFloor][BCab] = true
-				elevator.Requests[elevator.CurrentFloor][BCab] = false
 			}
 			// if move itpo reevant cases
 			elevator.CurrentBehaviour = EBIdle
