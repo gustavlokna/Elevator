@@ -40,14 +40,14 @@ func ElevatorDriver(
 			switch {
 			case elevator.Requests[elevator.CurrentFloor][BCab]:
 				hwelevio.SetMotorDirection(MDStop)
-				elevator.CurrentBehaviour = EBDoorOpen
+				elevator.CurrentBehaviour = DoorOpen
 				motorActiveChan <- false
 				doorOpenChan <- true
 				payloadToLights <- FromDriverToLight{CurrentFloor: elevator.CurrentFloor, DoorLight: true}
 
 			case orderAtCurrentFloorInDir(elevator):
 				hwelevio.SetMotorDirection(MDStop)
-				elevator.CurrentBehaviour = EBDoorOpen
+				elevator.CurrentBehaviour = DoorOpen
 				motorActiveChan <- false
 				doorOpenChan <- true
 				payloadToLights <- FromDriverToLight{CurrentFloor: elevator.CurrentFloor, DoorLight: true}
@@ -58,7 +58,7 @@ func ElevatorDriver(
 
 			case orderAtCurrentFloorOppositeDir(elevator):
 				hwelevio.SetMotorDirection(MDStop)
-				elevator.CurrentBehaviour = EBDoorOpen
+				elevator.CurrentBehaviour = DoorOpen
 				motorActiveChan <- false
 				doorOpenChan <- true
 				payloadToLights <- FromDriverToLight{CurrentFloor: elevator.CurrentFloor, DoorLight: true}
@@ -70,7 +70,7 @@ func ElevatorDriver(
 			default:
 				elevator.Dirn = MDStop
 				hwelevio.SetMotorDirection(MDStop)
-				elevator.CurrentBehaviour = EBIdle
+				elevator.CurrentBehaviour = Idle
 				payloadToLights <- FromDriverToLight{CurrentFloor: elevator.CurrentFloor, DoorLight: false}
 				payloadFromElevator <- FromDriverToAssigner{Elevator: elevator, CompletedOrders: clearedRequests}
 			}
@@ -107,7 +107,7 @@ func ElevatorDriver(
 				clearedRequests[elevator.CurrentFloor][BCab] = true
 			}
 			// if move itpo reevant cases
-			elevator.CurrentBehaviour = EBIdle
+			elevator.CurrentBehaviour = Idle
 
 			payloadFromElevator <- FromDriverToAssigner{Elevator: elevator, CompletedOrders: clearedRequests}
 			payloadToLights <- FromDriverToLight{CurrentFloor: elevator.CurrentFloor, DoorLight: false}
@@ -116,13 +116,13 @@ func ElevatorDriver(
 
 		case <-motorInactiveChan:
 
-			if elevator.CurrentBehaviour == EBMoving {
+			if elevator.CurrentBehaviour == Moving {
 				elevator.ActiveSatus = false
 				payloadFromElevator <- FromDriverToAssigner{Elevator: elevator, CompletedOrders: clearedRequests}
 			}
 
 		case obstruction = <-obstructionChannel:
-			if elevator.CurrentBehaviour == EBDoorOpen {
+			if elevator.CurrentBehaviour == DoorOpen {
 				elevator.ActiveSatus = !obstruction
 				doorOpenChan <- !obstruction
 			}
@@ -131,17 +131,17 @@ func ElevatorDriver(
 		case elevator.Requests = <-newOrderChannel:
 			ElevatorPrint(elevator)
 			switch elevator.CurrentBehaviour {
-			case EBIdle:
+			case Idle:
 				switch {
 				case orderAtCurrentFloorInDir(elevator) || elevator.Requests[elevator.CurrentFloor][BCab]:
 					elevator.Dirn = btnToDirn(elevator)
-					elevator.CurrentBehaviour = EBDoorOpen
+					elevator.CurrentBehaviour = DoorOpen
 					doorOpenChan <- true
 					payloadToLights <- FromDriverToLight{CurrentFloor: elevator.CurrentFloor, DoorLight: true}
 					payloadFromElevator <- FromDriverToAssigner{Elevator: elevator, CompletedOrders: clearedRequests}
 
 				case orderInCurrentDir(elevator):
-					elevator.CurrentBehaviour = EBMoving
+					elevator.CurrentBehaviour = Moving
 					hwelevio.SetMotorDirection(elevator.Dirn)
 					motorActiveChan <- true
 					payloadToLights <- FromDriverToLight{CurrentFloor: elevator.CurrentFloor, DoorLight: false}
@@ -149,13 +149,13 @@ func ElevatorDriver(
 
 				case orderAtCurrentFloorOppositeDir(elevator):
 					elevator.Dirn = setMotorOppositeDir(elevator)
-					elevator.CurrentBehaviour = EBDoorOpen
+					elevator.CurrentBehaviour = DoorOpen
 					doorOpenChan <- true
 					payloadToLights <- FromDriverToLight{CurrentFloor: elevator.CurrentFloor, DoorLight: true}
 					payloadFromElevator <- FromDriverToAssigner{Elevator: elevator, CompletedOrders: clearedRequests}
 
 				case orderOppositeDir(elevator):
-					elevator.CurrentBehaviour = EBMoving
+					elevator.CurrentBehaviour = Moving
 					elevator.Dirn = setMotorOppositeDir(elevator)
 					hwelevio.SetMotorDirection(elevator.Dirn)
 					motorActiveChan <- true
@@ -168,8 +168,8 @@ func ElevatorDriver(
 					payloadFromElevator <- FromDriverToAssigner{Elevator: elevator, CompletedOrders: clearedRequests}
 				}
 
-			case EBMoving:
-			case EBDoorOpen:
+			case Moving:
+			case DoorOpen:
 			}
 			
 		}

@@ -51,7 +51,7 @@ func handlePayloadFromElevator(fromElevator FromDriverToAssigner,
 
 	behavior, direction, cabRequests := convertElevatorState(fromElevator.Elevator)
 	toNetwork.States[nodeID] = HRAElevState{
-		Behavior:    behavior,
+		Behaviour:    behavior,
 		Floor:       fromElevator.Elevator.CurrentFloor,
 		Direction:   direction,
 		CabRequests: cabRequests,
@@ -75,16 +75,17 @@ func convertElevatorState(e Elevator) (string, string, []bool) {
 
 func ebToString(behaviour ElevatorBehaviour) string {
 	switch behaviour {
-	case EBIdle:
+	case Idle:
 		return "idle"
-	case EBDoorOpen:
+	case DoorOpen:
 		return "doorOpen"
-	case EBMoving:
+	case Moving:
 		return "moving"
 	default:
 		return "Unknown"
 	}
 }
+
 func elevDirToString(d HWMotorDirection) string {
 	switch d {
 	case MDDown:

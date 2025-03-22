@@ -18,9 +18,9 @@ func initializeElevatorList() [NElevators]HRAElevState {
 	var list [NElevators]HRAElevState
 	for i := 0; i < NElevators; i++ {
 		list[i] = HRAElevState{
-			Behavior:    "EBIdle",
+			Behaviour:    "idle",
 			Floor:       0,
-			Direction:   "MDStop",
+			Direction:   "stop",
 			CabRequests: make([]bool, NFloors),
 		}
 	}

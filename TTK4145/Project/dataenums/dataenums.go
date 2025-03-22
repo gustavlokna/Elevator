@@ -29,7 +29,7 @@ type ButtonState int
 
 const (
 	Initial ButtonState = iota
-	Idle
+	Inactive
 	ButtonPressed
 	OrderAssigned
 	OrderComplete
@@ -51,9 +51,9 @@ type ButtonEvent struct {
 type ElevatorBehaviour int
 
 const (
-	EBIdle ElevatorBehaviour = iota
-	EBDoorOpen
-	EBMoving
+	Idle ElevatorBehaviour = iota
+	DoorOpen
+	Moving
 )
 
 type DirnBehaviourPair struct {
@@ -70,7 +70,7 @@ type Elevator struct {
 }
 
 type HRAElevState struct {
-	Behavior    string `json:"behaviour"`
+	Behaviour    string `json:"behaviour"`
 	Floor       int    `json:"floor"`
 	Direction   string `json:"direction"`
 	CabRequests []bool `json:"cabRequests"`

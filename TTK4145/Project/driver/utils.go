@@ -145,11 +145,11 @@ func ElevatorPrint(e Elevator) {
 
 func EBToString(behaviour ElevatorBehaviour) string {
 	switch behaviour {
-	case EBIdle:
+	case Idle:
 		return "idle"
-	case EBDoorOpen:
+	case DoorOpen:
 		return "doorOpen"
-	case EBMoving:
+	case Moving:
 		return "moving"
 	default:
 		return "Unknown"
