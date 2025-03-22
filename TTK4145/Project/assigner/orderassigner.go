@@ -26,12 +26,13 @@ func Assigner(
 		fmt.Printf("Invalid nodeID: %v\n", err)
 		return
 	}
+	
 	payload := <-payloadFromElevator
 	PayloadFromassignerToNetwork = handlePayloadFromElevator(payload,
 		PayloadFromassignerToNetwork, nodeID)
 
 	toNetworkChannel <- PayloadFromassignerToNetwork
-
+	
 	go hwelevio.PollButtons(drv_buttons)
 	for {
 		select {
@@ -47,18 +48,19 @@ func Assigner(
 			toNetworkChannel <- PayloadFromassignerToNetwork
 
 		case PayloadFromNetwork := <-fromNetworkChannel:
-
+			
 			PayloadFromassignerToNetwork = handlePayloadFromNetwork(PayloadFromassignerToNetwork,
 				PayloadFromNetwork, myID)
-
+			
 			newOrders := assignOrders(PayloadFromNetwork, myID)
-
+			PrintOrders(newOrders)
 			if newOrders != prevAssignedOrders {
+				fmt.Println("WE GET THE MSG")
 				newOrderChannel <- newOrders
 				prevAssignedOrders = newOrders
 			}
 			fromAsstoLight <- updateLightStates(PayloadFromNetwork, myID)
-
+			fmt.Println("PENIS")
 		}
 	}
 

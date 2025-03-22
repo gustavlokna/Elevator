@@ -2,6 +2,7 @@ package assigner
 
 import (
 	. "Project/dataenums"
+	"fmt"
 )
 
 func initPayloadToNetwork() FromAssignerToNetwork {
@@ -94,5 +95,16 @@ func elevDirToString(d HWMotorDirection) string {
 		return "up"
 	default:
 		return "DirUnknown"
+	}
+}
+
+// TODO REMOVE
+func PrintOrders(orders [NFloors][NButtons]bool) {
+	for floor := 0; floor < NFloors; floor++ {
+		for btn := 0; btn < NButtons; btn++ {
+			if orders[floor][btn] {
+				fmt.Printf("Order at floor %d, button %d: true\n", floor, btn)
+			}
+		}
 	}
 }

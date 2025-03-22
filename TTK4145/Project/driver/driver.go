@@ -13,12 +13,12 @@ func ElevatorDriver(
 	payloadToLights chan<- FromDriverToLight,
 ) {
 	var (
-		floorChannel       = make(chan int)
-		obstructionChannel = make(chan bool)
-		doorOpenChan       = make(chan bool)
-		doorClosedChan     = make(chan bool)
-		motorActiveChan    = make(chan bool)
-		motorInactiveChan  = make(chan bool)
+		floorChannel       = make(chan int, BufferSize)
+		obstructionChannel = make(chan bool, BufferSize)
+		doorOpenChan       = make(chan bool, BufferSize)
+		doorClosedChan     = make(chan bool, BufferSize)
+		motorActiveChan    = make(chan bool, BufferSize)
+		motorInactiveChan  = make(chan bool, BufferSize)
 		clearedRequests    = [NFloors][NButtons]bool{}
 		obstruction        bool
 	)
@@ -29,7 +29,7 @@ func ElevatorDriver(
 
 	elevator := initelevator()
 	hwelevio.SetMotorDirection(elevator.Dirn)
-
+	
 	for {
 
 		select {
@@ -68,6 +68,7 @@ func ElevatorDriver(
 				payloadFromElevator <- FromDriverToAssigner{Elevator: elevator, CompletedOrders: clearedRequests}
 
 			default:
+				fmt.Println("INITLIZED ELEVATOR")
 				elevator.Dirn = MDStop
 				hwelevio.SetMotorDirection(MDStop)
 				elevator.CurrentBehaviour = EBIdle
@@ -76,7 +77,6 @@ func ElevatorDriver(
 			}
 
 		case <-doorClosedChan:
-
 			if obstruction {
 				elevator.ActiveSatus = !obstruction
 				fmt.Println(!obstruction)
