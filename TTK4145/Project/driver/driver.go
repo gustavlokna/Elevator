@@ -69,7 +69,7 @@ func ElevatorDriver(
 			payloadFromElevator <- FromDriverToAssigner{Elevator: elevator, CompletedOrders: clearedRequests}
 
 		case <-doorClosedChan:
-			
+
 			if obstruction {
 				elevator.ActiveSatus = !obstruction
 				fmt.Println(!obstruction)
@@ -142,7 +142,6 @@ func ElevatorDriver(
 				
 				case orderInCurrentDir(elevator):
 					elevator.CurrentBehaviour = EBMoving
-					elevator.Dirn = MDUp
 					hwelevio.SetMotorDirection(elevator.Dirn)
 					motorActiveChan <- true
 				

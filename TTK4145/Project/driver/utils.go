@@ -91,14 +91,6 @@ func requestsBelow(elevator Elevator) bool {
 	return false
 }
 
-func requestsHere(elevator Elevator) bool {
-	for btn := BHallUp; btn <= BCab; btn++ {
-		if elevator.Requests[elevator.CurrentFloor][btn] {
-			return true
-		}
-	}
-	return false
-}
 
 // TODO REMOVE
 func ElevatorPrint(e Elevator) {
