@@ -108,7 +108,7 @@ func Network(messagefromOrderAssigner <-chan FromAssignerToNetwork,
 			aliveList[nodeIDInt] = payload.ActiveSatus
 			elevatorList[nodeIDInt] = payload.States[nodeID]
 
-		case <-time.After(10 * time.Millisecond):
+		case <-time.After(50 * time.Millisecond):
 			broadcastTransmissionChannel <- Message{
 				SenderId:      nodeID,
 				ElevatorList:  elevatorList,
