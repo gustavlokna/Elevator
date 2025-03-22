@@ -62,6 +62,7 @@ func ElevatorDriver(
 				payloadToLights <- FromDriverToLight{CurrentFloor: elevator.CurrentFloor, DoorLight: false}
 
 			default:
+				elevator.Dirn = MDStop
 				hwelevio.SetMotorDirection(MDStop)
 				elevator.CurrentBehaviour = EBIdle
 				payloadToLights <- FromDriverToLight{CurrentFloor: elevator.CurrentFloor, DoorLight: false}
@@ -160,7 +161,8 @@ func ElevatorDriver(
 					hwelevio.SetMotorDirection(elevator.Dirn)
 					motorActiveChan <- true
 				default:	
-
+					elevator.Dirn = MDStop
+					hwelevio.SetMotorDirection(MDStop)
 				}
 
 			case EBMoving:
