@@ -66,10 +66,6 @@ func Network(messagefromOrderAssigner <-chan FromAssignerToNetwork,
 			ackMap[senderId] = reflect.DeepEqual(elevatorList, msg.ElevatorList) && reflect.DeepEqual(hallOrderList, msg.HallOrderList)
 
 			// TODO THIS CAN BE A FUNC
-			if !reflect.DeepEqual(elevatorList, msg.ElevatorList) || !reflect.DeepEqual(aliveList, msg.AliveList) {
-				newOrder = true
-			}
-
 			if !init {
 				elevatorList[nodeIDInt] = msg.ElevatorList[nodeIDInt]
 				init = true

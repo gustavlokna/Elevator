@@ -4,6 +4,7 @@ import (
 	. "Project/dataenums"
 	"Project/hwelevio"
 	"fmt"
+	"reflect"
 	"strconv"
 )
 
@@ -19,6 +20,8 @@ func Assigner(
 		PayloadFromassignerToNetwork = initPayloadToNetwork()
 		prevAssignedOrders           [NFloors][NButtons]bool
 		drv_buttons                  = make(chan ButtonEvent)
+		prevMsg                      FromNetworkToAssigner
+		newOrder                     bool
 	)
 	// Convert nodeID to int
 	myID, err := strconv.Atoi(nodeID)
@@ -46,18 +49,29 @@ func Assigner(
 
 			toNetworkChannel <- PayloadFromassignerToNetwork
 
-		case PayloadFromNetwork := <-fromNetworkChannel:
+		case msg := <-fromNetworkChannel:
 
-			PayloadFromassignerToNetwork = handlePayloadFromNetwork(PayloadFromassignerToNetwork,
-				PayloadFromNetwork, myID)
-
-			newOrders := assignOrders(PayloadFromNetwork, myID)
-
-			if newOrders != prevAssignedOrders {
-				newOrderChannel <- newOrders
-				prevAssignedOrders = newOrders
+			if !reflect.DeepEqual(prevMsg.HallOrderList, msg.HallOrderList) || !reflect.DeepEqual(prevMsg, msg.AliveList) {
+				newOrder = true
 			}
-			fromAsstoLight <- updateLightStates(PayloadFromNetwork, myID)
+
+			for i := 0; i < NElevators; i++ {
+				if !reflect.DeepEqual(prevMsg.ElevatorList[i].CabRequests, msg.ElevatorList[i].CabRequests) {
+					newOrder = true
+					break
+				}
+			}			
+			
+			PayloadFromassignerToNetwork = handlePayloadFromNetwork(PayloadFromassignerToNetwork,
+				msg, myID)
+			if newOrder{
+				newOrders := assignOrders(msg, myID)
+				if newOrders != prevAssignedOrders {
+					newOrderChannel <- newOrders
+					prevAssignedOrders = newOrders
+				}
+			}
+			fromAsstoLight <- updateLightStates(msg, myID)
 
 		}
 	}
