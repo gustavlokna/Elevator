@@ -53,14 +53,11 @@ func Assigner(
 				PayloadFromNetwork, myID)
 			
 			newOrders := assignOrders(PayloadFromNetwork, myID)
-			PrintOrders(newOrders)
 			if newOrders != prevAssignedOrders {
-				fmt.Println("WE GET THE MSG")
 				newOrderChannel <- newOrders
 				prevAssignedOrders = newOrders
 			}
 			fromAsstoLight <- updateLightStates(PayloadFromNetwork, myID)
-			fmt.Println("PENIS")
 		}
 	}
 
