@@ -68,7 +68,6 @@ func ElevatorDriver(
 				payloadFromElevator <- FromDriverToAssigner{Elevator: elevator, CompletedOrders: clearedRequests}
 
 			default:
-				fmt.Println("INITLIZED ELEVATOR")
 				elevator.Dirn = MDStop
 				hwelevio.SetMotorDirection(MDStop)
 				elevator.CurrentBehaviour = EBIdle
@@ -91,11 +90,6 @@ func ElevatorDriver(
 				elevator.Requests[elevator.CurrentFloor][dirToBtn(elevator.Dirn)] = false
 
 			case orderInCurrentDir(elevator):
-				/*
-					elevator.CurrentBehaviour = EBMoving
-					hwelevio.SetMotorDirection(elevator.Dirn)
-					motorActiveChan <- true
-				*/
 
 			case orderAtCurrentFloorOppositeDir(elevator):
 				elevator.Dirn = setMotorOppositeDir(elevator)
@@ -103,12 +97,7 @@ func ElevatorDriver(
 				elevator.Requests[elevator.CurrentFloor][dirToBtn(elevator.Dirn)] = false
 
 			case orderOppositeDir(elevator):
-				/*
-					elevator.CurrentBehaviour = EBMoving
-					elevator.Dirn = setMotorOppositeDir(elevator.Dirn)
-					hwelevio.SetMotorDirection(elevator.Dirn)
-					motorActiveChan <- true
-				*/
+
 			default:
 				elevator.Dirn = MDStop
 				hwelevio.SetMotorDirection(MDStop)
