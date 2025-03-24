@@ -27,3 +27,15 @@ func initializeElevatorList() [NElevators]HRAElevState {
 	}
 	return list
 }
+
+func allAcknowledged(ackMap [NElevators]bool, aliveList [NElevators]bool, id int) bool {
+	for elevator := 0; elevator < NElevators; elevator++ {
+		if id == elevator {
+			continue
+		}
+		if aliveList[elevator] && !ackMap[elevator] {
+			return false
+		}
+	}
+	return true
+}

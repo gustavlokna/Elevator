@@ -69,24 +69,12 @@ func Network(worldview <-chan FromAssignerToNetwork,
 			hallOrderList[senderId] = msg.HallOrderList[senderId]
 			hallOrderList = cyclicCounter(hallOrderList, nodeIDInt)
 
-			//TODO THIS CAN BE FUNC
-			allAcknowledged := true
-			for elevator := 0; elevator < NElevators; elevator++ {
-				if nodeIDInt == elevator {
-					continue
-				}
-				if aliveList[elevator] && !ackMap[elevator] {
-					allAcknowledged = false
-					break
-				}
-			}
-			if allAcknowledged {
+			if allAcknowledged(ackMap, aliveList, nodeIDInt) {
 				for elevator := 0; elevator < NElevators; elevator++ {
 					if elevator != nodeIDInt {
 						ackMap[elevator] = false
 					}
 				}
-				//printHallOrderList(hallOrderList)
 				stateBroadcast <- FromNetworkToAssigner{
 					AliveList:     aliveList,
 					ElevatorList:  elevatorList,

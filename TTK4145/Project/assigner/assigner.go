@@ -21,7 +21,6 @@ func Assigner(
 		prevAssignedOrders           [NFloors][NButtons]bool
 		drv_buttons                  = make(chan ButtonEvent)
 	)
-	// Convert nodeID to int
 	myID, err := strconv.Atoi(nodeID)
 	if err != nil {
 		fmt.Printf("Invalid nodeID: %v\n", err)
