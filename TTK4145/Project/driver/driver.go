@@ -79,7 +79,6 @@ func Driver(
 		case <-doorClosedChan:
 			if obstruction {
 				elevator.ActiveStatus = !obstruction
-				fmt.Println(!obstruction)
 				doorOpenChan <- true
 				driverEvents <- FromDriverToAssigner{Elevator: elevator, CompletedOrders: clearedRequests}
 				continue
@@ -163,7 +162,7 @@ func Driver(
 
 			case Moving:
 			case DoorOpen:
-				
+
 			}
 			driverEvents <- FromDriverToAssigner{Elevator: elevator, CompletedOrders: clearedRequests}
 
