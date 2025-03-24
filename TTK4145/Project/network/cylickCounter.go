@@ -10,26 +10,26 @@ func cyclicCounter(
 	myID int,
 ) [NElevators][NFloors][NButtons]ButtonState {
 
-	for f := 0; f < NFloors; f++ {
-		for b := 0; b < NButtons; b++ {
-			origState := orders[myID][f][b]
+	for floor := 0; floor < NFloors; floor++ {
+		for btn := 0; btn < NButtons; btn++ {
+			origState := orders[myID][floor][btn]
 			myState := origState
 
 			if myState == Initial {
-				for e := 0; e < NElevators; e++ {
-					if e != myID && orders[e][f][b] != Initial {
-						myState = orders[e][f][b]
+				for elevator := 0; elevator < NElevators; elevator++ {
+					if elevator != myID && orders[elevator][floor][btn] != Initial {
+						myState = orders[elevator][floor][btn]
 						break
 					}
 				}
-				orders[myID][f][b] = myState
+				orders[myID][floor][btn] = myState
 				continue
 			}
 
 			var peers []ButtonState
-			for e := 0; e < NElevators; e++ {
-				if e != myID && orders[e][f][b] != Initial {
-					peers = append(peers, orders[e][f][b])
+			for elevator := 0; elevator < NElevators; elevator++ {
+				if elevator != myID && orders[elevator][floor][btn] != Initial {
+					peers = append(peers, orders[elevator][floor][btn])
 				}
 			}
 
@@ -75,7 +75,7 @@ func cyclicCounter(
 				}
 			}
 
-			orders[myID][f][b] = myState
+			orders[myID][floor][btn] = myState
 		}
 	}
 	return orders

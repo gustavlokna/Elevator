@@ -91,9 +91,9 @@ func orderOppositeDirn(elevator Elevator) bool {
 }
 
 func requestsAbove(elevator Elevator) bool {
-	for f := elevator.CurrentFloor + 1; f < NFloors; f++ {
+	for floor := elevator.CurrentFloor + 1; floor < NFloors; floor++ {
 		for btn := BHallUp; btn <= BCab; btn++ {
-			if elevator.Requests[f][btn] {
+			if elevator.Requests[floor][btn] {
 				return true
 			}
 		}
@@ -102,9 +102,9 @@ func requestsAbove(elevator Elevator) bool {
 }
 
 func requestsBelow(elevator Elevator) bool {
-	for f := 0; f < elevator.CurrentFloor; f++ {
+	for floor := 0; floor < elevator.CurrentFloor; floor++ {
 		for btn := BHallUp; btn <= BCab; btn++ {
-			if elevator.Requests[f][btn] {
+			if elevator.Requests[floor][btn] {
 				return true
 			}
 		}
@@ -125,14 +125,14 @@ func ElevatorPrint(elevator Elevator) {
 	)
 	fmt.Println("  +--------------------+")
 	fmt.Println("  |  | up  | dn  | cab |")
-	for f := NFloors - 1; f >= 0; f-- {
-		fmt.Printf("  | %d", f)
+	for floor := NFloors - 1; floor >= 0; floor-- {
+		fmt.Printf("  | %d", floor)
 		for btn := BHallUp; btn <= BCab; btn++ {
-			if (f == NFloors-1 && btn == BHallUp) ||
-				(f == 0 && btn == BHallDown) {
+			if (floor == NFloors-1 && btn == BHallUp) ||
+				(floor == 0 && btn == BHallDown) {
 				fmt.Print("|     ")
 			} else {
-				if elevator.Requests[f][btn] {
+				if elevator.Requests[floor][btn] {
 					fmt.Print("|  #  ")
 				} else {
 					fmt.Print("|  -  ")

@@ -2,11 +2,11 @@ package hwelevio
 
 import (
 	. "Project/dataenums"
+	. "Project/config"
 	"fmt"
 	"net"
 	"sync"
 	"time"
-	"Project/config"
 )
 
 var _initialize bool = false
@@ -45,16 +45,16 @@ func SetDoorOpenLamp(value bool) {
 }
 
 func PollButtons(receiver chan<- ButtonEvent) {
-	prev := make([][3]bool, config.NFloors)
+	prev := make([][3]bool, NFloors)
 	for {
-		time.Sleep(config.PollRateMS)
-		for f := 0; f < config.NFloors; f++ {
-			for b := BHallUp; b <= BCab; b++ {
-				v := getButton(b, f)
-				if v != prev[f][b] && v {
-					receiver <- ButtonEvent{f, Button(b)}
+		time.Sleep(PollRateMS)
+		for floor := 0; floor < NFloors; floor++ {
+			for btn := BHallUp; btn <= BCab; btn++ {
+				v := getButton(btn, floor)
+				if v != prev[floor][btn] && v {
+					receiver <- ButtonEvent{floor, Button(btn)}
 				}
-				prev[f][b] = v
+				prev[floor][btn] = v
 			}
 		}
 	}
@@ -63,7 +63,7 @@ func PollButtons(receiver chan<- ButtonEvent) {
 func PollFloorSensor(receiver chan<- int) {
 	prev := -1
 	for {
-		time.Sleep(config.PollRateMS)
+		time.Sleep(PollRateMS)
 		v := getFloor()
 		if v != prev && v != -1 {
 			receiver <- v
@@ -75,7 +75,7 @@ func PollFloorSensor(receiver chan<- int) {
 func PollObstructionSwitch(receiver chan<- bool) {
 	prev := false
 	for {
-		time.Sleep(config.PollRateMS)
+		time.Sleep(PollRateMS)
 		v := getObstruction()
 		if v != prev {
 			receiver <- v
@@ -132,17 +132,17 @@ func write(in [4]byte) {
 }
 
 func toByte(a bool) byte {
-	var b byte = 0
+	var btn byte = 0
 	if a {
-		b = 1
+		btn = 1
 	}
-	return b
+	return btn
 }
 
 func toBool(a byte) bool {
-	var b bool = false
+	var btn bool = false
 	if a != 0 {
-		b = true
+		btn = true
 	}
-	return b
+	return btn
 }

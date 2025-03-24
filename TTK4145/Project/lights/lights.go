@@ -18,8 +18,8 @@ func LightsHandler(
 
 		case orders := <-orderList:
 			for floor := 0; floor < NFloors; floor++ {
-				for button := 0; button < NButtons; button++ {
-					hwelevio.SetButtonLamp(Button(button), floor, orders[floor][button] == OrderAssigned)
+				for btn := 0; btn < NButtons; btn++ {
+					hwelevio.SetButtonLamp(Button(btn), floor, orders[floor][btn] == OrderAssigned)
 				}
 			}
 		}

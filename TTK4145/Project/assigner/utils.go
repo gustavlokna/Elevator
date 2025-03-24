@@ -32,12 +32,12 @@ func handlePayloadFromNetwork(
 	stateBroadcast FromNetworkToAssigner,
 	nodeID int,
 ) FromAssignerToNetwork {
-	for f := 0; f < NFloors; f++ {
-		for b := 0; b < NButtons; b++ {
-			incomingState := stateBroadcast.HallOrderList[nodeID][f][b]
-			localState := worldview.HallRequests[f][b]
+	for floor := 0; floor < NFloors; floor++ {
+		for btn := 0; btn < NButtons; btn++ {
+			incomingState := stateBroadcast.HallOrderList[nodeID][floor][btn]
+			localState := worldview.HallRequests[floor][btn]
 			if localState != OrderComplete || incomingState != OrderAssigned {
-				worldview.HallRequests[f][b] = incomingState
+				worldview.HallRequests[floor][btn] = incomingState
 			}
 		}
 	}
@@ -49,14 +49,14 @@ func handlePayloadFromElevator(driverEvents FromDriverToAssigner,
 	worldview FromAssignerToNetwork, nodeID string) FromAssignerToNetwork {
 
 	cabRequests := make([]bool, NFloors)
-	for f := 0; f < NFloors; f++ {
-		cabRequests[f] = driverEvents.Elevator.Requests[f][BCab]
+	for floor := 0; floor < NFloors; floor++ {
+		cabRequests[floor] = driverEvents.Elevator.Requests[floor][BCab]
 	}
 
 	worldview.States[nodeID] = HRAElevState{
 		Behaviour:   ebToString(driverEvents.Elevator.CurrentBehaviour),
 		Floor:       driverEvents.Elevator.CurrentFloor,
-		Direction:   elevDirToString(driverEvents.Elevator.Dirn),
+		Direction:   elevDirnToString(driverEvents.Elevator.Dirn),
 		CabRequests: cabRequests,
 	}
 	worldview.ActiveStatus = driverEvents.Elevator.ActiveStatus
@@ -78,8 +78,8 @@ func ebToString(behaviour ElevatorBehaviour) string {
 	}
 }
 
-func elevDirToString(dirn MotorDirection) string {
-	switch dirn {
+func elevDirnToString(direction MotorDirection) string {
+	switch direction {
 	case MDDown:
 		return "down"
 	case MDStop:

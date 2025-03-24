@@ -49,7 +49,7 @@ func Network(worldview <-chan FromAssignerToNetwork,
 					online = false
 				} else {
 					fmt.Println("WE SET AN ELEVATOR INACTIVE")
-					// check if newOrder = true must be set (but i do not think so)
+					// check if newOrder = true must be set (but elevator do not think so)
 					aliveList[lostNodeInt] = false
 					hallOrderList[lostNodeInt] = resetHallCalls()
 				}
@@ -81,19 +81,19 @@ func Network(worldview <-chan FromAssignerToNetwork,
 
 			//TODO THIS CAN BE FUNC
 			allAcknowledged := true
-			for i := 0; i < NElevators; i++ {
-				if nodeIDInt == i {
+			for elevator := 0; elevator < NElevators; elevator++ {
+				if nodeIDInt == elevator {
 					continue
 				}
-				if aliveList[i] && !ackMap[i] {
+				if aliveList[elevator] && !ackMap[elevator] {
 					allAcknowledged = false
 					break
 				}
 			}
 			if allAcknowledged {
-				for i := 0; i < NElevators; i++ {
-					if i != nodeIDInt {
-						ackMap[i] = false
+				for elevator := 0; elevator < NElevators; elevator++ {
+					if elevator != nodeIDInt {
+						ackMap[elevator] = false
 					}
 				}
 				//printHallOrderList(hallOrderList)
@@ -109,7 +109,7 @@ func Network(worldview <-chan FromAssignerToNetwork,
 			aliveList[nodeIDInt] = payload.ActiveStatus
 			elevatorList[nodeIDInt] = payload.States[nodeID]
 
-		case <-time.After(50 * time.Millisecond):
+		case <-time.After(BroadcastRate):
 			broadcastTransmissionChannel <- Message{
 				SenderId:      nodeID,
 				ElevatorList:  elevatorList,
