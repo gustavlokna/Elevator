@@ -27,16 +27,10 @@ func Timer(
 	for {
 		select {
 		case startDoor = <-doorOpenChan:
-			// TODO CHECK IF NEEDED ALEX 
-			/*
-			if startDoor{
-				DoorTimer = time.NewTimer(DoorOpenDurationS)
-			}
-			*/
-			DoorTimer = time.NewTimer(DoorOpenDurationS)
+			DoorTimer = time.NewTimer(DoorOpenDuration)
 
 		case startMotor = <-motorActiveChan:
-			MotorTimer = time.NewTimer(MotorTimeoutS)
+			MotorTimer = time.NewTimer(MotorTimeout)
 
 		case <-DoorTimer.C:
 			if startDoor {

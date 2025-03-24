@@ -126,7 +126,6 @@ func Driver(
 			driverEvents <- FromDriverToAssigner{Elevator: elevator, CompletedOrders: clearedRequests}
 
 		case elevator.Requests = <-newOrder:
-
 			switch elevator.CurrentBehaviour {
 			case Idle:
 				switch {
@@ -164,6 +163,7 @@ func Driver(
 
 			case Moving:
 			case DoorOpen:
+				
 			}
 			driverEvents <- FromDriverToAssigner{Elevator: elevator, CompletedOrders: clearedRequests}
 
