@@ -1,6 +1,7 @@
 package broadcast
 
 import (
+	. "Project/config"
 	. "Project/dataenums"
 	"Project/network/conn"
 	"encoding/json"
@@ -16,7 +17,7 @@ func Sender(port int, msgCh <-chan Message) {
 
 	for msg := range msgCh {
 		jsonBytes, _ := json.Marshal(msg)
-		if len(jsonBytes) > BufferSize {
+		if len(jsonBytes) > BroadcastBufferSize {
 			panic("Packet too large.")
 		}
 		conn.WriteTo(jsonBytes, addr)
@@ -26,7 +27,7 @@ func Sender(port int, msgCh <-chan Message) {
 func Receiver(port int, myID string, messageCh chan<- Message, registryCh chan<- NetworkNodeRegistry) {
 	lastSeen := make(map[string]time.Time)
 	reportedNew := make(map[string]bool)
-	var buf [BufferSize]byte
+	var buf [BroadcastBufferSize]byte
 
 	conn := conn.DialBroadcastUDP(port)
 

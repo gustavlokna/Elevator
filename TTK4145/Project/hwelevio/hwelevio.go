@@ -1,6 +1,7 @@
 package hwelevio
 
 import (
+	. "Project/config"
 	. "Project/dataenums"
 	"fmt"
 	"net"
@@ -13,7 +14,6 @@ var _mtx sync.Mutex
 var _conn net.Conn
 
 func Init(addr string) {
-	print("_initialize", _initialize)
 	if _initialize {
 		fmt.Println("Driver already _initialize!")
 		return
@@ -27,8 +27,8 @@ func Init(addr string) {
 	_initialize = true
 }
 
-func SetMotorDirection(dir HWMotorDirection) {
-	write([4]byte{1, byte(dir), 0, 0})
+func SetMotorDirection(dirn MotorDirection) {
+	write([4]byte{1, byte(dirn), 0, 0})
 }
 
 func SetButtonLamp(button Button, floor int, value bool) {
@@ -47,13 +47,13 @@ func PollButtons(receiver chan<- ButtonEvent) {
 	prev := make([][3]bool, NFloors)
 	for {
 		time.Sleep(PollRateMS)
-		for f := 0; f < NFloors; f++ {
-			for b := BHallUp; b <= BCab; b++ {
-				v := getButton(b, f)
-				if v != prev[f][b] && v {
-					receiver <- ButtonEvent{f, Button(b)}
+		for floor := 0; floor < NFloors; floor++ {
+			for btn := BHallUp; btn <= BCab; btn++ {
+				v := getButton(btn, floor)
+				if v != prev[floor][btn] && v {
+					receiver <- ButtonEvent{floor, Button(btn)}
 				}
-				prev[f][b] = v
+				prev[floor][btn] = v
 			}
 		}
 	}
@@ -131,17 +131,17 @@ func write(in [4]byte) {
 }
 
 func toByte(a bool) byte {
-	var b byte = 0
+	var btn byte = 0
 	if a {
-		b = 1
+		btn = 1
 	}
-	return b
+	return btn
 }
 
 func toBool(a byte) bool {
-	var b bool = false
+	var btn bool = false
 	if a != 0 {
-		b = true
+		btn = true
 	}
-	return b
+	return btn
 }

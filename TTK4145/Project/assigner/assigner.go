@@ -1,6 +1,7 @@
 package assigner
 
 import (
+	. "Project/config"
 	. "Project/dataenums"
 	"Project/hwelevio"
 	"fmt"
@@ -8,11 +9,11 @@ import (
 )
 
 func Assigner(
-	newOrderChannel chan<- [NFloors][NButtons]bool,
-	payloadFromElevator <-chan FromDriverToAssigner,
-	toNetworkChannel chan<- FromAssignerToNetwork,
-	fromNetworkChannel <-chan FromNetworkToAssigner,
-	fromAsstoLight chan<- [NFloors][NButtons]ButtonState,
+	newOrders chan<- [NFloors][NButtons]bool,
+	driverEvents <-chan FromDriverToAssigner,
+	worldview chan<- FromAssignerToNetwork,
+	stateBroadcast <-chan FromNetworkToAssigner,
+	sharedLights chan<- [NFloors][NButtons]ButtonState,
 	nodeID string,
 ) {
 	var (
@@ -20,45 +21,43 @@ func Assigner(
 		prevAssignedOrders           [NFloors][NButtons]bool
 		drv_buttons                  = make(chan ButtonEvent)
 	)
-	// Convert nodeID to int
 	myID, err := strconv.Atoi(nodeID)
 	if err != nil {
 		fmt.Printf("Invalid nodeID: %v\n", err)
 		return
 	}
-	payload := <-payloadFromElevator
+
+	payload := <-driverEvents
 	PayloadFromassignerToNetwork = handlePayloadFromElevator(payload,
 		PayloadFromassignerToNetwork, nodeID)
 
-	toNetworkChannel <- PayloadFromassignerToNetwork
+	worldview <- PayloadFromassignerToNetwork
 
 	go hwelevio.PollButtons(drv_buttons)
 	for {
 		select {
 		case btnEvent := <-drv_buttons:
-			PayloadFromassignerToNetwork = buttonPressed(PayloadFromassignerToNetwork,
+			PayloadFromassignerToNetwork = handleButtonPressed(PayloadFromassignerToNetwork,
 				nodeID, btnEvent)
-			toNetworkChannel <- PayloadFromassignerToNetwork
+			worldview <- PayloadFromassignerToNetwork
 
-		case payload := <-payloadFromElevator:
+		case payload := <-driverEvents:
 			PayloadFromassignerToNetwork = handlePayloadFromElevator(payload,
 				PayloadFromassignerToNetwork, nodeID)
 
-			toNetworkChannel <- PayloadFromassignerToNetwork
+			worldview <- PayloadFromassignerToNetwork
 
-		case PayloadFromNetwork := <-fromNetworkChannel:
+		case PayloadFromNetwork := <-stateBroadcast:
 
 			PayloadFromassignerToNetwork = handlePayloadFromNetwork(PayloadFromassignerToNetwork,
 				PayloadFromNetwork, myID)
 
-			newOrders := assignOrders(PayloadFromNetwork, myID)
-
-			if newOrders != prevAssignedOrders {
-				newOrderChannel <- newOrders
-				prevAssignedOrders = newOrders
+			localOrders := assignOrders(PayloadFromNetwork, myID)
+			if localOrders != prevAssignedOrders {
+				newOrders <- localOrders
+				prevAssignedOrders = localOrders
 			}
-			fromAsstoLight <- updateLightStates(PayloadFromNetwork, myID)
-
+			sharedLights <- updateLightStates(PayloadFromNetwork, myID)
 		}
 	}
 

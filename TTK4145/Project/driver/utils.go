@@ -1,74 +1,98 @@
 package driver
 
 import (
+	. "Project/config"
 	. "Project/dataenums"
-	"fmt"
 )
 
-func chooseDirection(elevator Elevator) Elevator {
-	dirnBehaviour := decideDirection(elevator)
-	elevator.Dirn = dirnBehaviour.Dirn
-	elevator.CurrentBehaviour = dirnBehaviour.Behaviour
-	return elevator
+func dirnToBtn(dirn MotorDirection) Button {
+	switch dirn {
+	case MDUp:
+		return BHallUp
+	case MDDown:
+		return BHallDown
+	default:
+		panic("invalid dirn in dirnToBtn ")
+	}
 }
 
-func decideDirection(elevator Elevator) DirnBehaviourPair {
+func btnToDirn(elevator Elevator) MotorDirection {
+	switch {
+	case elevator.Requests[elevator.CurrentFloor][BHallUp]:
+		return MDUp
+	case elevator.Requests[elevator.CurrentFloor][BHallDown]:
+		return MDDown
+	default:
+		return MDStop
+	}
+}
+
+func setMotorOppositeDirn(elevator Elevator) MotorDirection {
 	switch elevator.Dirn {
 	case MDUp:
-		return decideDirectionUp(elevator)
+		return MDDown
 	case MDDown:
-		return decideDirectionDown(elevator)
-	case MDStop:
-		return decideDirectionStop(elevator)
+		return MDUp
 	default:
-		return DirnBehaviourPair{MDStop, EBIdle}
+		switch {
+		case requestsAbove(elevator) || elevator.Requests[elevator.CurrentFloor][BHallUp]:
+			return MDUp
+		case requestsBelow(elevator) || elevator.Requests[elevator.CurrentFloor][BHallDown]:
+			return MDDown
+		default:
+			return MDStop
+		}
 	}
 }
 
-func decideDirectionUp(elevator Elevator) DirnBehaviourPair {
-	switch {
-	case requestsAbove(elevator):
-		return DirnBehaviourPair{MDUp, EBMoving}
-	case requestsHere(elevator):
-		return DirnBehaviourPair{MDStop, EBIdle} // Was MDDown
-	case requestsBelow(elevator):
-		return DirnBehaviourPair{MDDown, EBMoving}
+func orderAtCurrentFloorInDirn(elevator Elevator) bool {
+	switch elevator.Dirn {
+	case MDUp:
+		return elevator.Requests[elevator.CurrentFloor][BHallUp]
+	case MDDown:
+		return elevator.Requests[elevator.CurrentFloor][BHallDown]
 	default:
-		return DirnBehaviourPair{MDStop, EBIdle}
+		return elevator.Requests[elevator.CurrentFloor][BHallUp] || elevator.Requests[elevator.CurrentFloor][BHallDown]
 	}
 }
 
-func decideDirectionDown(elevator Elevator) DirnBehaviourPair {
-	switch {
-	case requestsBelow(elevator):
-		return DirnBehaviourPair{MDDown, EBMoving}
-	case requestsHere(elevator):
-		return DirnBehaviourPair{MDStop, EBIdle} //WAS MDUp
-	case requestsAbove(elevator):
-		return DirnBehaviourPair{MDUp, EBMoving}
+func orderAtCurrentFloorOppositeDirn(elevator Elevator) bool {
+	switch elevator.Dirn {
+	case MDUp:
+		return elevator.Requests[elevator.CurrentFloor][BHallDown]
+	case MDDown:
+		return elevator.Requests[elevator.CurrentFloor][BHallUp]
 	default:
-		return DirnBehaviourPair{MDStop, EBIdle}
+		return elevator.Requests[elevator.CurrentFloor][BHallUp] || elevator.Requests[elevator.CurrentFloor][BHallDown]
 	}
-
 }
 
-func decideDirectionStop(elevator Elevator) DirnBehaviourPair {
-	switch {
-	case requestsHere(elevator):
-		return DirnBehaviourPair{MDStop, EBIdle}
-	case requestsAbove(elevator):
-		return DirnBehaviourPair{MDUp, EBMoving}
-	case requestsBelow(elevator):
-		return DirnBehaviourPair{MDDown, EBMoving}
+func orderCurrentDirn(elevator Elevator) bool {
+	switch elevator.Dirn {
+	case MDUp:
+		return requestsAbove(elevator)
+	case MDDown:
+		return requestsBelow(elevator)
+	}
+	return false
+}
+
+func orderOppositeDirn(elevator Elevator) bool {
+	switch elevator.Dirn {
+	case MDUp:
+		return requestsBelow(elevator)
+	case MDDown:
+		return requestsAbove(elevator)
 	default:
-		return DirnBehaviourPair{MDStop, EBIdle}
+		return requestsBelow(elevator) || requestsAbove(elevator)
+
 	}
 }
 
 func requestsAbove(elevator Elevator) bool {
-	for f := elevator.CurrentFloor + 1; f < NFloors; f++ {
+	for floor := elevator.CurrentFloor + 1; floor < NFloors; floor++ {
 		for btn := BHallUp; btn <= BCab; btn++ {
-			if elevator.Requests[f][btn] {
+			if elevator.Requests[floor][btn] {
 				return true
 			}
 		}
@@ -77,78 +101,12 @@ func requestsAbove(elevator Elevator) bool {
 }
 
 func requestsBelow(elevator Elevator) bool {
-	for f := 0; f < elevator.CurrentFloor; f++ {
+	for floor := 0; floor < elevator.CurrentFloor; floor++ {
 		for btn := BHallUp; btn <= BCab; btn++ {
-			if elevator.Requests[f][btn] {
+			if elevator.Requests[floor][btn] {
 				return true
 			}
 		}
 	}
 	return false
-}
-
-func requestsHere(elevator Elevator) bool {
-	for btn := BHallUp; btn <= BCab; btn++ {
-		if elevator.Requests[elevator.CurrentFloor][btn] {
-			return true
-		}
-	}
-	return false
-}
-
-// TODO REMOVE
-func ElevatorPrint(e Elevator) {
-	fmt.Println("\n  +--------------------+")
-	fmt.Printf(
-		"  |floor = %-2d          |\n"+
-			"  |dirn  = %-12s|\n"+
-			"  |behav = %-12s|\n",
-		e.CurrentFloor,
-		ElevDirToString(e.Dirn),
-		EBToString(e.CurrentBehaviour),
-	)
-	fmt.Println("  +--------------------+")
-	fmt.Println("  |  | up  | dn  | cab |")
-	for f := NFloors - 1; f >= 0; f-- {
-		fmt.Printf("  | %d", f)
-		for btn := BHallUp; btn <= BCab; btn++ {
-			if (f == NFloors-1 && btn == BHallUp) ||
-				(f == 0 && btn == BHallDown) {
-				fmt.Print("|     ")
-			} else {
-				if e.Requests[f][btn] {
-					fmt.Print("|  #  ")
-				} else {
-					fmt.Print("|  -  ")
-				}
-			}
-		}
-		fmt.Println("|")
-	}
-	fmt.Println("  +--------------------+")
-}
-
-func EBToString(behaviour ElevatorBehaviour) string {
-	switch behaviour {
-	case EBIdle:
-		return "idle"
-	case EBDoorOpen:
-		return "doorOpen"
-	case EBMoving:
-		return "moving"
-	default:
-		return "Unknown"
-	}
-}
-func ElevDirToString(d HWMotorDirection) string {
-	switch d {
-	case MDDown:
-		return "down"
-	case MDStop:
-		return "stop"
-	case MDUp:
-		return "up"
-	default:
-		return "DirUnknown"
-	}
 }

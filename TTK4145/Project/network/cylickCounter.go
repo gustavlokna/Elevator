@@ -1,6 +1,7 @@
 package network
 
 import (
+	. "Project/config"
 	. "Project/dataenums"
 )
 
@@ -9,33 +10,33 @@ func cyclicCounter(
 	myID int,
 ) [NElevators][NFloors][NButtons]ButtonState {
 
-	for f := 0; f < NFloors; f++ {
-		for b := 0; b < NButtons; b++ {
-			origState := orders[myID][f][b]
+	for floor := 0; floor < NFloors; floor++ {
+		for btn := 0; btn < NButtons; btn++ {
+			origState := orders[myID][floor][btn]
 			myState := origState
 
 			if myState == Initial {
-				for e := 0; e < NElevators; e++ {
-					if e != myID && orders[e][f][b] != Initial {
-						myState = orders[e][f][b]
+				for elevator := 0; elevator < NElevators; elevator++ {
+					if elevator != myID && orders[elevator][floor][btn] != Initial {
+						myState = orders[elevator][floor][btn]
 						break
 					}
 				}
-				orders[myID][f][b] = myState
+				orders[myID][floor][btn] = myState
 				continue
 			}
 
 			var peers []ButtonState
-			for e := 0; e < NElevators; e++ {
-				if e != myID && orders[e][f][b] != Initial {
-					peers = append(peers, orders[e][f][b])
+			for elevator := 0; elevator < NElevators; elevator++ {
+				if elevator != myID && orders[elevator][floor][btn] != Initial {
+					peers = append(peers, orders[elevator][floor][btn])
 				}
 			}
 
 			// Attempt a valid transition.
 			switch origState {
-			case Idle:
-				if allIn(peers, Idle, ButtonPressed) && anyIs(peers, ButtonPressed) {
+			case Inactive:
+				if allIn(peers, Inactive, ButtonPressed) && anyIs(peers, ButtonPressed) {
 					myState = ButtonPressed
 				}
 			case ButtonPressed:
@@ -47,20 +48,20 @@ func cyclicCounter(
 					myState = OrderComplete
 				}
 			case OrderComplete:
-				if allIn(peers, OrderComplete, Idle) {
-					myState = Idle
+				if allIn(peers, OrderComplete, Inactive) {
+					myState = Inactive
 				}
 			}
 
 			// If no valid transition occurred, check for an illegal combination.
 			if myState == origState {
 				switch origState {
-				case Idle:
-					if !(allIn(peers, Idle, ButtonPressed) || allIn(peers, Idle, OrderComplete)) {
+				case Inactive:
+					if !(allIn(peers, Inactive, ButtonPressed) || allIn(peers, Inactive, OrderComplete)) {
 						myState = Initial
 					}
 				case ButtonPressed:
-					if !(allIn(peers, ButtonPressed, OrderAssigned) || allIn(peers, Idle, ButtonPressed)) {
+					if !(allIn(peers, ButtonPressed, OrderAssigned) || allIn(peers, Inactive, ButtonPressed)) {
 						myState = Initial
 					}
 				case OrderAssigned:
@@ -68,13 +69,13 @@ func cyclicCounter(
 						myState = Initial
 					}
 				case OrderComplete:
-					if !(allIn(peers, OrderComplete, Idle) || allIn(peers, OrderAssigned, OrderComplete)) {
+					if !(allIn(peers, OrderComplete, Inactive) || allIn(peers, OrderAssigned, OrderComplete)) {
 						myState = Initial
 					}
 				}
 			}
 
-			orders[myID][f][b] = myState
+			orders[myID][floor][btn] = myState
 		}
 	}
 	return orders

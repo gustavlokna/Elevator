@@ -1,24 +1,25 @@
 package lights
 
 import (
+	. "Project/config"
 	. "Project/dataenums"
 	"Project/hwelevio"
 )
 
-func LightsHandler(
+func Lights(
 	orderList <-chan [NFloors][NButtons]ButtonState,
-	payloadFromDriver <-chan FromDriverToLight,
+	localLights <-chan FromDriverToLight,
 ) {
 	for {
 		select {
-		case payload := <-payloadFromDriver:
+		case payload := <-localLights:
 			hwelevio.SetFloorIndicator(payload.CurrentFloor)
 			hwelevio.SetDoorOpenLamp(payload.DoorLight)
 
 		case orders := <-orderList:
 			for floor := 0; floor < NFloors; floor++ {
-				for button := 0; button < NButtons; button++ {
-					hwelevio.SetButtonLamp(Button(button), floor, orders[floor][button] == OrderAssigned)
+				for btn := 0; btn < NButtons; btn++ {
+					hwelevio.SetButtonLamp(Button(btn), floor, orders[floor][btn] == OrderAssigned)
 				}
 			}
 		}

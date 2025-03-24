@@ -1,7 +1,7 @@
 package timer
 
 import (
-	. "Project/dataenums"
+	. "Project/config"
 	"time"
 )
 
@@ -13,10 +13,10 @@ const (
 )
 
 func Timer(
-	doorOpenChan <-chan bool,
-	motorActiveChan <-chan bool,
-	doorClosedChan chan<- bool,
-	motorInactiveChan chan<- bool,
+	doorOpenChan <- chan bool,
+	motorActiveChan <- chan bool,
+	doorClosedChan chan <- bool,
+	motorInactiveChan chan <- bool,
 ) {
 	var startDoor, startMotor bool
 	MotorTimer := time.NewTimer(time.Hour)
@@ -27,10 +27,10 @@ func Timer(
 	for {
 		select {
 		case startDoor = <-doorOpenChan:
-			DoorTimer = time.NewTimer(DoorOpenDurationS)
+			DoorTimer = time.NewTimer(DoorOpenDuration)
 
 		case startMotor = <-motorActiveChan:
-			MotorTimer = time.NewTimer(MotorTimeoutS)
+			MotorTimer = time.NewTimer(MotorTimeout)
 
 		case <-DoorTimer.C:
 			if startDoor {

@@ -1,91 +1,81 @@
 package assigner
 
 import (
+	. "Project/config"
 	. "Project/dataenums"
 )
 
 func initPayloadToNetwork() FromAssignerToNetwork {
-	payload := FromAssignerToNetwork{
+	worldview := FromAssignerToNetwork{
 		HallRequests: [NFloors][NButtons]ButtonState{},
 		States:       make(map[string]HRAElevState),
 	}
-	return payload
+	return worldview
 }
-func updateLightStates(payload FromNetworkToAssigner, myID int) [NFloors][NButtons]ButtonState {
-	var updatedLights [NFloors][NButtons]ButtonState
-	updatedLights = payload.HallOrderList[myID]
-	// Include cab calls for the local elevator
+func updateLightStates(stateBroadcast FromNetworkToAssigner,
+	myID int) [NFloors][NButtons]ButtonState {
+
+	updatedLights := stateBroadcast.HallOrderList[myID]
 	for floor := 0; floor < NFloors; floor++ {
-		if payload.ElevatorList[myID].CabRequests[floor] {
+		if stateBroadcast.ElevatorList[myID].CabRequests[floor] {
 			updatedLights[floor][BCab] = OrderAssigned
 		}
 	}
-
 	return updatedLights
 }
 
 func handlePayloadFromNetwork(
-	payload FromAssignerToNetwork,
-	netPayload FromNetworkToAssigner,
+	worldview FromAssignerToNetwork,
+	stateBroadcast FromNetworkToAssigner,
 	nodeID int,
 ) FromAssignerToNetwork {
-	for f := 0; f < NFloors; f++ {
-		for b := 0; b < NButtons; b++ {
-			incomingState := netPayload.HallOrderList[nodeID][f][b]
-			localState := payload.HallRequests[f][b]
-
-			if localState == OrderComplete && incomingState == OrderAssigned {
-				// do nothing; stay OrderComplete.
-			} else {
-				payload.HallRequests[f][b] = incomingState
+	for floor := 0; floor < NFloors; floor++ {
+		for btn := 0; btn < NButtons; btn++ {
+			incomingState := stateBroadcast.HallOrderList[nodeID][floor][btn]
+			localState := worldview.HallRequests[floor][btn]
+			if localState != OrderComplete || incomingState != OrderAssigned {
+				worldview.HallRequests[floor][btn] = incomingState
 			}
-
 		}
 	}
-	return payload
+	return worldview
 }
 
-func handlePayloadFromElevator(fromElevator FromDriverToAssigner,
-	toNetwork FromAssignerToNetwork, nodeID string) FromAssignerToNetwork {
+func handlePayloadFromElevator(driverEvents FromDriverToAssigner,
+	worldview FromAssignerToNetwork, nodeID string) FromAssignerToNetwork {
 
-	behavior, direction, cabRequests := convertElevatorState(fromElevator.Elevator)
-	toNetwork.States[nodeID] = HRAElevState{
-		Behavior:    behavior,
-		Floor:       fromElevator.Elevator.CurrentFloor,
-		Direction:   direction,
+	cabRequests := make([]bool, NFloors)
+	for floor := 0; floor < NFloors; floor++ {
+		cabRequests[floor] = driverEvents.Elevator.Requests[floor][BCab]
+	}
+
+	worldview.States[nodeID] = HRAElevState{
+		Behaviour:   ebToString(driverEvents.Elevator.CurrentBehaviour),
+		Floor:       driverEvents.Elevator.CurrentFloor,
+		Direction:   elevDirnToString(driverEvents.Elevator.Dirn),
 		CabRequests: cabRequests,
 	}
-	toNetwork.ActiveSatus = fromElevator.Elevator.ActiveSatus
-	toNetwork = orderComplete(toNetwork, nodeID, fromElevator.CompletedOrders)
+	worldview.ActiveStatus = driverEvents.Elevator.ActiveStatus
+	worldview = handleOrderComplete(worldview, nodeID, driverEvents.CompletedOrders)
 
-	return toNetwork
-}
-
-func convertElevatorState(e Elevator) (string, string, []bool) {
-	behavior := ebToString(e.CurrentBehaviour)
-	direction := elevDirToString(e.Dirn)
-	cabRequests := make([]bool, NFloors)
-
-	for f := 0; f < NFloors; f++ {
-		cabRequests[f] = e.Requests[f][BCab]
-	}
-	return behavior, direction, cabRequests
+	return worldview
 }
 
 func ebToString(behaviour ElevatorBehaviour) string {
 	switch behaviour {
-	case EBIdle:
+	case Idle:
 		return "idle"
-	case EBDoorOpen:
+	case DoorOpen:
 		return "doorOpen"
-	case EBMoving:
+	case Moving:
 		return "moving"
 	default:
 		return "Unknown"
 	}
 }
-func elevDirToString(d HWMotorDirection) string {
-	switch d {
+
+func elevDirnToString(direction MotorDirection) string {
+	switch direction {
 	case MDDown:
 		return "down"
 	case MDStop:
