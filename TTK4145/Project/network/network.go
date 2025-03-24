@@ -31,13 +31,7 @@ func Network(worldview <-chan FromAssignerToNetwork,
 		online        bool
 		init          bool
 	)
-	//INIT
-	/*
-		payload := <-messagefromOrderAssigner
-		hallOrderList[nodeIDInt] = payload.HallRequests
-		aliveList[nodeIDInt] = payload.ActiveSatus
-		elevatorList[nodeIDInt] = payload.States[nodeID]
-	*/
+
 	for {
 		select {
 		case reg := <-nodeRegistryChannel:
