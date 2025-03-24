@@ -1,8 +1,8 @@
 package assigner
 
 import (
-	. "Project/dataenums"
 	. "Project/config"
+	. "Project/dataenums"
 	"Project/hwelevio"
 	"fmt"
 	"strconv"
@@ -18,7 +18,6 @@ func Assigner(
 ) {
 	var (
 		PayloadFromassignerToNetwork = initPayloadToNetwork()
-		prevAssignedOrders           [NFloors][NButtons]bool
 		drv_buttons                  = make(chan ButtonEvent)
 	)
 	// Convert nodeID to int
@@ -27,37 +26,34 @@ func Assigner(
 		fmt.Printf("Invalid nodeID: %v\n", err)
 		return
 	}
-	
+
 	payload := <-driverEvents
 	PayloadFromassignerToNetwork = handlePayloadFromElevator(payload,
 		PayloadFromassignerToNetwork, nodeID)
 
-		worldview <- PayloadFromassignerToNetwork
-	
+	worldview <- PayloadFromassignerToNetwork
+
 	go hwelevio.PollButtons(drv_buttons)
 	for {
 		select {
 		case btnEvent := <-drv_buttons:
 			PayloadFromassignerToNetwork = handleButtonPressed(PayloadFromassignerToNetwork,
 				nodeID, btnEvent)
-				worldview <- PayloadFromassignerToNetwork
+			worldview <- PayloadFromassignerToNetwork
 
 		case payload := <-driverEvents:
 			PayloadFromassignerToNetwork = handlePayloadFromElevator(payload,
 				PayloadFromassignerToNetwork, nodeID)
 
-				worldview <- PayloadFromassignerToNetwork
+			worldview <- PayloadFromassignerToNetwork
 
 		case PayloadFromNetwork := <-stateBroadcast:
-			
+
 			PayloadFromassignerToNetwork = handlePayloadFromNetwork(PayloadFromassignerToNetwork,
 				PayloadFromNetwork, myID)
-			
-			localOrders := assignOrders(PayloadFromNetwork, myID)
-			if localOrders != prevAssignedOrders {
-				newOrders <- localOrders
-				prevAssignedOrders = localOrders
-			}
+
+			newOrders <- assignOrders(PayloadFromNetwork, myID)
+
 			sharedLights <- updateLightStates(PayloadFromNetwork, myID)
 		}
 	}

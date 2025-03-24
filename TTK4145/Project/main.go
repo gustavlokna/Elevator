@@ -2,12 +2,12 @@ package main
 
 import (
 	"Project/assigner"
+	. "Project/config"
 	. "Project/dataenums"
 	"Project/driver"
 	"Project/hwelevio"
 	"Project/lights"
 	"Project/network"
-	"Project/config"
 	"flag"
 	"strconv"
 )
@@ -16,15 +16,15 @@ func main() {
 
 	nodeID := parseArgs()
 
-	hwelevio.Init(config.Addr)
+	hwelevio.Init(Addr)
 
 	var (
-		newOrders       = make(chan [config.NFloors][config.NButtons]bool, config.BufferSize)
-		driverEvents  = make(chan FromDriverToAssigner, config.BufferSize)
-		worldview = make(chan FromAssignerToNetwork, config.BufferSize)
-		stateBroadcast = make(chan FromNetworkToAssigner, config.BufferSize)
-		localLights     = make(chan FromDriverToLight, config.BufferSize)
-		sharedLights   = make(chan [config.NFloors][config.NButtons]ButtonState, config.BufferSize)
+		newOrders      = make(chan [NFloors][NButtons]bool, ChannelBufferSize)
+		driverEvents   = make(chan FromDriverToAssigner, ChannelBufferSize)
+		worldview      = make(chan FromAssignerToNetwork, ChannelBufferSize)
+		stateBroadcast = make(chan FromNetworkToAssigner, ChannelBufferSize)
+		localLights    = make(chan FromDriverToLight, ChannelBufferSize)
+		sharedLights   = make(chan [NFloors][NButtons]ButtonState, ChannelBufferSize)
 	)
 
 	go assigner.Assigner(
@@ -36,7 +36,7 @@ func main() {
 		nodeID,
 	)
 
-	go driver.ElevatorDriver(
+	go driver.Driver(
 		newOrders,
 		driverEvents,
 		localLights,
@@ -48,11 +48,10 @@ func main() {
 		nodeID,
 	)
 
-	go lights.LightsHandler(
+	go lights.Lights(
 		sharedLights,
 		localLights,
 	)
-	// TODO is the select needed ?
 	select {}
 }
 

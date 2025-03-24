@@ -3,7 +3,6 @@ package driver
 import (
 	. "Project/config"
 	. "Project/dataenums"
-	"fmt"
 )
 
 func dirnToBtn(dirn MotorDirection) Button {
@@ -13,7 +12,7 @@ func dirnToBtn(dirn MotorDirection) Button {
 	case MDDown:
 		return BHallDown
 	default:
-		panic("invalid dirn in dirToEnum ")
+		panic("invalid dirn in dirnToBtn ")
 	}
 }
 
@@ -110,61 +109,4 @@ func requestsBelow(elevator Elevator) bool {
 		}
 	}
 	return false
-}
-
-// TODO REMOVE
-func ElevatorPrint(elevator Elevator) {
-	fmt.Println("\n  +--------------------+")
-	fmt.Printf(
-		"  |floor = %-2d          |\n"+
-			"  |dirn  = %-12s|\n"+
-			"  |behav = %-12s|\n",
-		elevator.CurrentFloor,
-		ElevDirnToString(elevator.Dirn),
-		EBToString(elevator.CurrentBehaviour),
-	)
-	fmt.Println("  +--------------------+")
-	fmt.Println("  |  | up  | dn  | cab |")
-	for floor := NFloors - 1; floor >= 0; floor-- {
-		fmt.Printf("  | %d", floor)
-		for btn := BHallUp; btn <= BCab; btn++ {
-			if (floor == NFloors-1 && btn == BHallUp) ||
-				(floor == 0 && btn == BHallDown) {
-				fmt.Print("|     ")
-			} else {
-				if elevator.Requests[floor][btn] {
-					fmt.Print("|  #  ")
-				} else {
-					fmt.Print("|  -  ")
-				}
-			}
-		}
-		fmt.Println("|")
-	}
-	fmt.Println("  +--------------------+")
-}
-
-func EBToString(behaviour ElevatorBehaviour) string {
-	switch behaviour {
-	case Idle:
-		return "idle"
-	case DoorOpen:
-		return "doorOpen"
-	case Moving:
-		return "moving"
-	default:
-		return "Unknown"
-	}
-}
-func ElevDirnToString(direction MotorDirection) string {
-	switch direction {
-	case MDDown:
-		return "down"
-	case MDStop:
-		return "stop"
-	case MDUp:
-		return "up"
-	default:
-		return "DirUnknown"
-	}
 }

@@ -67,7 +67,6 @@ type HRAInput struct {
 }
 
 type Message struct {
-	//TODO: Make int
 	SenderId      string
 	ElevatorList  [NElevators]HRAElevState
 	HallOrderList [NElevators][NFloors][NButtons]ButtonState

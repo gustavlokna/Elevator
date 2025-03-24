@@ -1,11 +1,9 @@
 package assigner
 
 import (
-	. "Project/dataenums"
 	. "Project/config"
+	. "Project/dataenums"
 )
-
-//TODO Change payload to worldview or something and stateUpdate also
 
 func initPayloadToNetwork() FromAssignerToNetwork {
 	worldview := FromAssignerToNetwork{
@@ -26,7 +24,6 @@ func updateLightStates(stateBroadcast FromNetworkToAssigner,
 	return updatedLights
 }
 
-// TODO ALEX WRITE BETTER 
 func handlePayloadFromNetwork(
 	worldview FromAssignerToNetwork,
 	stateBroadcast FromNetworkToAssigner,
@@ -44,7 +41,6 @@ func handlePayloadFromNetwork(
 	return worldview
 }
 
-// TODO BETTER NAME THAN toAssigner REQUIRED
 func handlePayloadFromElevator(driverEvents FromDriverToAssigner,
 	worldview FromAssignerToNetwork, nodeID string) FromAssignerToNetwork {
 

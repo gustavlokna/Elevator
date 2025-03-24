@@ -1,8 +1,8 @@
 package network
 
 import (
-	. "Project/dataenums"
 	. "Project/config"
+	. "Project/dataenums"
 )
 
 func cyclicCounter(

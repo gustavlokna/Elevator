@@ -1,11 +1,9 @@
 package assigner
 
 import (
-	. "Project/dataenums"
 	. "Project/config"
+	. "Project/dataenums"
 )
-
-//TODO Change payload to worldview or something and stateUpdate also
 
 func handleButtonPressed(worldview FromAssignerToNetwork, ElevatorName string,
 	btnEvent ButtonEvent) FromAssignerToNetwork {

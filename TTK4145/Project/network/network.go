@@ -1,10 +1,9 @@
 package network
 
 import (
-	. "Project/dataenums"
 	. "Project/config"
+	. "Project/dataenums"
 	"Project/network/broadcast"
-	"fmt"
 	"reflect"
 	"strconv"
 	"time"
@@ -14,7 +13,6 @@ func Network(worldview <-chan FromAssignerToNetwork,
 	stateBroadcast chan<- FromNetworkToAssigner,
 	nodeID string) {
 
-	// TODO MAKE CODE COMPATIBLE WITHOUT THIS "STR TO INT CONV"
 	nodeIDInt, _ := strconv.Atoi(nodeID)
 
 	nodeRegistryChannel := make(chan NetworkNodeRegistry)
@@ -35,28 +33,26 @@ func Network(worldview <-chan FromAssignerToNetwork,
 	for {
 		select {
 		case reg := <-nodeRegistryChannel:
-			// TODO THIS reg/ or it can be a double variable CAN ALSO CONTAIN THE ONLIE STATUS :)
 			for _, lostNode := range reg.Lost {
-				fmt.Printf("Node lost connection: %s\n", lostNode)
 				lostNodeInt, _ := strconv.Atoi(lostNode)
-				if lostNodeInt == nodeIDInt {
+				switch {
+				case lostNodeInt == nodeIDInt:
 					online = false
-				} else {
-					fmt.Println("WE SET AN ELEVATOR INACTIVE")
-					// check if newOrder = true must be set (but elevator do not think so)
+				default:
 					aliveList[lostNodeInt] = false
 					hallOrderList[lostNodeInt] = resetHallCalls()
 				}
-
 			}
 			for _, connectedNode := range reg.New {
-				fmt.Printf("Node active: %s\n", connectedNode)
 				activeNodeInt, _ := strconv.Atoi(connectedNode)
-				if activeNodeInt == nodeIDInt {
-					hallOrderList[activeNodeInt] = resetHallCalls()
+				switch {
+				case activeNodeInt == nodeIDInt:
 					online = true
+					aliveList[activeNodeInt] = true
+					hallOrderList[activeNodeInt] = resetHallCalls()
+				default:
+					aliveList[activeNodeInt] = true
 				}
-				aliveList[activeNodeInt] = true
 			}
 
 		case msg := <-broadcastReceiverChannel:
@@ -73,24 +69,12 @@ func Network(worldview <-chan FromAssignerToNetwork,
 			hallOrderList[senderId] = msg.HallOrderList[senderId]
 			hallOrderList = cyclicCounter(hallOrderList, nodeIDInt)
 
-			//TODO THIS CAN BE FUNC
-			allAcknowledged := true
-			for elevator := 0; elevator < NElevators; elevator++ {
-				if nodeIDInt == elevator {
-					continue
-				}
-				if aliveList[elevator] && !ackMap[elevator] {
-					allAcknowledged = false
-					break
-				}
-			}
-			if allAcknowledged {
+			if allAcknowledged(ackMap, aliveList, nodeIDInt) {
 				for elevator := 0; elevator < NElevators; elevator++ {
 					if elevator != nodeIDInt {
 						ackMap[elevator] = false
 					}
 				}
-				//printHallOrderList(hallOrderList)
 				stateBroadcast <- FromNetworkToAssigner{
 					AliveList:     aliveList,
 					ElevatorList:  elevatorList,
@@ -98,7 +82,7 @@ func Network(worldview <-chan FromAssignerToNetwork,
 				}
 			}
 
-		case payload := <- worldview:
+		case payload := <-worldview:
 			hallOrderList[nodeIDInt] = payload.HallRequests
 			aliveList[nodeIDInt] = payload.ActiveStatus
 			elevatorList[nodeIDInt] = payload.States[nodeID]

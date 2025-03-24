@@ -1,27 +1,27 @@
 package driver
 
 import (
-	. "Project/dataenums"
 	. "Project/config"
+	. "Project/dataenums"
 	"Project/driver/timer"
 	"Project/hwelevio"
 	"fmt"
 )
 
-func ElevatorDriver(
+func Driver(
 	newOrder <-chan [NFloors][NButtons]bool,
 	driverEvents chan<- FromDriverToAssigner,
 	localLights chan<- FromDriverToLight,
 ) {
 	var (
-		floorChan       = make(chan int, BufferSize)
-		obstructionChan = make(chan bool, BufferSize)
-		doorOpenChan       = make(chan bool, BufferSize)
-		doorClosedChan     = make(chan bool, BufferSize)
-		motorActiveChan    = make(chan bool, BufferSize)
-		motorInactiveChan  = make(chan bool, BufferSize)
-		clearedRequests    = [NFloors][NButtons]bool{}
-		obstruction        bool
+		floorChan         = make(chan int, ChannelBufferSize)
+		obstructionChan   = make(chan bool, ChannelBufferSize)
+		doorOpenChan      = make(chan bool, ChannelBufferSize)
+		doorClosedChan    = make(chan bool, ChannelBufferSize)
+		motorActiveChan   = make(chan bool, ChannelBufferSize)
+		motorInactiveChan = make(chan bool, ChannelBufferSize)
+		clearedRequests   = [NFloors][NButtons]bool{}
+		obstruction       bool
 	)
 
 	go hwelevio.PollFloorSensor(floorChan)
@@ -88,16 +88,12 @@ func ElevatorDriver(
 			switch {
 			case orderAtCurrentFloorInDirn(elevator):
 				clearedRequests[elevator.CurrentFloor][dirnToBtn(elevator.Dirn)] = true
-				// TODO REMOVE BELLOW ? THOUGH I DID BUT DO NOT DEER NOW 
-				elevator.Requests[elevator.CurrentFloor][dirnToBtn(elevator.Dirn)] = false
 
 			case orderCurrentDirn(elevator):
 
 			case orderAtCurrentFloorOppositeDirn(elevator):
 				elevator.Dirn = setMotorOppositeDirn(elevator)
 				clearedRequests[elevator.CurrentFloor][dirnToBtn(elevator.Dirn)] = true
-				// TODO REMOVE BELLOW ? THOUGH I DID BUT DO NOT DEER NOW 
-				elevator.Requests[elevator.CurrentFloor][dirnToBtn(elevator.Dirn)] = false
 
 			case orderOppositeDirn(elevator):
 
@@ -109,12 +105,10 @@ func ElevatorDriver(
 			if elevator.Requests[elevator.CurrentFloor][BCab] {
 				clearedRequests[elevator.CurrentFloor][BCab] = true
 			}
-			// if move itpo reevant cases
 			elevator.CurrentBehaviour = Idle
 
 			driverEvents <- FromDriverToAssigner{Elevator: elevator, CompletedOrders: clearedRequests}
 			localLights <- FromDriverToLight{CurrentFloor: elevator.CurrentFloor, DoorLight: false}
-			// Reset clearedRequests to all false
 			clearedRequests = [NFloors][NButtons]bool{}
 
 		case <-motorInactiveChan:
@@ -132,7 +126,7 @@ func ElevatorDriver(
 			driverEvents <- FromDriverToAssigner{Elevator: elevator, CompletedOrders: clearedRequests}
 
 		case elevator.Requests = <-newOrder:
-			
+
 			switch elevator.CurrentBehaviour {
 			case Idle:
 				switch {
@@ -169,11 +163,8 @@ func ElevatorDriver(
 				}
 
 			case Moving:
-				// TODO TURN OFF LIGHTS? 
 			case DoorOpen:
-				// TODO CHECK IF ORDERS HERE AND START TIMER ? 
 			}
-			ElevatorPrint(elevator)
 			driverEvents <- FromDriverToAssigner{Elevator: elevator, CompletedOrders: clearedRequests}
 
 		}

@@ -1,8 +1,8 @@
 package hwelevio
 
 import (
-	. "Project/dataenums"
 	. "Project/config"
+	. "Project/dataenums"
 	"fmt"
 	"net"
 	"sync"
@@ -14,7 +14,6 @@ var _mtx sync.Mutex
 var _conn net.Conn
 
 func Init(addr string) {
-	print("_initialize", _initialize)
 	if _initialize {
 		fmt.Println("Driver already _initialize!")
 		return
