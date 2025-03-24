@@ -18,6 +18,7 @@ func Assigner(
 ) {
 	var (
 		PayloadFromassignerToNetwork = initPayloadToNetwork()
+		prevAssignedOrders           [NFloors][NButtons]bool
 		drv_buttons                  = make(chan ButtonEvent)
 	)
 	// Convert nodeID to int
@@ -52,8 +53,11 @@ func Assigner(
 			PayloadFromassignerToNetwork = handlePayloadFromNetwork(PayloadFromassignerToNetwork,
 				PayloadFromNetwork, myID)
 
-			newOrders <- assignOrders(PayloadFromNetwork, myID)
-
+			localOrders := assignOrders(PayloadFromNetwork, myID)
+			if localOrders != prevAssignedOrders {
+				newOrders <- localOrders
+				prevAssignedOrders = localOrders
+			}
 			sharedLights <- updateLightStates(PayloadFromNetwork, myID)
 		}
 	}
