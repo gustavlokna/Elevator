@@ -2,16 +2,17 @@ package lights
 
 import (
 	. "Project/dataenums"
+	. "Project/config"
 	"Project/hwelevio"
 )
 
 func LightsHandler(
 	orderList <-chan [NFloors][NButtons]ButtonState,
-	payloadFromDriver <-chan FromDriverToLight,
+	localLights <-chan FromDriverToLight,
 ) {
 	for {
 		select {
-		case payload := <-payloadFromDriver:
+		case payload := <- localLights:
 			hwelevio.SetFloorIndicator(payload.CurrentFloor)
 			hwelevio.SetDoorOpenLamp(payload.DoorLight)
 

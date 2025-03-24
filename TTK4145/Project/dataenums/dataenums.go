@@ -1,21 +1,6 @@
 package dataenums
 
-import "time"
-
-// TODO PUT ALL CONSTS IN A CONFIG FILE
-const (
-	NFloors           int    = 4
-	NButtons          int    = 3
-	NElevators        int    = 3
-	PollRateMS               = 20 * time.Millisecond
-	DoorOpenDurationS        = 3 * time.Second
-	MotorTimeoutS            = 4 * time.Second // TODO MAKE 3s (worked on slow elevs)
-	BufferSize               = 4 * 1024
-	HeartbeatInterval        = 150 * time.Millisecond  // TODO REDUCE
-	HeartbeatTimeout         = 3000 * time.Millisecond // TODO REDUCE
-	Addr              string = "localhost:15657"
-	MessagePort int = 1338
-)
+import . "Project/config"
 
 type Button int
 
@@ -35,10 +20,10 @@ const (
 	OrderComplete
 )
 
-type HWMotorDirection int
+type MotorDirection int
 
 const (
-	MDDown HWMotorDirection = iota - 1
+	MDDown MotorDirection = iota - 1
 	MDStop
 	MDUp
 )
@@ -57,20 +42,20 @@ const (
 )
 
 type DirnBehaviourPair struct {
-	Dirn      HWMotorDirection
+	Dirn      MotorDirection
 	Behaviour ElevatorBehaviour
 }
 
 type Elevator struct {
 	CurrentFloor     int
-	Dirn             HWMotorDirection
+	Dirn             MotorDirection
 	Requests         [NFloors][NButtons]bool
 	CurrentBehaviour ElevatorBehaviour
-	ActiveSatus      bool
+	ActiveStatus     bool
 }
 
 type HRAElevState struct {
-	Behaviour    string `json:"behaviour"`
+	Behaviour   string `json:"behaviour"`
 	Floor       int    `json:"floor"`
 	Direction   string `json:"direction"`
 	CabRequests []bool `json:"cabRequests"`
@@ -93,7 +78,7 @@ type Message struct {
 type FromAssignerToNetwork struct {
 	HallRequests [NFloors][NButtons]ButtonState
 	States       map[string]HRAElevState
-	ActiveSatus  bool
+	ActiveStatus bool
 }
 
 type FromNetworkToAssigner struct {

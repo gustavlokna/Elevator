@@ -1,43 +1,44 @@
 package driver
 
 import (
+	. "Project/config"
 	. "Project/dataenums"
 	"fmt"
 )
 
-func dirToBtn(dir HWMotorDirection) Button {
-	switch dir {
+func dirnToBtn(dirn MotorDirection) Button {
+	switch dirn {
 	case MDUp:
 		return BHallUp
 	case MDDown:
 		return BHallDown
 	default:
-		panic("invalid direction in dirToEnum ")
+		panic("invalid dirn in dirToEnum ")
 	}
 }
 
-func btnToDirn(e Elevator) HWMotorDirection {
+func btnToDirn(elevator Elevator) MotorDirection {
 	switch {
-	case e.Requests[e.CurrentFloor][BHallUp]:
+	case elevator.Requests[elevator.CurrentFloor][BHallUp]:
 		return MDUp
-	case e.Requests[e.CurrentFloor][BHallDown]:
+	case elevator.Requests[elevator.CurrentFloor][BHallDown]:
 		return MDDown
 	default:
-		return MDStop 
+		return MDStop
 	}
 }
 
-func setMotorOppositeDir(e Elevator) HWMotorDirection {
-	switch e.Dirn {
+func setMotorOppositeDirn(elevator Elevator) MotorDirection {
+	switch elevator.Dirn {
 	case MDUp:
 		return MDDown
 	case MDDown:
 		return MDUp
 	default:
 		switch {
-		case requestsAbove(e) || e.Requests[e.CurrentFloor][BHallUp]:
+		case requestsAbove(elevator) || elevator.Requests[elevator.CurrentFloor][BHallUp]:
 			return MDUp
-		case requestsBelow(e) || e.Requests[e.CurrentFloor][BHallDown]:
+		case requestsBelow(elevator) || elevator.Requests[elevator.CurrentFloor][BHallDown]:
 			return MDDown
 		default:
 			return MDStop
@@ -45,46 +46,46 @@ func setMotorOppositeDir(e Elevator) HWMotorDirection {
 	}
 }
 
-func orderAtCurrentFloorInDir(e Elevator) bool {
-	switch e.Dirn {
+func orderAtCurrentFloorInDirn(elevator Elevator) bool {
+	switch elevator.Dirn {
 	case MDUp:
-		return e.Requests[e.CurrentFloor][BHallUp]
+		return elevator.Requests[elevator.CurrentFloor][BHallUp]
 	case MDDown:
-		return e.Requests[e.CurrentFloor][BHallDown]
+		return elevator.Requests[elevator.CurrentFloor][BHallDown]
 	default:
-		return e.Requests[e.CurrentFloor][BHallUp] || e.Requests[e.CurrentFloor][BHallDown]
+		return elevator.Requests[elevator.CurrentFloor][BHallUp] || elevator.Requests[elevator.CurrentFloor][BHallDown]
 	}
 }
 
-func orderAtCurrentFloorOppositeDir(e Elevator) bool {
-	switch e.Dirn {
+func orderAtCurrentFloorOppositeDirn(elevator Elevator) bool {
+	switch elevator.Dirn {
 	case MDUp:
-		return e.Requests[e.CurrentFloor][BHallDown]
+		return elevator.Requests[elevator.CurrentFloor][BHallDown]
 	case MDDown:
-		return e.Requests[e.CurrentFloor][BHallUp]
+		return elevator.Requests[elevator.CurrentFloor][BHallUp]
 	default:
-		return e.Requests[e.CurrentFloor][BHallUp] || e.Requests[e.CurrentFloor][BHallDown]
+		return elevator.Requests[elevator.CurrentFloor][BHallUp] || elevator.Requests[elevator.CurrentFloor][BHallDown]
 	}
 }
 
-func orderInCurrentDir(e Elevator) bool {
-	switch e.Dirn {
+func orderCurrentDirn(elevator Elevator) bool {
+	switch elevator.Dirn {
 	case MDUp:
-		return requestsAbove(e)
+		return requestsAbove(elevator)
 	case MDDown:
-		return requestsBelow(e)
+		return requestsBelow(elevator)
 	}
 	return false
 }
 
-func orderOppositeDir(e Elevator) bool {
-	switch e.Dirn {
+func orderOppositeDirn(elevator Elevator) bool {
+	switch elevator.Dirn {
 	case MDUp:
-		return requestsBelow(e)
+		return requestsBelow(elevator)
 	case MDDown:
-		return requestsAbove(e)
+		return requestsAbove(elevator)
 	default:
-		return requestsBelow(e) || requestsAbove(e)
+		return requestsBelow(elevator) || requestsAbove(elevator)
 
 	}
 }
@@ -112,15 +113,15 @@ func requestsBelow(elevator Elevator) bool {
 }
 
 // TODO REMOVE
-func ElevatorPrint(e Elevator) {
+func ElevatorPrint(elevator Elevator) {
 	fmt.Println("\n  +--------------------+")
 	fmt.Printf(
 		"  |floor = %-2d          |\n"+
 			"  |dirn  = %-12s|\n"+
 			"  |behav = %-12s|\n",
-		e.CurrentFloor,
-		ElevDirToString(e.Dirn),
-		EBToString(e.CurrentBehaviour),
+		elevator.CurrentFloor,
+		ElevDirnToString(elevator.Dirn),
+		EBToString(elevator.CurrentBehaviour),
 	)
 	fmt.Println("  +--------------------+")
 	fmt.Println("  |  | up  | dn  | cab |")
@@ -131,7 +132,7 @@ func ElevatorPrint(e Elevator) {
 				(f == 0 && btn == BHallDown) {
 				fmt.Print("|     ")
 			} else {
-				if e.Requests[f][btn] {
+				if elevator.Requests[f][btn] {
 					fmt.Print("|  #  ")
 				} else {
 					fmt.Print("|  -  ")
@@ -155,8 +156,8 @@ func EBToString(behaviour ElevatorBehaviour) string {
 		return "Unknown"
 	}
 }
-func ElevDirToString(d HWMotorDirection) string {
-	switch d {
+func ElevDirnToString(direction MotorDirection) string {
+	switch direction {
 	case MDDown:
 		return "down"
 	case MDStop:

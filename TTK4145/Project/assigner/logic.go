@@ -2,19 +2,20 @@ package assigner
 
 import (
 	. "Project/dataenums"
+	. "Project/config"
 	"encoding/json"
 	"fmt"
 	"os/exec"
 )
 
-func assignOrders(payload FromNetworkToAssigner,
+func assignOrders(stateBroadcast FromNetworkToAssigner,
 	nodeID int) [NFloors][NButtons]bool {
 	var orderList [NFloors][NButtons]bool
 
 	for floor := 0; floor < NFloors; floor++ {
-		orderList[floor][BCab] = payload.ElevatorList[nodeID].CabRequests[floor]
+		orderList[floor][BCab] = stateBroadcast.ElevatorList[nodeID].CabRequests[floor]
 	}
-	if !(payload.AliveList[nodeID]) {
+	if !(stateBroadcast.AliveList[nodeID]) {
 		return orderList
 	}
 
@@ -22,18 +23,18 @@ func assignOrders(payload FromNetworkToAssigner,
 		HallRequests: [NFloors][NButtons - 1]bool{},
 		States:       make(map[string]HRAElevState),
 	}
-	for i, alive := range payload.AliveList {
+	for i, alive := range stateBroadcast.AliveList {
 		if alive {
 			elevatorID := fmt.Sprintf("elevator_%d", i)
-			hraInput.States[elevatorID] = payload.ElevatorList[i]
+			hraInput.States[elevatorID] = stateBroadcast.ElevatorList[i]
 		}
 	}
 
 	for floor := 0; floor < NFloors; floor++ {
 		for btn := BHallUp; btn <= BHallDown; btn++ {
 			allAssigned := true
-			for i, alive := range payload.AliveList {
-				if alive && payload.HallOrderList[i][floor][btn] != OrderAssigned {
+			for i, alive := range stateBroadcast.AliveList {
+				if alive && stateBroadcast.HallOrderList[i][floor][btn] != OrderAssigned {
 					allAssigned = false
 					break
 				}

@@ -6,6 +6,7 @@ import (
 	"net"
 	"sync"
 	"time"
+	"Project/config"
 )
 
 var _initialize bool = false
@@ -27,8 +28,8 @@ func Init(addr string) {
 	_initialize = true
 }
 
-func SetMotorDirection(dir HWMotorDirection) {
-	write([4]byte{1, byte(dir), 0, 0})
+func SetMotorDirection(dirn MotorDirection) {
+	write([4]byte{1, byte(dirn), 0, 0})
 }
 
 func SetButtonLamp(button Button, floor int, value bool) {
@@ -44,10 +45,10 @@ func SetDoorOpenLamp(value bool) {
 }
 
 func PollButtons(receiver chan<- ButtonEvent) {
-	prev := make([][3]bool, NFloors)
+	prev := make([][3]bool, config.NFloors)
 	for {
-		time.Sleep(PollRateMS)
-		for f := 0; f < NFloors; f++ {
+		time.Sleep(config.PollRateMS)
+		for f := 0; f < config.NFloors; f++ {
 			for b := BHallUp; b <= BCab; b++ {
 				v := getButton(b, f)
 				if v != prev[f][b] && v {
@@ -62,7 +63,7 @@ func PollButtons(receiver chan<- ButtonEvent) {
 func PollFloorSensor(receiver chan<- int) {
 	prev := -1
 	for {
-		time.Sleep(PollRateMS)
+		time.Sleep(config.PollRateMS)
 		v := getFloor()
 		if v != prev && v != -1 {
 			receiver <- v
@@ -74,7 +75,7 @@ func PollFloorSensor(receiver chan<- int) {
 func PollObstructionSwitch(receiver chan<- bool) {
 	prev := false
 	for {
-		time.Sleep(PollRateMS)
+		time.Sleep(config.PollRateMS)
 		v := getObstruction()
 		if v != prev {
 			receiver <- v

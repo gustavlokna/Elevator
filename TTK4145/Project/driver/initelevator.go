@@ -9,6 +9,6 @@ func initelevator() Elevator {
 		CurrentFloor:     -1,
 		Dirn:             MDDown,
 		CurrentBehaviour: Moving,
-		ActiveSatus:      true, 
+		ActiveStatus:      true, 
 	}
 }

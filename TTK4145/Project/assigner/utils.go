@@ -2,21 +2,24 @@ package assigner
 
 import (
 	. "Project/dataenums"
+	. "Project/config"
 )
 
+//TODO Change payload to worldview or something and stateUpdate also
+
 func initPayloadToNetwork() FromAssignerToNetwork {
-	payload := FromAssignerToNetwork{
+	worldview := FromAssignerToNetwork{
 		HallRequests: [NFloors][NButtons]ButtonState{},
 		States:       make(map[string]HRAElevState),
 	}
-	return payload
+	return worldview
 }
-func updateLightStates(payload FromNetworkToAssigner,
+func updateLightStates(stateBroadcast FromNetworkToAssigner,
 	myID int) [NFloors][NButtons]ButtonState {
 
-	updatedLights := payload.HallOrderList[myID]
+	updatedLights := stateBroadcast.HallOrderList[myID]
 	for floor := 0; floor < NFloors; floor++ {
-		if payload.ElevatorList[myID].CabRequests[floor] {
+		if stateBroadcast.ElevatorList[myID].CabRequests[floor] {
 			updatedLights[floor][BCab] = OrderAssigned
 		}
 	}
@@ -25,45 +28,41 @@ func updateLightStates(payload FromNetworkToAssigner,
 
 // TODO ALEX WRITE BETTER 
 func handlePayloadFromNetwork(
-	payload FromAssignerToNetwork,
-	netPayload FromNetworkToAssigner,
+	worldview FromAssignerToNetwork,
+	stateBroadcast FromNetworkToAssigner,
 	nodeID int,
 ) FromAssignerToNetwork {
 	for f := 0; f < NFloors; f++ {
 		for b := 0; b < NButtons; b++ {
-			incomingState := netPayload.HallOrderList[nodeID][f][b]
-			localState := payload.HallRequests[f][b]
-
-			if localState == OrderComplete && incomingState == OrderAssigned {
-				// do nothing; stay OrderComplete.
-			} else {
-				payload.HallRequests[f][b] = incomingState
+			incomingState := stateBroadcast.HallOrderList[nodeID][f][b]
+			localState := worldview.HallRequests[f][b]
+			if localState != OrderComplete || incomingState != OrderAssigned {
+				worldview.HallRequests[f][b] = incomingState
 			}
-
 		}
 	}
-	return payload
+	return worldview
 }
 
-// TODO BETTER NAME THAN msg REQUIRED
-func handlePayloadFromElevator(msg FromDriverToAssigner,
-	toNetwork FromAssignerToNetwork, nodeID string) FromAssignerToNetwork {
+// TODO BETTER NAME THAN toAssigner REQUIRED
+func handlePayloadFromElevator(driverEvents FromDriverToAssigner,
+	worldview FromAssignerToNetwork, nodeID string) FromAssignerToNetwork {
 
 	cabRequests := make([]bool, NFloors)
 	for f := 0; f < NFloors; f++ {
-		cabRequests[f] = msg.Elevator.Requests[f][BCab]
+		cabRequests[f] = driverEvents.Elevator.Requests[f][BCab]
 	}
 
-	toNetwork.States[nodeID] = HRAElevState{
-		Behaviour:   ebToString(msg.Elevator.CurrentBehaviour),
-		Floor:       msg.Elevator.CurrentFloor,
-		Direction:   elevDirToString(msg.Elevator.Dirn),
+	worldview.States[nodeID] = HRAElevState{
+		Behaviour:   ebToString(driverEvents.Elevator.CurrentBehaviour),
+		Floor:       driverEvents.Elevator.CurrentFloor,
+		Direction:   elevDirToString(driverEvents.Elevator.Dirn),
 		CabRequests: cabRequests,
 	}
-	toNetwork.ActiveSatus = msg.Elevator.ActiveSatus
-	toNetwork = orderComplete(toNetwork, nodeID, msg.CompletedOrders)
+	worldview.ActiveStatus = driverEvents.Elevator.ActiveStatus
+	worldview = handleOrderComplete(worldview, nodeID, driverEvents.CompletedOrders)
 
-	return toNetwork
+	return worldview
 }
 
 func ebToString(behaviour ElevatorBehaviour) string {
@@ -79,8 +78,8 @@ func ebToString(behaviour ElevatorBehaviour) string {
 	}
 }
 
-func elevDirToString(d HWMotorDirection) string {
-	switch d {
+func elevDirToString(dirn MotorDirection) string {
+	switch dirn {
 	case MDDown:
 		return "down"
 	case MDStop:

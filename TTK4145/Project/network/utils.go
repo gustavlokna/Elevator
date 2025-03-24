@@ -2,6 +2,7 @@ package network
 
 import (
 	. "Project/dataenums"
+	. "Project/config"
 	"fmt"
 )
 

@@ -3,6 +3,7 @@ package broadcast
 import (
 	. "Project/dataenums"
 	"Project/network/conn"
+	"Project/config"
 	"encoding/json"
 	"fmt"
 	"net"
@@ -16,7 +17,7 @@ func Sender(port int, msgCh <-chan Message) {
 
 	for msg := range msgCh {
 		jsonBytes, _ := json.Marshal(msg)
-		if len(jsonBytes) > BufferSize {
+		if len(jsonBytes) > config.BufferSize {
 			panic("Packet too large.")
 		}
 		conn.WriteTo(jsonBytes, addr)
@@ -26,12 +27,12 @@ func Sender(port int, msgCh <-chan Message) {
 func Receiver(port int, myID string, messageCh chan<- Message, registryCh chan<- NetworkNodeRegistry) {
 	lastSeen := make(map[string]time.Time)
 	reportedNew := make(map[string]bool)
-	var buf [BufferSize]byte
+	var buf [config.BufferSize]byte
 
 	conn := conn.DialBroadcastUDP(port)
 
 	for {
-		conn.SetReadDeadline(time.Now().Add(HeartbeatInterval))
+		conn.SetReadDeadline(time.Now().Add(config.HeartbeatInterval))
 		n, _, err := conn.ReadFrom(buf[:])
 		if err != nil {
 			if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
@@ -58,7 +59,7 @@ func Receiver(port int, myID string, messageCh chan<- Message, registryCh chan<-
 		now := time.Now()
 		var lostNodes, activeNodes, newNodes []string
 		for id, t := range lastSeen {
-			if now.Sub(t) > HeartbeatTimeout {
+			if now.Sub(t) > config.HeartbeatTimeout {
 				lostNodes = append(lostNodes, id)
 				delete(lastSeen, id)
 				delete(reportedNew, id)

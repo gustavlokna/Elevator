@@ -2,6 +2,7 @@ package network
 
 import (
 	. "Project/dataenums"
+	. "Project/config"
 	"Project/network/broadcast"
 	"fmt"
 	"reflect"
@@ -9,8 +10,8 @@ import (
 	"time"
 )
 
-func Network(messagefromOrderAssigner <-chan FromAssignerToNetwork,
-	messagetoOrderAssignerChannel chan<- FromNetworkToAssigner,
+func Network(worldview <-chan FromAssignerToNetwork,
+	stateBroadcast chan<- FromNetworkToAssigner,
 	nodeID string) {
 
 	// TODO MAKE CODE COMPATIBLE WITHOUT THIS "STR TO INT CONV"
@@ -96,16 +97,16 @@ func Network(messagefromOrderAssigner <-chan FromAssignerToNetwork,
 					}
 				}
 				//printHallOrderList(hallOrderList)
-				messagetoOrderAssignerChannel <- FromNetworkToAssigner{
+				stateBroadcast <- FromNetworkToAssigner{
 					AliveList:     aliveList,
 					ElevatorList:  elevatorList,
 					HallOrderList: hallOrderList,
 				}
 			}
 
-		case payload := <-messagefromOrderAssigner:
+		case payload := <- worldview:
 			hallOrderList[nodeIDInt] = payload.HallRequests
-			aliveList[nodeIDInt] = payload.ActiveSatus
+			aliveList[nodeIDInt] = payload.ActiveStatus
 			elevatorList[nodeIDInt] = payload.States[nodeID]
 
 		case <-time.After(50 * time.Millisecond):
@@ -120,7 +121,7 @@ func Network(messagefromOrderAssigner <-chan FromAssignerToNetwork,
 			if !online {
 				newAliveList := [NElevators]bool{}
 				newAliveList[nodeIDInt] = aliveList[nodeIDInt]
-				messagetoOrderAssignerChannel <- FromNetworkToAssigner{
+				stateBroadcast <- FromNetworkToAssigner{
 					AliveList:     newAliveList,
 					ElevatorList:  elevatorList,
 					HallOrderList: hallOrderList,
