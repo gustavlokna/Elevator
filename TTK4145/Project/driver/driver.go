@@ -5,7 +5,6 @@ import (
 	. "Project/dataenums"
 	"Project/driver/timer"
 	"Project/hwelevio"
-	"fmt"
 )
 
 func Driver(
