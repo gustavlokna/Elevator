@@ -138,6 +138,7 @@ func Driver(
 					hwelevio.SetMotorDirection(elevator.Dirn)
 					motorActiveChan <- true
 					localLights <- FromDriverToLight{CurrentFloor: elevator.CurrentFloor, DoorLight: false}
+					driverEvents <- FromDriverToAssigner{Elevator: elevator, CompletedOrders: clearedRequests}
 
 				case orderAtCurrentFloorOppositeDirn(elevator):
 					elevator.Dirn = setMotorOppositeDirn(elevator)
@@ -151,19 +152,18 @@ func Driver(
 					hwelevio.SetMotorDirection(elevator.Dirn)
 					motorActiveChan <- true
 					localLights <- FromDriverToLight{CurrentFloor: elevator.CurrentFloor, DoorLight: false}
+					driverEvents <- FromDriverToAssigner{Elevator: elevator, CompletedOrders: clearedRequests}
 
 				default:
 					elevator.Dirn = MDStop
 					hwelevio.SetMotorDirection(MDStop)
 					localLights <- FromDriverToLight{CurrentFloor: elevator.CurrentFloor, DoorLight: false}
-
+					driverEvents <- FromDriverToAssigner{Elevator: elevator, CompletedOrders: clearedRequests}
 				}
-
 			case Moving:
 			case DoorOpen:
-
 			}
-			driverEvents <- FromDriverToAssigner{Elevator: elevator, CompletedOrders: clearedRequests}
+			
 
 		}
 	}
