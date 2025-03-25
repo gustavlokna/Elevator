@@ -29,7 +29,6 @@ func Assigner(
 	payload := <-driverEvents
 	PayloadFromassignerToNetwork = handlePayloadFromElevator(payload,
 		PayloadFromassignerToNetwork, nodeID)
-
 	worldview <- PayloadFromassignerToNetwork
 
 	go hwelevio.PollButtons(drv_buttons)
@@ -47,10 +46,9 @@ func Assigner(
 			worldview <- PayloadFromassignerToNetwork
 
 		case PayloadFromNetwork := <-stateBroadcast:
-
 			PayloadFromassignerToNetwork = handlePayloadFromNetwork(PayloadFromassignerToNetwork,
 				PayloadFromNetwork, myID)
-			
+
 			newOrders <- assignOrders(PayloadFromNetwork, myID)
 			sharedLights <- updateLightStates(PayloadFromNetwork, myID)
 		}

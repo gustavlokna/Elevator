@@ -158,7 +158,7 @@ func Driver(
 					elevator.Dirn = MDStop
 					hwelevio.SetMotorDirection(MDStop)
 					localLights <- FromDriverToLight{CurrentFloor: elevator.CurrentFloor, DoorLight: false}
-					driverEvents <- FromDriverToAssigner{Elevator: elevator, CompletedOrders: clearedRequests}
+					//driverEvents <- FromDriverToAssigner{Elevator: elevator, CompletedOrders: clearedRequests}
 				}
 			case Moving:
 			case DoorOpen:

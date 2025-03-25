@@ -7,7 +7,7 @@ const (
 	NButtons            = 3
 	NElevators          = 3
 	PollRateMS          = 20 * time.Millisecond
-	BroadcastRate       = 10 * time.Millisecond
+	BroadcastRate       = 100 * time.Millisecond // TODO MAKE 50
 	DoorOpenDuration   = 3 * time.Second
 	MotorTimeout       = 4 * time.Second
 	BroadcastBufferSize = 4 * 1024
