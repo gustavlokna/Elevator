@@ -8,6 +8,7 @@ import (
 
 func initPayloadToNetwork(driverEvents FromDriverToAssigner,stateBroadcast FromNetworkToAssigner, nodeID int) FromAssignerToNetwork {
 	// TODO CHECK IF WORKS
+	// TODO MAKE THE STATES make(map[int]HRAElevState)
 	worldview := FromAssignerToNetwork{
 		HallRequests: [NFloors][NButtons]ButtonState{},
 		States:       make(map[string]HRAElevState),
@@ -63,7 +64,7 @@ func handlePayloadFromElevator(driverEvents FromDriverToAssigner,
 		Behaviour:   ebToString(driverEvents.Elevator.CurrentBehaviour),
 		Floor:       driverEvents.Elevator.CurrentFloor,
 		Direction:   elevDirnToString(driverEvents.Elevator.Dirn),
-		//CabRequests: cabRequests,
+		CabRequests: worldview.States[strconv.Itoa(nodeID)].CabRequests,
 	}
 	worldview.ActiveStatus = driverEvents.Elevator.ActiveStatus
 	worldview = handleOrderComplete(worldview, nodeID, driverEvents.CompletedOrders)
