@@ -31,24 +31,24 @@ func updateLightStates(stateBroadcast FromNetworkToAssigner,
 	return updatedLights
 }
 
-func handlePayloadFromNetwork(
+func mergeNetworkHallOrders(
 	worldview FromAssignerToNetwork,
 	stateBroadcast FromNetworkToAssigner,
 	nodeID int,
 ) FromAssignerToNetwork {
 	for floor := 0; floor < NFloors; floor++ {
 		for btn := 0; btn < NButtons; btn++ {
-			incomingState := stateBroadcast.HallOrderList[nodeID][floor][btn]
-			localState := worldview.HallRequests[floor][btn]
-			if localState != OrderComplete || incomingState != OrderAssigned {
-				worldview.HallRequests[floor][btn] = incomingState
+			incommingOrder := stateBroadcast.HallOrderList[nodeID][floor][btn] 
+			localOrder := worldview.HallRequests[floor][btn] 	
+			if localOrder != OrderComplete || incommingOrder != OrderAssigned {
+				worldview.HallRequests[floor][btn] = incommingOrder
 			}
 		}
 	}
 	return worldview
 }
 
-func handlePayloadFromElevator(driverEvents FromDriverToAssigner,
+func syncDriverElevatorState(driverEvents FromDriverToAssigner,
 	worldview FromAssignerToNetwork, nodeID int) FromAssignerToNetwork {
 
 	worldview.States[nodeID] = HRAElevState{

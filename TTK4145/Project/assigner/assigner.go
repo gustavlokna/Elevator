@@ -32,13 +32,13 @@ func Assigner(
 			worldview <- PayloadFromassignerToNetwork
 
 		case payloadFormDriver := <-driverEvents:
-			PayloadFromassignerToNetwork = handlePayloadFromElevator(payloadFormDriver,
+			PayloadFromassignerToNetwork = syncDriverElevatorState(payloadFormDriver,
 				PayloadFromassignerToNetwork, nodeID)
 
 			worldview <- PayloadFromassignerToNetwork
 
-		case PayloadFromNetwork := <-stateBroadcast:
-			PayloadFromassignerToNetwork = handlePayloadFromNetwork(PayloadFromassignerToNetwork,
+		case PayloadFromNetwork := <-stateBroadcast: 
+			PayloadFromassignerToNetwork = mergeNetworkHallOrders(PayloadFromassignerToNetwork,
 				PayloadFromNetwork, nodeID)
 
 			newOrders <- assignOrders(PayloadFromNetwork, nodeID)
