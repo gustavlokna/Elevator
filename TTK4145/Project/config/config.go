@@ -14,6 +14,6 @@ const (
 	ChannelBufferSize   = 100
 	HeartbeatInterval   = 150 * time.Millisecond
 	HeartbeatTimeout    = 3000 * time.Millisecond
-	Addr                = "localhost:15657"
+	Addr                = "localhost:15659"
 	MessagePort         = 1338
 )

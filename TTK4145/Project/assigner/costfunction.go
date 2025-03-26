@@ -11,7 +11,13 @@ import (
 func assignOrders(stateBroadcast FromNetworkToAssigner,
 	nodeID int) [NFloors][NButtons]bool {
 	var orderList [NFloors][NButtons]bool
-
+	
+	elevator := stateBroadcast.ElevatorList[nodeID]
+	if len(elevator.CabRequests) == 0 {
+		fmt.Println("Error: CabRequests is empty for elevator", nodeID)
+		return orderList
+	}
+	
 	for floor := 0; floor < NFloors; floor++ {
 		orderList[floor][BCab] = stateBroadcast.ElevatorList[nodeID].CabRequests[floor]
 	}
