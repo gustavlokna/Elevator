@@ -4,6 +4,7 @@ import (
 	. "Project/config"
 	. "Project/dataenums"
 	"Project/network/broadcast"
+	"fmt"
 	"reflect"
 	"strconv"
 	"time"
@@ -35,20 +36,25 @@ func Network(worldview <-chan FromAssignerToNetwork,
 				lostNodeInt, _ := strconv.Atoi(lostNode)
 				switch {
 				case lostNodeInt == nodeID:
+					fmt.Printf("⚠️  This node (ID %d) marked offline\n", nodeID)
 					online = false
 				default:
+					fmt.Printf("❌ Node %d lost connection\n", lostNodeInt)
 					aliveList[lostNodeInt] = false
 					hallOrderList[lostNodeInt] = resetHallCalls()
 				}
 			}
+
 			for _, connectedNode := range reg.New {
 				activeNodeInt, _ := strconv.Atoi(connectedNode)
 				switch {
 				case activeNodeInt == nodeID:
+					fmt.Printf("✅ This node (ID %d) is now online\n", nodeID)
 					online = true
 					aliveList[activeNodeInt] = true
 					hallOrderList[activeNodeInt] = resetHallCalls()
 				default:
+					fmt.Printf("➕ Node %d joined the network\n", activeNodeInt)
 					aliveList[activeNodeInt] = true
 				}
 			}
