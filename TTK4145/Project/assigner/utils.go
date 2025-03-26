@@ -7,7 +7,11 @@ import (
 
 func initPayloadToNetwork(driverEvents FromDriverToAssigner,stateBroadcast FromNetworkToAssigner, nodeID string) FromAssignerToNetwork {
 	// TODO CHECK IF WORKS
-	worldview.States[nodeID] := HRAElevState{
+	worldview := FromAssignerToNetwork{
+		HallRequests: [NFloors][NButtons]ButtonState{},
+		States:       make(map[string]HRAElevState),
+	}
+	worldview.States[nodeID] = HRAElevState{
 		Behaviour:   ebToString(driverEvents.Elevator.CurrentBehaviour),
 		Floor:       driverEvents.Elevator.CurrentFloor,
 		Direction:   elevDirnToString(driverEvents.Elevator.Dirn),
