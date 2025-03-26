@@ -11,11 +11,11 @@ import (
 	"time"
 )
 
-func Sender(port int, broadcastTransmissionChannel <-chan Message) {
+func Sender(port int, msgCh <-chan Message) {
 	conn := conn.DialBroadcastUDP(port)
 	addr, _ := net.ResolveUDPAddr("udp4", fmt.Sprintf("255.255.255.255:%d", port))
 
-	for msg := range broadcastTransmissionChannel {
+	for msg := range msgCh {
 		jsonBytes, _ := json.Marshal(msg)
 		if len(jsonBytes) > BroadcastBufferSize {
 			panic("Packet too large.")
@@ -24,9 +24,9 @@ func Sender(port int, broadcastTransmissionChannel <-chan Message) {
 	}
 }
 
-func Receiver(port int, myID int, broadcastReceiverChannel chan<- Message, nodeRegistryChannel chan<- NetworkNodeRegistry) {
-	lastSeen := make(map[int]time.Time)
-	reportedNew := make(map[int]bool)
+func Receiver(port int, myID string, messageCh chan<- Message, registryCh chan<- NetworkNodeRegistry) {
+	lastSeen := make(map[string]time.Time)
+	reportedNew := make(map[string]bool)
 	var buf [BroadcastBufferSize]byte
 
 	conn := conn.DialBroadcastUDP(port)
@@ -50,19 +50,15 @@ func Receiver(port int, myID int, broadcastReceiverChannel chan<- Message, nodeR
 					reportedNew[msg.SenderId] = false
 				}
 				if msg.SenderId != myID {
-					broadcastReceiverChannel <- msg
-				}
-				if msg.SenderId == myID {
-					lastSeen[myID] = time.Now()
+					messageCh <- msg
 				}
 			}
 		}
 
 		// Heartbeat check
 		now := time.Now()
-		var lostNodes, activeNodes, newNodes []int
+		var lostNodes, activeNodes, newNodes []string
 		for id, t := range lastSeen {
-			fmt.Printf("🧠 lastSeen[%d] = %v (Δt = %v)\n", myID, lastSeen[myID], now.Sub(lastSeen[myID]))
 			if now.Sub(t) > HeartbeatTimeout {
 				lostNodes = append(lostNodes, id)
 				delete(lastSeen, id)
@@ -78,8 +74,8 @@ func Receiver(port int, myID int, broadcastReceiverChannel chan<- Message, nodeR
 			}
 		}
 		if len(lostNodes) > 0 || len(newNodes) > 0 {
-			sort.Ints(activeNodes)
-			nodeRegistryChannel <- NetworkNodeRegistry{
+			sort.Strings(activeNodes)
+			registryCh <- NetworkNodeRegistry{
 				Nodes: activeNodes,
 				New:   newNodes,
 				Lost:  lostNodes,

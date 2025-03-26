@@ -4,8 +4,8 @@ import (
 	. "Project/config"
 	. "Project/dataenums"
 	"Project/network/broadcast"
-	"fmt"
 	"reflect"
+	"strconv"
 	"time"
 )
 
@@ -26,46 +26,45 @@ func Network(worldview <-chan FromAssignerToNetwork,
 	)
 
 	go broadcast.Sender(MessagePort, broadcastTransmissionChannel)
-	go broadcast.Receiver(MessagePort, nodeID, broadcastReceiverChannel, nodeRegistryChannel)
+	go broadcast.Receiver(MessagePort, strconv.Itoa(nodeID), broadcastReceiverChannel, nodeRegistryChannel)
 
 	for {
 		select {
 		case reg := <-nodeRegistryChannel:
 			for _, lostNode := range reg.Lost {
+				lostNodeInt, _ := strconv.Atoi(lostNode)
 				switch {
-				case lostNode == nodeID:
-					fmt.Printf("⚠️  This node (ID %d) marked offline\n", nodeID)
+				case lostNodeInt == nodeID:
 					online = false
 				default:
-					fmt.Printf("❌ Node %d lost connection\n", lostNode)
-					aliveList[lostNode] = false
-					hallOrderList[lostNode] = resetHallCalls()
+					aliveList[lostNodeInt] = false
+					hallOrderList[lostNodeInt] = resetHallCalls()
 				}
 			}
 			for _, connectedNode := range reg.New {
+				activeNodeInt, _ := strconv.Atoi(connectedNode)
 				switch {
-				case connectedNode == nodeID:
-					fmt.Printf("✅ This node (ID %d) is now online\n", nodeID)
+				case activeNodeInt == nodeID:
 					online = true
-					aliveList[connectedNode] = true
-					hallOrderList[connectedNode] = resetHallCalls()
+					aliveList[activeNodeInt] = true
+					hallOrderList[activeNodeInt] = resetHallCalls()
 				default:
-					fmt.Printf("➕ Node %d joined the network\n", connectedNode)
-					aliveList[connectedNode] = true
+					aliveList[activeNodeInt] = true
 				}
 			}
 
 		case msg := <-broadcastReceiverChannel:
-			ackMap[msg.SenderId] = reflect.DeepEqual(elevatorList, msg.ElevatorList) && reflect.DeepEqual(hallOrderList, msg.HallOrderList)
+			senderId, _ := strconv.Atoi(msg.SenderId)
+			ackMap[senderId] = reflect.DeepEqual(elevatorList, msg.ElevatorList) && reflect.DeepEqual(hallOrderList, msg.HallOrderList)
 
 			if !init {
 				elevatorList[nodeID] = msg.ElevatorList[nodeID]
 				init = true
 			}
 
-			aliveList[msg.SenderId] = msg.OnlineStatus
-			elevatorList[msg.SenderId] = msg.ElevatorList[msg.SenderId]
-			hallOrderList[msg.SenderId] = msg.HallOrderList[msg.SenderId]
+			aliveList[senderId] = msg.OnlineStatus
+			elevatorList[senderId] = msg.ElevatorList[senderId]
+			hallOrderList[senderId] = msg.HallOrderList[senderId]
 			hallOrderList = cyclicCounter(hallOrderList, nodeID)
 
 			if allAcknowledged(ackMap, aliveList, nodeID) {
@@ -88,7 +87,7 @@ func Network(worldview <-chan FromAssignerToNetwork,
 
 		case <-time.After(BroadcastRate):
 			broadcastTransmissionChannel <- Message{
-				SenderId:      nodeID,
+				SenderId:      strconv.Itoa(nodeID),
 				ElevatorList:  elevatorList,
 				HallOrderList: hallOrderList,
 				OnlineStatus:  aliveList[nodeID],

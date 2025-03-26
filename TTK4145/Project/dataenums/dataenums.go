@@ -62,7 +62,7 @@ type HRAInput struct {
 }
 
 type Message struct {
-	SenderId      int
+	SenderId      string
 	ElevatorList  [NElevators]HRAElevState
 	HallOrderList [NElevators][NFloors][NButtons]ButtonState
 	OnlineStatus  bool
@@ -92,7 +92,7 @@ type FromDriverToAssigner struct {
 }
 
 type NetworkNodeRegistry struct {
-	Nodes []int
-	New   []int
-	Lost  []int
+	Nodes []string
+	New   []string
+	Lost  []string
 }
