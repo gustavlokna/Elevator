@@ -17,7 +17,6 @@ func Assigner(
 	nodeID string,
 ) {
 	var (
-		PayloadFromassignerToNetwork = initPayloadToNetwork()
 		drv_buttons                  = make(chan ButtonEvent)
 	)
 	myID, err := strconv.Atoi(nodeID)
@@ -26,9 +25,10 @@ func Assigner(
 		return
 	}
 
-	payload := <-driverEvents
-	PayloadFromassignerToNetwork = handlePayloadFromElevator(payload,
-		PayloadFromassignerToNetwork, nodeID)
+	payloadFormDriver := <-driverEvents
+	PayloadFromNetwork := <-stateBroadcast:
+	PayloadFromassignerToNetwork := initPayloadToNetwork(payloadFormDriver,
+		PayloadFromNetwork, nodeID)
 	worldview <- PayloadFromassignerToNetwork
 
 	go hwelevio.PollButtons(drv_buttons)
@@ -39,8 +39,8 @@ func Assigner(
 				nodeID, btnEvent)
 			worldview <- PayloadFromassignerToNetwork
 
-		case payload := <-driverEvents:
-			PayloadFromassignerToNetwork = handlePayloadFromElevator(payload,
+		case payloadFormDriver := <-driverEvents:
+			PayloadFromassignerToNetwork = handlePayloadFromElevator(payloadFormDriver,
 				PayloadFromassignerToNetwork, nodeID)
 
 			worldview <- PayloadFromassignerToNetwork

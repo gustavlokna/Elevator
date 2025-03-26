@@ -5,10 +5,13 @@ import (
 	. "Project/dataenums"
 )
 
-func initPayloadToNetwork() FromAssignerToNetwork {
-	worldview := FromAssignerToNetwork{
-		HallRequests: [NFloors][NButtons]ButtonState{},
-		States:       make(map[string]HRAElevState),
+func initPayloadToNetwork(driverEvents FromDriverToAssigner,stateBroadcast FromNetworkToAssigner, nodeID string) FromAssignerToNetwork {
+	// TODO CHECK IF WORKS
+	worldview.States[nodeID] := HRAElevState{
+		Behaviour:   ebToString(driverEvents.Elevator.CurrentBehaviour),
+		Floor:       driverEvents.Elevator.CurrentFloor,
+		Direction:   elevDirnToString(driverEvents.Elevator.Dirn),
+		CabRequests: worldview.States[elevatorName].CabRequests[floor],
 	}
 	return worldview
 }
@@ -44,16 +47,18 @@ func handlePayloadFromNetwork(
 func handlePayloadFromElevator(driverEvents FromDriverToAssigner,
 	worldview FromAssignerToNetwork, nodeID string) FromAssignerToNetwork {
 
+	/*
+	// TODO DO NOT NEED ? -> IF SO rewrite to = worldview.States[elevatorName].CabRequests[floor]
 	cabRequests := make([]bool, NFloors)
 	for floor := 0; floor < NFloors; floor++ {
 		cabRequests[floor] = driverEvents.Elevator.Requests[floor][BCab]
 	}
-
+	*/
 	worldview.States[nodeID] = HRAElevState{
 		Behaviour:   ebToString(driverEvents.Elevator.CurrentBehaviour),
 		Floor:       driverEvents.Elevator.CurrentFloor,
 		Direction:   elevDirnToString(driverEvents.Elevator.Dirn),
-		CabRequests: cabRequests,
+		//CabRequests: cabRequests,
 	}
 	worldview.ActiveStatus = driverEvents.Elevator.ActiveStatus
 	worldview = handleOrderComplete(worldview, nodeID, driverEvents.CompletedOrders)
