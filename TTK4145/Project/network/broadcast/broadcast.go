@@ -52,6 +52,9 @@ func Receiver(port int, myID int, broadcastReceiverChannel chan<- Message, nodeR
 				if msg.SenderId != myID {
 					broadcastReceiverChannel <- msg
 				}
+				if msg.SenderId == myID {
+					lastSeen[myID] = time.Now()
+				}
 			}
 		}
 
@@ -59,6 +62,7 @@ func Receiver(port int, myID int, broadcastReceiverChannel chan<- Message, nodeR
 		now := time.Now()
 		var lostNodes, activeNodes, newNodes []int
 		for id, t := range lastSeen {
+			fmt.Printf("🧠 lastSeen[%d] = %v (Δt = %v)\n", myID, lastSeen[myID], now.Sub(lastSeen[myID]))
 			if now.Sub(t) > HeartbeatTimeout {
 				lostNodes = append(lostNodes, id)
 				delete(lastSeen, id)
