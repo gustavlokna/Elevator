@@ -13,17 +13,17 @@ func Network(worldview <-chan FromAssignerToNetwork,
 	nodeID int) {
 
 	var (
-		nodeRegistryChannel = make(chan NetworkNodeRegistry)
+		nodeRegistryChannel          = make(chan NetworkNodeRegistry)
 		broadcastTransmissionChannel = make(chan Message)
-		broadcastReceiverChannel = make(chan Message)
-		elevatorList  = initializeElevatorList()
-		hallOrderList [NElevators][NFloors][NButtons]ButtonState
-		aliveList     [NElevators]bool
-		ackMap        [NElevators]bool
-		online        bool
-		init          bool
+		broadcastReceiverChannel     = make(chan Message)
+		elevatorList                 = initializeElevatorList()
+		hallOrderList                [NElevators][NFloors][NButtons]ButtonState
+		aliveList                    [NElevators]bool
+		ackMap                       [NElevators]bool
+		online                       bool
+		init                         bool
 	)
-		
+
 	go broadcast.Sender(MessagePort, broadcastTransmissionChannel)
 	go broadcast.Receiver(MessagePort, nodeID, broadcastReceiverChannel, nodeRegistryChannel)
 
@@ -79,7 +79,7 @@ func Network(worldview <-chan FromAssignerToNetwork,
 		case payload := <-worldview:
 			hallOrderList[nodeID] = payload.HallRequests
 			aliveList[nodeID] = payload.ActiveStatus
-			elevatorList[nodeID] = payload.States[strconv.Itoa(nodeID)]
+			elevatorList[nodeID] = payload.States[nodeID]
 
 		case <-time.After(BroadcastRate):
 			broadcastTransmissionChannel <- Message{

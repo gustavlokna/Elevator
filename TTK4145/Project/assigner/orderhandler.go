@@ -3,7 +3,6 @@ package assigner
 import (
 	. "Project/config"
 	. "Project/dataenums"
-	"strconv"
 )
 
 func handleButtonPressed(worldview FromAssignerToNetwork, nodeID int,
@@ -19,7 +18,7 @@ func handleButtonPressed(worldview FromAssignerToNetwork, nodeID int,
 		}
 
 	case BCab:
-		worldview.States[strconv.Itoa(nodeID)].CabRequests[btnEvent.Floor] = true
+		worldview.States[nodeID].CabRequests[btnEvent.Floor] = true
 
 	}
 	return worldview
@@ -36,7 +35,7 @@ func handleOrderComplete(worldview FromAssignerToNetwork, nodeID int,
 				case BHallDown:
 					worldview.HallRequests[floor][BHallDown] = OrderComplete
 				case BCab:
-					worldview.States[strconv.Itoa(nodeID)].CabRequests[floor] = false
+					worldview.States[nodeID].CabRequests[floor] = false
 				}
 			}
 		}

@@ -76,7 +76,7 @@ type Message struct {
 
 type FromAssignerToNetwork struct {
 	HallRequests [NFloors][NButtons]ButtonState
-	States       map[string]HRAElevState
+	States       map[int]HRAElevState
 	ActiveStatus bool
 }
 
