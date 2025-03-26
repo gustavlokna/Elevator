@@ -4,8 +4,6 @@ import (
 	. "Project/config"
 	. "Project/dataenums"
 	"Project/hwelevio"
-	"fmt"
-	"strconv"
 )
 
 func Assigner(
@@ -20,7 +18,7 @@ func Assigner(
 		drv_buttons                  = make(chan ButtonEvent)
 	)
 	payloadFormDriver := <-driverEvents
-	PayloadFromNetwork := <-stateBroadcast:
+	PayloadFromNetwork := <-stateBroadcast
 	PayloadFromassignerToNetwork := initPayloadToNetwork(payloadFormDriver,
 		PayloadFromNetwork, nodeID)
 	worldview <- PayloadFromassignerToNetwork
