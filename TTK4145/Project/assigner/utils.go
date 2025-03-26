@@ -15,7 +15,7 @@ func initPayloadToNetwork(driverEvents FromDriverToAssigner,stateBroadcast FromN
 		Behaviour:   ebToString(driverEvents.Elevator.CurrentBehaviour),
 		Floor:       driverEvents.Elevator.CurrentFloor,
 		Direction:   elevDirnToString(driverEvents.Elevator.Dirn),
-		CabRequests: worldview.States[elevatorName].CabRequests[floor],
+		CabRequests: stateBroadcast.States[strconv.Itoa(nodeID)].CabRequests,
 	}
 	return worldview
 }
