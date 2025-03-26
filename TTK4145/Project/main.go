@@ -59,5 +59,5 @@ func parseArgs() string {
 	var nodeID int
 	flag.IntVar(&nodeID, "id", 0, "Node ID")
 	flag.Parse()
-	return strconv.Itoa(nodeID)
+	return nodeID
 }

@@ -24,7 +24,7 @@ func Sender(port int, broadcastTransmissionChannel <-chan Message) {
 	}
 }
 
-func Receiver(port int, myID string, broadcastReceiverChannel chan<- Message, nodeRegistryChannel chan<- NetworkNodeRegistry) {
+func Receiver(port int, myID int, broadcastReceiverChannel chan<- Message, nodeRegistryChannel chan<- NetworkNodeRegistry) {
 	lastSeen := make(map[string]time.Time)
 	reportedNew := make(map[string]bool)
 	var buf [BroadcastBufferSize]byte

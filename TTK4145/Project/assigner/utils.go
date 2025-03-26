@@ -5,13 +5,13 @@ import (
 	. "Project/dataenums"
 )
 
-func initPayloadToNetwork(driverEvents FromDriverToAssigner,stateBroadcast FromNetworkToAssigner, nodeID string) FromAssignerToNetwork {
+func initPayloadToNetwork(driverEvents FromDriverToAssigner,stateBroadcast FromNetworkToAssigner, nodeID int) FromAssignerToNetwork {
 	// TODO CHECK IF WORKS
 	worldview := FromAssignerToNetwork{
 		HallRequests: [NFloors][NButtons]ButtonState{},
 		States:       make(map[string]HRAElevState),
 	}
-	worldview.States[nodeID] = HRAElevState{
+	worldview.States[strconv.Itoa(nodeID)] = HRAElevState{
 		Behaviour:   ebToString(driverEvents.Elevator.CurrentBehaviour),
 		Floor:       driverEvents.Elevator.CurrentFloor,
 		Direction:   elevDirnToString(driverEvents.Elevator.Dirn),
@@ -20,11 +20,11 @@ func initPayloadToNetwork(driverEvents FromDriverToAssigner,stateBroadcast FromN
 	return worldview
 }
 func updateLightStates(stateBroadcast FromNetworkToAssigner,
-	myID int) [NFloors][NButtons]ButtonState {
+	nodeID int) [NFloors][NButtons]ButtonState {
 
-	updatedLights := stateBroadcast.HallOrderList[myID]
+	updatedLights := stateBroadcast.HallOrderList[nodeID]
 	for floor := 0; floor < NFloors; floor++ {
-		if stateBroadcast.ElevatorList[myID].CabRequests[floor] {
+		if stateBroadcast.ElevatorList[nodeID].CabRequests[floor] {
 			updatedLights[floor][BCab] = OrderAssigned
 		}
 	}
@@ -49,7 +49,7 @@ func handlePayloadFromNetwork(
 }
 
 func handlePayloadFromElevator(driverEvents FromDriverToAssigner,
-	worldview FromAssignerToNetwork, nodeID string) FromAssignerToNetwork {
+	worldview FromAssignerToNetwork, nodeID int) FromAssignerToNetwork {
 
 	/*
 	// TODO DO NOT NEED ? -> IF SO rewrite to = worldview.States[elevatorName].CabRequests[floor]
@@ -58,7 +58,7 @@ func handlePayloadFromElevator(driverEvents FromDriverToAssigner,
 		cabRequests[floor] = driverEvents.Elevator.Requests[floor][BCab]
 	}
 	*/
-	worldview.States[nodeID] = HRAElevState{
+	worldview.States[strconv.Itoa(nodeID)] = HRAElevState{
 		Behaviour:   ebToString(driverEvents.Elevator.CurrentBehaviour),
 		Floor:       driverEvents.Elevator.CurrentFloor,
 		Direction:   elevDirnToString(driverEvents.Elevator.Dirn),

@@ -14,17 +14,11 @@ func Assigner(
 	worldview chan<- FromAssignerToNetwork,
 	stateBroadcast <-chan FromNetworkToAssigner,
 	sharedLights chan<- [NFloors][NButtons]ButtonState,
-	nodeID string,
+	nodeID int,
 ) {
 	var (
 		drv_buttons                  = make(chan ButtonEvent)
 	)
-	myID, err := strconv.Atoi(nodeID)
-	if err != nil {
-		fmt.Printf("Invalid nodeID: %v\n", err)
-		return
-	}
-
 	payloadFormDriver := <-driverEvents
 	PayloadFromNetwork := <-stateBroadcast:
 	PayloadFromassignerToNetwork := initPayloadToNetwork(payloadFormDriver,
@@ -47,10 +41,10 @@ func Assigner(
 
 		case PayloadFromNetwork := <-stateBroadcast:
 			PayloadFromassignerToNetwork = handlePayloadFromNetwork(PayloadFromassignerToNetwork,
-				PayloadFromNetwork, myID)
+				PayloadFromNetwork, nodeID)
 
-			newOrders <- assignOrders(PayloadFromNetwork, myID)
-			sharedLights <- updateLightStates(PayloadFromNetwork, myID)
+			newOrders <- assignOrders(PayloadFromNetwork, nodeID)
+			sharedLights <- updateLightStates(PayloadFromNetwork, nodeID)
 		}
 	}
 
