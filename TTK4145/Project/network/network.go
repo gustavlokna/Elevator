@@ -13,6 +13,7 @@ import (
 func Network(worldview <-chan FromAssignerToNetwork,
 	stateBroadcast chan<- FromNetworkToAssigner,
 	nodeID int) {
+	nodeIDStr := strconv.Itoa(nodeID)
 
 	var (
 		nodeRegistryChannel          = make(chan NetworkNodeRegistry)
@@ -93,7 +94,7 @@ func Network(worldview <-chan FromAssignerToNetwork,
 
 		case <-time.After(BroadcastRate):
 			broadcastTransmissionChannel <- Message{
-				SenderId:      strconv.Itoa(nodeID),
+				SenderId:      nodeIDStr,
 				ElevatorList:  elevatorList,
 				HallOrderList: hallOrderList,
 				OnlineStatus:  aliveList[nodeID],
