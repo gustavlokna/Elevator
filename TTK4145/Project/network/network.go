@@ -51,16 +51,16 @@ func Network(worldview <-chan FromAssignerToNetwork,
 			}
 
 		case msg := <-broadcastReceiverChannel:
-			ackMap[msg.senderId] = reflect.DeepEqual(elevatorList, msg.ElevatorList) && reflect.DeepEqual(hallOrderList, msg.HallOrderList)
+			ackMap[msg.SenderId] = reflect.DeepEqual(elevatorList, msg.ElevatorList) && reflect.DeepEqual(hallOrderList, msg.HallOrderList)
 
 			if !init {
 				elevatorList[nodeID] = msg.ElevatorList[nodeID]
 				init = true
 			}
 
-			aliveList[msg.senderId] = msg.OnlineStatus
-			elevatorList[msg.senderId] = msg.ElevatorList[msg.senderId]
-			hallOrderList[msg.senderId] = msg.HallOrderList[msg.senderId]
+			aliveList[msg.SenderId] = msg.OnlineStatus
+			elevatorList[msg.SenderId] = msg.ElevatorList[msg.SenderId]
+			hallOrderList[msg.SenderId] = msg.HallOrderList[msg.SenderId]
 			hallOrderList = cyclicCounter(hallOrderList, nodeID)
 
 			if allAcknowledged(ackMap, aliveList, nodeID) {
@@ -79,7 +79,7 @@ func Network(worldview <-chan FromAssignerToNetwork,
 		case payload := <-worldview:
 			hallOrderList[nodeID] = payload.HallRequests
 			aliveList[nodeID] = payload.ActiveStatus
-			elevatorList[nodeID] = payload.States[nodeID]
+			elevatorList[nodeID] = payload.States[strconv.Itoa(nodeID)]
 
 		case <-time.After(BroadcastRate):
 			broadcastTransmissionChannel <- Message{
