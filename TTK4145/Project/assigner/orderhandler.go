@@ -35,7 +35,7 @@ func handleOrderComplete(worldview FromAssignerToNetwork, elevatorName string,
 				case BHallDown:
 					worldview.HallRequests[floor][BHallDown] = OrderComplete
 				case BCab:
-					 = false
+					worldview.States[elevatorName].CabRequests[floor] = false
 				}
 			}
 		}
