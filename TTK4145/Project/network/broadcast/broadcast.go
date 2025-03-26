@@ -11,11 +11,11 @@ import (
 	"time"
 )
 
-func Sender(port int, msgCh <-chan Message) {
+func Sender(port int, broadcastTransmissionChannel <-chan Message) {
 	conn := conn.DialBroadcastUDP(port)
 	addr, _ := net.ResolveUDPAddr("udp4", fmt.Sprintf("255.255.255.255:%d", port))
 
-	for msg := range msgCh {
+	for msg := range broadcastTransmissionChannel {
 		jsonBytes, _ := json.Marshal(msg)
 		if len(jsonBytes) > BroadcastBufferSize {
 			panic("Packet too large.")
@@ -24,7 +24,7 @@ func Sender(port int, msgCh <-chan Message) {
 	}
 }
 
-func Receiver(port int, myID string, messageCh chan<- Message, registryCh chan<- NetworkNodeRegistry) {
+func Receiver(port int, myID string, broadcastReceiverChannel chan<- Message, nodeRegistryChannel chan<- NetworkNodeRegistry) {
 	lastSeen := make(map[string]time.Time)
 	reportedNew := make(map[string]bool)
 	var buf [BroadcastBufferSize]byte
@@ -50,7 +50,7 @@ func Receiver(port int, myID string, messageCh chan<- Message, registryCh chan<-
 					reportedNew[msg.SenderId] = false
 				}
 				if msg.SenderId != myID {
-					messageCh <- msg
+					broadcastReceiverChannel <- msg
 				}
 			}
 		}
@@ -75,7 +75,7 @@ func Receiver(port int, myID string, messageCh chan<- Message, registryCh chan<-
 		}
 		if len(lostNodes) > 0 || len(newNodes) > 0 {
 			sort.Strings(activeNodes)
-			registryCh <- NetworkNodeRegistry{
+			nodeRegistryChannel <- NetworkNodeRegistry{
 				Nodes: activeNodes,
 				New:   newNodes,
 				Lost:  lostNodes,
