@@ -9,7 +9,6 @@ import (
 	"Project/lights"
 	"Project/network"
 	"flag"
-	"strconv"
 )
 
 func main() {
@@ -55,7 +54,7 @@ func main() {
 	select {}
 }
 
-func parseArgs() string {
+func parseArgs() int {
 	var nodeID int
 	flag.IntVar(&nodeID, "id", 0, "Node ID")
 	flag.Parse()

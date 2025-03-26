@@ -52,16 +52,16 @@ func Network(worldview <-chan FromAssignerToNetwork,
 			}
 
 		case msg := <-broadcastReceiverChannel:
-			ackMap[senderId] = reflect.DeepEqual(elevatorList, msg.ElevatorList) && reflect.DeepEqual(hallOrderList, msg.HallOrderList)
+			ackMap[msg.senderId] = reflect.DeepEqual(elevatorList, msg.ElevatorList) && reflect.DeepEqual(hallOrderList, msg.HallOrderList)
 
 			if !init {
 				elevatorList[nodeID] = msg.ElevatorList[nodeID]
 				init = true
 			}
 
-			aliveList[senderId] = msg.OnlineStatus
-			elevatorList[senderId] = msg.ElevatorList[senderId]
-			hallOrderList[senderId] = msg.HallOrderList[senderId]
+			aliveList[msg.senderId] = msg.OnlineStatus
+			elevatorList[msg.senderId] = msg.ElevatorList[msg.senderId]
+			hallOrderList[msg.senderId] = msg.HallOrderList[msg.senderId]
 			hallOrderList = cyclicCounter(hallOrderList, nodeID)
 
 			if allAcknowledged(ackMap, aliveList, nodeID) {
