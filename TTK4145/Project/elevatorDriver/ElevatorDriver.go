@@ -1,13 +1,13 @@
-package driver
+package elevatorDriver
 
 import (
 	. "Project/config"
 	. "Project/dataenums"
-	"Project/driver/timer"
+	"Project/elevatorDriver/timer"
 	"Project/hwelevio"
 )
 
-func Driver(
+func ElevatorDriver(
 	newOrder <-chan [NFloors][NButtons]bool,
 	driverEvents chan<- FromDriverToAssigner,
 	localLights chan<- FromDriverToLight,

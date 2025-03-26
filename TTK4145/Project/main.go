@@ -4,7 +4,7 @@ import (
 	"Project/assigner"
 	. "Project/config"
 	. "Project/dataenums"
-	"Project/driver"
+	"Project/elevatorDriver"
 	"Project/hwelevio"
 	"Project/lights"
 	"Project/network"
@@ -35,7 +35,7 @@ func main() {
 		nodeID,
 	)
 
-	go driver.Driver(
+	go elevatorDriver.ElevatorDriver(
 		newOrders,
 		driverEvents,
 		elevatorLights,
