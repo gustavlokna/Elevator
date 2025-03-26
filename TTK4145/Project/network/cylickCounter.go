@@ -12,17 +12,17 @@ func cyclicCounter(
 
 	for floor := 0; floor < NFloors; floor++ {
 		for btn := 0; btn < NButtons; btn++ {
-			origState := orders[myID][floor][btn]
-			myState := origState
+			currentOrder := orders[myID][floor][btn]
+			updatedOrder := currentOrder
 
-			if myState == Initial {
+			if updatedOrder == Initial {
 				for elevator := 0; elevator < NElevators; elevator++ {
 					if elevator != myID && orders[elevator][floor][btn] != Initial {
-						myState = orders[elevator][floor][btn]
+						updatedOrder = orders[elevator][floor][btn]
 						break
 					}
 				}
-				orders[myID][floor][btn] = myState
+				orders[myID][floor][btn] = updatedOrder
 				continue
 			}
 
@@ -34,48 +34,48 @@ func cyclicCounter(
 			}
 
 			// Attempt a valid transition.
-			switch origState {
-			case Inactive:
-				if allIn(peers, Inactive, ButtonPressed) && anyIs(peers, ButtonPressed) {
-					myState = ButtonPressed
+			switch currentOrder {
+			case Standby:
+				if allIn(peers, Standby, ButtonPressed) && anyIs(peers, ButtonPressed) {
+					updatedOrder = ButtonPressed
 				}
 			case ButtonPressed:
 				if allIn(peers, ButtonPressed, OrderAssigned) {
-					myState = OrderAssigned
+					updatedOrder = OrderAssigned
 				}
 			case OrderAssigned:
 				if allIn(peers, OrderAssigned, OrderComplete) && anyIs(peers, OrderComplete) {
-					myState = OrderComplete
+					updatedOrder = OrderComplete
 				}
 			case OrderComplete:
-				if allIn(peers, OrderComplete, Inactive) {
-					myState = Inactive
+				if allIn(peers, OrderComplete, Standby) {
+					updatedOrder = Standby
 				}
 			}
 
 			// If no valid transition occurred, check for an illegal combination.
-			if myState == origState {
-				switch origState {
-				case Inactive:
-					if !(allIn(peers, Inactive, ButtonPressed) || allIn(peers, Inactive, OrderComplete)) {
-						myState = Initial
+			if updatedOrder == currentOrder {
+				switch currentOrder {
+				case Standby:
+					if !(allIn(peers, Standby, ButtonPressed) || allIn(peers, Standby, OrderComplete)) {
+						updatedOrder = Initial
 					}
 				case ButtonPressed:
-					if !(allIn(peers, ButtonPressed, OrderAssigned) || allIn(peers, Inactive, ButtonPressed)) {
-						myState = Initial
+					if !(allIn(peers, ButtonPressed, OrderAssigned) || allIn(peers, Standby, ButtonPressed)) {
+						updatedOrder = Initial
 					}
 				case OrderAssigned:
 					if !(allIn(peers, OrderAssigned, OrderComplete) || allIn(peers, OrderAssigned, ButtonPressed)) {
-						myState = Initial
+						updatedOrder = Initial
 					}
 				case OrderComplete:
-					if !(allIn(peers, OrderComplete, Inactive) || allIn(peers, OrderAssigned, OrderComplete)) {
-						myState = Initial
+					if !(allIn(peers, OrderComplete, Standby) || allIn(peers, OrderAssigned, OrderComplete)) {
+						updatedOrder = Initial
 					}
 				}
 			}
 
-			orders[myID][floor][btn] = myState
+			orders[myID][floor][btn] = updatedOrder
 		}
 	}
 	return orders

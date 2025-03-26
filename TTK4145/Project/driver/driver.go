@@ -28,7 +28,7 @@ func Driver(
 	go timer.Timer(doorOpenChan, motorActiveChan, doorClosedChan, motorInactiveChan)
 
 	elevator := initelevator()
-	hwelevio.SetMotorDirection(elevator.Dirn)
+	hwelevio.SetMotorDirection(elevator.Direction)
 
 	for {
 
@@ -37,32 +37,32 @@ func Driver(
 			elevator.ActiveStatus = true
 			motorActiveChan <- true
 			switch {
-			case orderAtCurrentFloorInDirn(elevator) || elevator.Requests[elevator.CurrentFloor][BCab]:
+			case orderAtCurrentFloorInDirection(elevator) || elevator.Requests[elevator.CurrentFloor][BCab]:
 				hwelevio.SetMotorDirection(MDStop)
 				elevator.CurrentBehaviour = DoorOpen
 				motorActiveChan <- false
 				doorOpenChan <- true
 				localLights <- FromDriverToLight{CurrentFloor: elevator.CurrentFloor, DoorLight: true}
 
-			case orderCurrentDirn(elevator):
+			case orderCurrentDirection(elevator):
 				localLights <- FromDriverToLight{CurrentFloor: elevator.CurrentFloor, DoorLight: false}
 				driverEvents <- FromDriverToAssigner{Elevator: elevator, CompletedOrders: clearedRequests}
 
-			case orderAtCurrentFloorOppositeDirn(elevator):
+			case orderAtCurrentFloorOppositeDirection(elevator):
 				hwelevio.SetMotorDirection(MDStop)
 				elevator.CurrentBehaviour = DoorOpen
 				motorActiveChan <- false
 				doorOpenChan <- true
 				localLights <- FromDriverToLight{CurrentFloor: elevator.CurrentFloor, DoorLight: true}
 
-			case orderOppositeDirn(elevator): // remove? 
-				//elevator.Dirn = setMotorOppositeDirn(elevator)
-				//hwelevio.SetMotorDirection(elevator.Dirn)
+			case orderOppositeDirection(elevator):
+				elevator.Direction = setMotorOppositeDirection(elevator)
+				hwelevio.SetMotorDirection(elevator.Direction)
 				localLights <- FromDriverToLight{CurrentFloor: elevator.CurrentFloor, DoorLight: false}
 				driverEvents <- FromDriverToAssigner{Elevator: elevator, CompletedOrders: clearedRequests}
 
 			default:
-				elevator.Dirn = MDStop
+				elevator.Direction = MDStop
 				hwelevio.SetMotorDirection(MDStop)
 				elevator.CurrentBehaviour = Idle
 				localLights <- FromDriverToLight{CurrentFloor: elevator.CurrentFloor, DoorLight: false}
@@ -78,19 +78,15 @@ func Driver(
 			}
 
 			switch {
-			case orderAtCurrentFloorInDirn(elevator):
-				clearedRequests[elevator.CurrentFloor][dirnToBtn(elevator.Dirn)] = true
+			case orderAtCurrentFloorInDirection(elevator):
+				clearedRequests[elevator.CurrentFloor][directionToButton(elevator.Direction)] = true
 
-			case orderCurrentDirn(elevator): // remove ? 
+			case orderAtCurrentFloorOppositeDirection(elevator) && !orderCurrentDirection(elevator): 
+				elevator.Direction = setMotorOppositeDirection(elevator)
+				clearedRequests[elevator.CurrentFloor][directionToButton(elevator.Direction)] = true
 
-			case orderAtCurrentFloorOppositeDirn(elevator): // !elevator.Requests[elevator.CurrentFloor][BCab]
-				elevator.Dirn = setMotorOppositeDirn(elevator)
-				clearedRequests[elevator.CurrentFloor][dirnToBtn(elevator.Dirn)] = true
-
-			case orderOppositeDirn(elevator): // rmoeve ?
-
-			default:
-				elevator.Dirn = MDStop
+			case !elevator.Requests[elevator.CurrentFloor][BCab]:
+				elevator.Direction = MDStop
 				hwelevio.SetMotorDirection(MDStop)
 			}
 
@@ -104,7 +100,6 @@ func Driver(
 			clearedRequests = [NFloors][NButtons]bool{}
 
 		case <-motorInactiveChan:
-
 			if elevator.CurrentBehaviour == Moving {
 				elevator.ActiveStatus = false
 				driverEvents <- FromDriverToAssigner{Elevator: elevator, CompletedOrders: clearedRequests}
@@ -121,35 +116,35 @@ func Driver(
 			switch elevator.CurrentBehaviour {
 			case Idle:
 				switch {
-				case orderAtCurrentFloorInDirn(elevator) || elevator.Requests[elevator.CurrentFloor][BCab]:
-					elevator.Dirn = btnToDirn(elevator)
+				case orderAtCurrentFloorInDirection(elevator) || elevator.Requests[elevator.CurrentFloor][BCab]:
+					elevator.Direction = buttonToDirection(elevator)
 					elevator.CurrentBehaviour = DoorOpen
 					doorOpenChan <- true
 					localLights <- FromDriverToLight{CurrentFloor: elevator.CurrentFloor, DoorLight: true}
 
-				case orderCurrentDirn(elevator):
+				case orderCurrentDirection(elevator):
 					elevator.CurrentBehaviour = Moving
-					hwelevio.SetMotorDirection(elevator.Dirn)
+					hwelevio.SetMotorDirection(elevator.Direction)
 					motorActiveChan <- true
 					localLights <- FromDriverToLight{CurrentFloor: elevator.CurrentFloor, DoorLight: false}
 					driverEvents <- FromDriverToAssigner{Elevator: elevator, CompletedOrders: clearedRequests}
 
-				case orderAtCurrentFloorOppositeDirn(elevator):
-					elevator.Dirn = setMotorOppositeDirn(elevator)
+				case orderAtCurrentFloorOppositeDirection(elevator):
+					elevator.Direction = setMotorOppositeDirection(elevator)
 					elevator.CurrentBehaviour = DoorOpen
 					doorOpenChan <- true
 					localLights <- FromDriverToLight{CurrentFloor: elevator.CurrentFloor, DoorLight: true}
 
-				case orderOppositeDirn(elevator):
+				case orderOppositeDirection(elevator):
 					elevator.CurrentBehaviour = Moving
-					elevator.Dirn = setMotorOppositeDirn(elevator)
-					hwelevio.SetMotorDirection(elevator.Dirn)
+					elevator.Direction = setMotorOppositeDirection(elevator)
+					hwelevio.SetMotorDirection(elevator.Direction)
 					motorActiveChan <- true
 					localLights <- FromDriverToLight{CurrentFloor: elevator.CurrentFloor, DoorLight: false}
 					driverEvents <- FromDriverToAssigner{Elevator: elevator, CompletedOrders: clearedRequests}
 
 				default:
-					elevator.Dirn = MDStop
+					elevator.Direction = MDStop
 					hwelevio.SetMotorDirection(MDStop)
 					localLights <- FromDriverToLight{CurrentFloor: elevator.CurrentFloor, DoorLight: false}
 					driverEvents <- FromDriverToAssigner{Elevator: elevator, CompletedOrders: clearedRequests}

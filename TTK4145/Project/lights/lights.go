@@ -7,16 +7,16 @@ import (
 )
 
 func Lights(
-	orderList <-chan [NFloors][NButtons]ButtonState,
-	localLights <-chan FromDriverToLight,
+	orderLights <-chan [NFloors][NButtons]ButtonState,
+	elevatorLights <-chan FromDriverToLight,
 ) {
 	for {
 		select {
-		case payload := <-localLights:
-			hwelevio.SetFloorIndicator(payload.CurrentFloor)
-			hwelevio.SetDoorOpenLamp(payload.DoorLight)
+		case elevator := <-elevatorLights:
+			hwelevio.SetFloorIndicator(elevator.CurrentFloor)
+			hwelevio.SetDoorOpenLamp(elevator.DoorLight)
 
-		case orders := <-orderList:
+		case orders := <-orderLights:
 			for floor := 0; floor < NFloors; floor++ {
 				for btn := 0; btn < NButtons; btn++ {
 					hwelevio.SetButtonLamp(Button(btn), floor, orders[floor][btn] == OrderAssigned)

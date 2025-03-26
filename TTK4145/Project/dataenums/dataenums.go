@@ -14,7 +14,7 @@ type ButtonState int
 
 const (
 	Initial ButtonState = iota
-	Inactive
+	Standby
 	ButtonPressed
 	OrderAssigned
 	OrderComplete
@@ -41,14 +41,9 @@ const (
 	Moving
 )
 
-type DirnBehaviourPair struct {
-	Dirn      MotorDirection
-	Behaviour ElevatorBehaviour
-}
-
 type Elevator struct {
 	CurrentFloor     int
-	Dirn             MotorDirection
+	Direction        MotorDirection
 	Requests         [NFloors][NButtons]bool
 	CurrentBehaviour ElevatorBehaviour
 	ActiveStatus     bool

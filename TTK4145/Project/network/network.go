@@ -16,7 +16,7 @@ func Network(worldview <-chan FromAssignerToNetwork,
 		nodeRegistryChannel          = make(chan NetworkNodeRegistry)
 		broadcastTransmissionChannel = make(chan Message)
 		broadcastReceiverChannel     = make(chan Message)
-		elevatorList                 = initializeElevatorList()
+		elevatorList                 = initElevatorList()
 		hallOrderList                [NElevators][NFloors][NButtons]ButtonState
 		aliveList                    [NElevators]bool
 		ackMap                       [NElevators]bool

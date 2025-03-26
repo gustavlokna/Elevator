@@ -12,37 +12,36 @@ func Assigner(
 	worldview chan<- FromAssignerToNetwork,
 	stateBroadcast <-chan FromNetworkToAssigner,
 	sharedLights chan<- [NFloors][NButtons]ButtonState,
-	nodeID int,
-) {
+	nodeID int){
 	var (
-		drv_buttons                  = make(chan ButtonEvent)
+		drv_buttons = make(chan ButtonEvent)
 	)
-	payloadFormDriver := <-driverEvents
-	PayloadFromNetwork := <-stateBroadcast
-	PayloadFromassignerToNetwork := initPayloadToNetwork(payloadFormDriver,
-		PayloadFromNetwork, nodeID)
-	worldview <- PayloadFromassignerToNetwork
+	elevatorState := <-driverEvents
+	globaWorldview := <-stateBroadcast
+	localWorldview := initLocalWorldview(elevatorState,
+		globaWorldview, nodeID)
+	worldview <- localWorldview
 
 	go hwelevio.PollButtons(drv_buttons)
 	for {
 		select {
 		case btnEvent := <-drv_buttons:
-			PayloadFromassignerToNetwork = handleButtonPressed(PayloadFromassignerToNetwork,
+			localWorldview = handleButtonPressed(localWorldview,
 				nodeID, btnEvent)
-			worldview <- PayloadFromassignerToNetwork
+			worldview <- localWorldview
 
-		case payloadFormDriver := <-driverEvents:
-			PayloadFromassignerToNetwork = syncDriverElevatorState(payloadFormDriver,
-				PayloadFromassignerToNetwork, nodeID)
+		case elevatorState := <-driverEvents:
+			localWorldview = syncElevatorState(elevatorState,
+				localWorldview, nodeID)
 
-			worldview <- PayloadFromassignerToNetwork
+			worldview <- localWorldview
 
-		case PayloadFromNetwork := <-stateBroadcast: 
-			PayloadFromassignerToNetwork = mergeNetworkHallOrders(PayloadFromassignerToNetwork,
-				PayloadFromNetwork, nodeID)
+		case globaWorldview := <-stateBroadcast:
+			localWorldview = mergeNetworkHallOrders(localWorldview,
+				globaWorldview, nodeID)
 
-			newOrders <- assignOrders(PayloadFromNetwork, nodeID)
-			sharedLights <- updateLightStates(PayloadFromNetwork, nodeID)
+			newOrders <- assignOrders(globaWorldview, nodeID)
+			sharedLights <- updateLightStates(globaWorldview, nodeID)
 		}
 	}
 
