@@ -74,7 +74,7 @@ func Receiver(port int, myID int, broadcastReceiverChannel chan<- Message, nodeR
 			}
 		}
 		if len(lostNodes) > 0 || len(newNodes) > 0 {
-			sort.Strings(activeNodes)
+			sort.Ints(activeNodes)
 			nodeRegistryChannel <- NetworkNodeRegistry{
 				Nodes: activeNodes,
 				New:   newNodes,
