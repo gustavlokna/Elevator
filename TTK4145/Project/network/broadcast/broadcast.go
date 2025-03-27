@@ -24,9 +24,9 @@ func Sender(port int, msgCh <-chan Message) {
 	}
 }
 
-func Receiver(port int, myID string, messageCh chan<- Message, registryCh chan<- NetworkNodeRegistry) {
-	lastSeen := make(map[string]time.Time)
-	reportedNew := make(map[string]bool)
+func Receiver(port int, myID int, messageCh chan<- Message, registryCh chan<- NetworkNodeRegistry) {
+	lastSeen := make(map[int]time.Time)
+	reportedNew := make(map[int]bool)
 	var buf [BroadcastBufferSize]byte
 
 	conn := conn.DialBroadcastUDP(port)
@@ -57,7 +57,7 @@ func Receiver(port int, myID string, messageCh chan<- Message, registryCh chan<-
 
 		// Heartbeat check
 		now := time.Now()
-		var lostNodes, activeNodes, newNodes []string
+		var lostNodes, activeNodes, newNodes []int
 		for id, t := range lastSeen {
 			if now.Sub(t) > HeartbeatTimeout {
 				lostNodes = append(lostNodes, id)
@@ -74,7 +74,7 @@ func Receiver(port int, myID string, messageCh chan<- Message, registryCh chan<-
 			}
 		}
 		if len(lostNodes) > 0 || len(newNodes) > 0 {
-			sort.Strings(activeNodes)
+			sort.Ints(activeNodes)
 			registryCh <- NetworkNodeRegistry{
 				Nodes: activeNodes,
 				New:   newNodes,

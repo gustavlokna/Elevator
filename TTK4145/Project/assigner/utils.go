@@ -6,17 +6,25 @@ import (
 )
 
 func initLocalWorldview(elevatorState FromDriverToAssigner,
-	globaWorldview FromNetworkToAssigner,
+	globalWorldview FromNetworkToAssigner,
 	nodeID int) FromAssignerToNetwork {
+
 	localWorldview := FromAssignerToNetwork{
 		HallRequests: [NFloors][NButtons]ButtonState{},
 		States:       make(map[int]HRAElevState),
 	}
+
+	cabRequests := make([]bool, NFloors)
+	if nodeID < len(globalWorldview.ElevatorList) &&
+		len(globalWorldview.ElevatorList[nodeID].CabRequests) == NFloors {
+		copy(cabRequests, globalWorldview.ElevatorList[nodeID].CabRequests)
+	}
+
 	localWorldview.States[nodeID] = HRAElevState{
 		Behaviour:   elevbehaviourToString(elevatorState.Elevator.CurrentBehaviour),
 		Floor:       elevatorState.Elevator.CurrentFloor,
 		Direction:   elevDirectionToString(elevatorState.Elevator.Direction),
-		CabRequests: globaWorldview.ElevatorList[nodeID].CabRequests,
+		CabRequests: cabRequests, 
 	}
 	return localWorldview
 }
