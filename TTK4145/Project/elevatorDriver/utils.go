@@ -35,7 +35,7 @@ func buttonToDirection(elevator Elevator) MotorDirection {
 	}
 }
 
-func setMotorOppositeDirection(elevator Elevator) MotorDirection {
+func switchDirection(elevator Elevator) MotorDirection {
 	switch elevator.Direction {
 	case MDUp:
 		return MDDown

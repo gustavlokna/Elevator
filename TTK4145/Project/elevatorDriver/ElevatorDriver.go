@@ -56,7 +56,7 @@ func ElevatorDriver(
 				localLights <- FromDriverToLight{CurrentFloor: elevator.CurrentFloor, DoorLight: true}
 
 			case orderOppositeDirection(elevator):
-				elevator.Direction = setMotorOppositeDirection(elevator)
+				elevator.Direction = switchDirection(elevator)
 				hwelevio.SetMotorDirection(elevator.Direction)
 				localLights <- FromDriverToLight{CurrentFloor: elevator.CurrentFloor, DoorLight: false}
 				driverEvents <- FromDriverToAssigner{Elevator: elevator, CompletedOrders: clearedRequests}
@@ -82,7 +82,7 @@ func ElevatorDriver(
 				clearedRequests[elevator.CurrentFloor][directionToButton(elevator.Direction)] = true
 
 			case orderAtCurrentFloorOppositeDirection(elevator) && !orderCurrentDirection(elevator):
-				elevator.Direction = setMotorOppositeDirection(elevator)
+				elevator.Direction = switchDirection(elevator)
 				clearedRequests[elevator.CurrentFloor][directionToButton(elevator.Direction)] = true
 
 			case !elevator.Requests[elevator.CurrentFloor][BCab]:
@@ -130,14 +130,14 @@ func ElevatorDriver(
 					driverEvents <- FromDriverToAssigner{Elevator: elevator, CompletedOrders: clearedRequests}
 
 				case orderAtCurrentFloorOppositeDirection(elevator):
-					elevator.Direction = setMotorOppositeDirection(elevator)
+					elevator.Direction = switchDirection(elevator)
 					elevator.CurrentBehaviour = DoorOpen
 					doorOpenChan <- true
 					localLights <- FromDriverToLight{CurrentFloor: elevator.CurrentFloor, DoorLight: true}
 
 				case orderOppositeDirection(elevator):
 					elevator.CurrentBehaviour = Moving
-					elevator.Direction = setMotorOppositeDirection(elevator)
+					elevator.Direction = switchDirection(elevator)
 					hwelevio.SetMotorDirection(elevator.Direction)
 					motorActiveChan <- true
 					localLights <- FromDriverToLight{CurrentFloor: elevator.CurrentFloor, DoorLight: false}
