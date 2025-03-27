@@ -12,9 +12,10 @@ func Assigner(
 	worldview chan<- FromAssignerToNetwork,
 	stateBroadcast <-chan FromNetworkToAssigner,
 	sharedLights chan<- [NFloors][NButtons]ButtonState,
-	nodeID int){
+	nodeID int) {
 	var (
-		drv_buttons = make(chan ButtonEvent)
+		drv_buttons        = make(chan ButtonEvent)
+		prevAssignedOrders [NFloors][NButtons]bool
 	)
 	elevatorState := <-driverEvents
 	globaWorldview := <-stateBroadcast
@@ -40,7 +41,11 @@ func Assigner(
 			localWorldview = mergeNetworkHallOrders(localWorldview,
 				globaWorldview, nodeID)
 
-			newOrders <- assignOrders(globaWorldview, nodeID)
+			localOrders := assignOrders(globaWorldview, nodeID)
+			if localOrders != prevAssignedOrders {
+				newOrders <- localOrders
+				prevAssignedOrders = localOrders
+			}
 			sharedLights <- updateLightStates(globaWorldview, nodeID)
 		}
 	}

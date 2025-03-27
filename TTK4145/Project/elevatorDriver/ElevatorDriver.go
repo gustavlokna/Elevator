@@ -81,7 +81,7 @@ func ElevatorDriver(
 			case orderAtCurrentFloorInDirection(elevator):
 				clearedRequests[elevator.CurrentFloor][directionToButton(elevator.Direction)] = true
 
-			case orderAtCurrentFloorOppositeDirection(elevator) && !orderCurrentDirection(elevator): 
+			case orderAtCurrentFloorOppositeDirection(elevator) && !orderCurrentDirection(elevator):
 				elevator.Direction = setMotorOppositeDirection(elevator)
 				clearedRequests[elevator.CurrentFloor][directionToButton(elevator.Direction)] = true
 
