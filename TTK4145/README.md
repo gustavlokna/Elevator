@@ -4,7 +4,7 @@ The program is a pure peer-to-peer, UDP-based system that utilizes a mesh networ
 
 The system consist of four independent modules. For detailed relationship see the class diagram.
 
-Driver: Manages all elevator sensors (floor and obstruction) and calculates the elevator’s current state. It propagates this state to the Assigner module and sets the motor direction as instructed by the Assigner. 
+ElevatorDriver: Manages all elevator sensors (floor and obstruction) and calculates the elevator’s current state. It propagates this state to the Assigner module and sets the motor direction as instructed by the Assigner. 
 
 Assigner: Assigns confirmed orders received from the Network module and forwards these to the Lights and Driver modules. It also forwards new and completed orders to the Network module, as well as an updated elevator state.
 
@@ -12,7 +12,7 @@ Lights: Handles all button, floor and door lights based on input from the Assign
 
 Network: Maintains the state of all elevators, propagates the cyclic counter, and transmits the local elevator state across the network. 
 
-![Demo Image](images/ClassDiagram.png)
+![Demo Image](Images/classDiagram.jpg)
 
 ### Pre-requisites
 * [hall_request_assigner (HRA)](https://github.com/TTK4145/Project-resources/releases/tag/v1.1.1) (v1.1.1) by [@klasbo](https://github.com/klasbo)
@@ -27,10 +27,10 @@ Navigate into the project directory
 cd <yourpath>/Project
 ```
 
-Add HRA dependency to the `orderassigner` module
+Add HRA dependency to the `assigner` module
 
 ```bash
-mv ~/Downloads/hall_request_assigner ./orderassigner/
+mv ~/Downloads/hall_request_assigner ./assigner/
 ```
 
 ### Build and Run
