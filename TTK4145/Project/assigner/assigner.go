@@ -18,9 +18,9 @@ func Assigner(
 		prevAssignedOrders [NFloors][NButtons]bool
 	)
 	elevatorState := <-driverEvents
-	globaWorldview := <-stateBroadcast
+	globalWorldview := <-stateBroadcast
 	localWorldview := initLocalWorldview(elevatorState,
-		globaWorldview, nodeID)
+		globalWorldview, nodeID)
 	worldview <- localWorldview
 
 	go hwelevio.PollButtons(drv_buttons)
@@ -37,16 +37,16 @@ func Assigner(
 
 			worldview <- localWorldview
 
-		case globaWorldview := <-stateBroadcast:
+		case globalWorldview := <-stateBroadcast:
 			localWorldview = mergeNetworkHallOrders(localWorldview,
-				globaWorldview, nodeID)
+				globalWorldview, nodeID)
 
-			localOrders := assignOrders(globaWorldview, nodeID)
+			localOrders := assignOrders(globalWorldview, nodeID)
 			if localOrders != prevAssignedOrders {
 				newOrders <- localOrders
 				prevAssignedOrders = localOrders
 			}
-			sharedLights <- updateLightStates(globaWorldview, nodeID)
+			sharedLights <- updateLightStates(globalWorldview, nodeID)
 		}
 	}
 

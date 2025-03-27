@@ -29,12 +29,12 @@ func initLocalWorldview(elevatorState FromDriverToAssigner,
 	return localWorldview
 }
 
-func updateLightStates(globaWorldview FromNetworkToAssigner,
+func updateLightStates(globalWorldview FromNetworkToAssigner,
 	nodeID int) [NFloors][NButtons]ButtonState {
 
-	updatedLights := globaWorldview.HallOrderList[nodeID]
+	updatedLights := globalWorldview.HallOrderList[nodeID]
 	for floor := 0; floor < NFloors; floor++ {
-		if globaWorldview.ElevatorList[nodeID].CabRequests[floor] {
+		if globalWorldview.ElevatorList[nodeID].CabRequests[floor] {
 			updatedLights[floor][BCab] = OrderAssigned
 		}
 	}
@@ -43,11 +43,11 @@ func updateLightStates(globaWorldview FromNetworkToAssigner,
 
 func mergeNetworkHallOrders(
 	localWorldview FromAssignerToNetwork,
-	globaWorldview FromNetworkToAssigner,
+	globalWorldview FromNetworkToAssigner,
 	nodeID int) FromAssignerToNetwork {
 	for floor := 0; floor < NFloors; floor++ {
 		for btn := 0; btn < NButtons; btn++ {
-			incommingOrder := globaWorldview.HallOrderList[nodeID][floor][btn]
+			incommingOrder := globalWorldview.HallOrderList[nodeID][floor][btn]
 			localOrder := localWorldview.HallRequests[floor][btn]
 			if localOrder != OrderComplete || incommingOrder != OrderAssigned {
 				localWorldview.HallRequests[floor][btn] = incommingOrder
