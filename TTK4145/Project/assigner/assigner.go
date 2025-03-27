@@ -4,8 +4,6 @@ import (
 	. "Project/config"
 	. "Project/dataenums"
 	"Project/hwelevio"
-	"fmt"
-	"strconv"
 )
 
 func Assigner(
@@ -14,50 +12,41 @@ func Assigner(
 	worldview chan<- FromAssignerToNetwork,
 	stateBroadcast <-chan FromNetworkToAssigner,
 	sharedLights chan<- [NFloors][NButtons]ButtonState,
-	nodeID string,
-) {
+	nodeID int) {
 	var (
-		PayloadFromassignerToNetwork = initPayloadToNetwork()
-		prevAssignedOrders           [NFloors][NButtons]bool
-		drv_buttons                  = make(chan ButtonEvent)
+		drv_buttons        = make(chan ButtonEvent)
+		prevAssignedOrders [NFloors][NButtons]bool
 	)
-	myID, err := strconv.Atoi(nodeID)
-	if err != nil {
-		fmt.Printf("Invalid nodeID: %v\n", err)
-		return
-	}
-
-	payload := <-driverEvents
-	PayloadFromassignerToNetwork = handlePayloadFromElevator(payload,
-		PayloadFromassignerToNetwork, nodeID)
-
-	worldview <- PayloadFromassignerToNetwork
+	elevatorState := <-driverEvents
+	globalWorldview := <-stateBroadcast
+	localWorldview := initLocalWorldview(elevatorState,
+		globalWorldview, nodeID)
+	worldview <- localWorldview
 
 	go hwelevio.PollButtons(drv_buttons)
 	for {
 		select {
 		case btnEvent := <-drv_buttons:
-			PayloadFromassignerToNetwork = handleButtonPressed(PayloadFromassignerToNetwork,
+			localWorldview = handleButtonPressed(localWorldview,
 				nodeID, btnEvent)
-			worldview <- PayloadFromassignerToNetwork
+			worldview <- localWorldview
 
-		case payload := <-driverEvents:
-			PayloadFromassignerToNetwork = handlePayloadFromElevator(payload,
-				PayloadFromassignerToNetwork, nodeID)
+		case elevatorState := <-driverEvents:
+			localWorldview = syncElevatorState(elevatorState,
+				localWorldview, nodeID)
 
-			worldview <- PayloadFromassignerToNetwork
+			worldview <- localWorldview
 
-		case PayloadFromNetwork := <-stateBroadcast:
+		case globalWorldview := <-stateBroadcast:
+			localWorldview = mergeNetworkHallOrders(localWorldview,
+				globalWorldview, nodeID)
 
-			PayloadFromassignerToNetwork = handlePayloadFromNetwork(PayloadFromassignerToNetwork,
-				PayloadFromNetwork, myID)
-
-			localOrders := assignOrders(PayloadFromNetwork, myID)
+			localOrders := assignOrders(globalWorldview, nodeID)
 			if localOrders != prevAssignedOrders {
 				newOrders <- localOrders
 				prevAssignedOrders = localOrders
 			}
-			sharedLights <- updateLightStates(PayloadFromNetwork, myID)
+			sharedLights <- updateLightStates(globalWorldview, nodeID)
 		}
 	}
 

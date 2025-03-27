@@ -5,63 +5,75 @@ import (
 	. "Project/dataenums"
 )
 
-func initPayloadToNetwork() FromAssignerToNetwork {
-	worldview := FromAssignerToNetwork{
-		HallRequests: [NFloors][NButtons]ButtonState{},
-		States:       make(map[string]HRAElevState),
-	}
-	return worldview
-}
-func updateLightStates(stateBroadcast FromNetworkToAssigner,
-	myID int) [NFloors][NButtons]ButtonState {
+func initLocalWorldview(elevatorState FromDriverToAssigner,
+	globalWorldview FromNetworkToAssigner,
+	nodeID int) FromAssignerToNetwork {
 
-	updatedLights := stateBroadcast.HallOrderList[myID]
+	localWorldview := FromAssignerToNetwork{
+		HallRequests: [NFloors][NButtons]ButtonState{},
+		States:       make(map[int]HRAElevState),
+	}
+
+	cabRequests := make([]bool, NFloors)
+	if nodeID < len(globalWorldview.ElevatorList) &&
+		len(globalWorldview.ElevatorList[nodeID].CabRequests) == NFloors {
+		copy(cabRequests, globalWorldview.ElevatorList[nodeID].CabRequests)
+	}
+
+	localWorldview.States[nodeID] = HRAElevState{
+		Behaviour:   elevbehaviourToString(elevatorState.Elevator.CurrentBehaviour),
+		Floor:       elevatorState.Elevator.CurrentFloor,
+		Direction:   elevDirectionToString(elevatorState.Elevator.Direction),
+		CabRequests: cabRequests, 
+	}
+	return localWorldview
+}
+
+func updateLightStates(globalWorldview FromNetworkToAssigner,
+	nodeID int) [NFloors][NButtons]ButtonState {
+
+	updatedLights := globalWorldview.HallOrderList[nodeID]
 	for floor := 0; floor < NFloors; floor++ {
-		if stateBroadcast.ElevatorList[myID].CabRequests[floor] {
+		if globalWorldview.ElevatorList[nodeID].CabRequests[floor] {
 			updatedLights[floor][BCab] = OrderAssigned
 		}
 	}
 	return updatedLights
 }
 
-func handlePayloadFromNetwork(
-	worldview FromAssignerToNetwork,
-	stateBroadcast FromNetworkToAssigner,
-	nodeID int,
-) FromAssignerToNetwork {
+func mergeNetworkHallOrders(
+	localWorldview FromAssignerToNetwork,
+	globalWorldview FromNetworkToAssigner,
+	nodeID int) FromAssignerToNetwork {
 	for floor := 0; floor < NFloors; floor++ {
 		for btn := 0; btn < NButtons; btn++ {
-			incomingState := stateBroadcast.HallOrderList[nodeID][floor][btn]
-			localState := worldview.HallRequests[floor][btn]
-			if localState != OrderComplete || incomingState != OrderAssigned {
-				worldview.HallRequests[floor][btn] = incomingState
+			incommingOrder := globalWorldview.HallOrderList[nodeID][floor][btn]
+			localOrder := localWorldview.HallRequests[floor][btn]
+			if localOrder != OrderComplete || incommingOrder != OrderAssigned {
+				localWorldview.HallRequests[floor][btn] = incommingOrder
 			}
 		}
 	}
-	return worldview
+	return localWorldview
 }
 
-func handlePayloadFromElevator(driverEvents FromDriverToAssigner,
-	worldview FromAssignerToNetwork, nodeID string) FromAssignerToNetwork {
+func syncElevatorState(elevatorState FromDriverToAssigner,
+	localWorldview FromAssignerToNetwork,
+	nodeID int) FromAssignerToNetwork {
 
-	cabRequests := make([]bool, NFloors)
-	for floor := 0; floor < NFloors; floor++ {
-		cabRequests[floor] = driverEvents.Elevator.Requests[floor][BCab]
+	localWorldview.States[nodeID] = HRAElevState{
+		Behaviour:   elevbehaviourToString(elevatorState.Elevator.CurrentBehaviour),
+		Floor:       elevatorState.Elevator.CurrentFloor,
+		Direction:   elevDirectionToString(elevatorState.Elevator.Direction),
+		CabRequests: localWorldview.States[nodeID].CabRequests,
 	}
+	localWorldview.ActiveStatus = elevatorState.Elevator.ActiveStatus
+	localWorldview = handleOrderComplete(localWorldview, nodeID, elevatorState.CompletedOrders)
 
-	worldview.States[nodeID] = HRAElevState{
-		Behaviour:   ebToString(driverEvents.Elevator.CurrentBehaviour),
-		Floor:       driverEvents.Elevator.CurrentFloor,
-		Direction:   elevDirnToString(driverEvents.Elevator.Dirn),
-		CabRequests: cabRequests,
-	}
-	worldview.ActiveStatus = driverEvents.Elevator.ActiveStatus
-	worldview = handleOrderComplete(worldview, nodeID, driverEvents.CompletedOrders)
-
-	return worldview
+	return localWorldview
 }
 
-func ebToString(behaviour ElevatorBehaviour) string {
+func elevbehaviourToString(behaviour ElevatorBehaviour) string {
 	switch behaviour {
 	case Idle:
 		return "idle"
@@ -74,7 +86,7 @@ func ebToString(behaviour ElevatorBehaviour) string {
 	}
 }
 
-func elevDirnToString(direction MotorDirection) string {
+func elevDirectionToString(direction MotorDirection) string {
 	switch direction {
 	case MDDown:
 		return "down"

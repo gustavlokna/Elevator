@@ -5,7 +5,7 @@ import (
 	. "Project/dataenums"
 )
 
-func handleButtonPressed(worldview FromAssignerToNetwork, ElevatorName string,
+func handleButtonPressed(worldview FromAssignerToNetwork, nodeID int,
 	btnEvent ButtonEvent) FromAssignerToNetwork {
 	switch btnEvent.Button {
 	case BHallUp:
@@ -18,13 +18,13 @@ func handleButtonPressed(worldview FromAssignerToNetwork, ElevatorName string,
 		}
 
 	case BCab:
-		worldview.States[ElevatorName].CabRequests[btnEvent.Floor] = true
+		worldview.States[nodeID].CabRequests[btnEvent.Floor] = true
 
 	}
 	return worldview
 }
 
-func handleOrderComplete(worldview FromAssignerToNetwork, elevatorName string,
+func handleOrderComplete(worldview FromAssignerToNetwork, nodeID int,
 	completedOrders [NFloors][NButtons]bool) FromAssignerToNetwork {
 	for floor := 0; floor < NFloors; floor++ {
 		for btn := BHallUp; btn <= BCab; btn++ {
@@ -35,7 +35,7 @@ func handleOrderComplete(worldview FromAssignerToNetwork, elevatorName string,
 				case BHallDown:
 					worldview.HallRequests[floor][BHallDown] = OrderComplete
 				case BCab:
-					worldview.States[elevatorName].CabRequests[floor] = false
+					worldview.States[nodeID].CabRequests[floor] = false
 				}
 			}
 		}

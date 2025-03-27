@@ -14,7 +14,7 @@ type ButtonState int
 
 const (
 	Initial ButtonState = iota
-	Inactive
+	Standby
 	ButtonPressed
 	OrderAssigned
 	OrderComplete
@@ -41,14 +41,9 @@ const (
 	Moving
 )
 
-type DirnBehaviourPair struct {
-	Dirn      MotorDirection
-	Behaviour ElevatorBehaviour
-}
-
 type Elevator struct {
 	CurrentFloor     int
-	Dirn             MotorDirection
+	Direction        MotorDirection
 	Requests         [NFloors][NButtons]bool
 	CurrentBehaviour ElevatorBehaviour
 	ActiveStatus     bool
@@ -67,7 +62,7 @@ type HRAInput struct {
 }
 
 type Message struct {
-	SenderId      string
+	SenderId      int
 	ElevatorList  [NElevators]HRAElevState
 	HallOrderList [NElevators][NFloors][NButtons]ButtonState
 	OnlineStatus  bool
@@ -76,7 +71,7 @@ type Message struct {
 
 type FromAssignerToNetwork struct {
 	HallRequests [NFloors][NButtons]ButtonState
-	States       map[string]HRAElevState
+	States       map[int]HRAElevState
 	ActiveStatus bool
 }
 
@@ -97,7 +92,7 @@ type FromDriverToAssigner struct {
 }
 
 type NetworkNodeRegistry struct {
-	Nodes []string
-	New   []string
-	Lost  []string
+	Nodes []int
+	New   []int
+	Lost  []int
 }

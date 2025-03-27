@@ -4,12 +4,11 @@ import (
 	"Project/assigner"
 	. "Project/config"
 	. "Project/dataenums"
-	"Project/driver"
+	"Project/elevatorDriver"
 	"Project/hwelevio"
 	"Project/lights"
 	"Project/network"
 	"flag"
-	"strconv"
 )
 
 func main() {
@@ -23,8 +22,8 @@ func main() {
 		driverEvents   = make(chan FromDriverToAssigner, ChannelBufferSize)
 		worldview      = make(chan FromAssignerToNetwork, ChannelBufferSize)
 		stateBroadcast = make(chan FromNetworkToAssigner, ChannelBufferSize)
-		localLights    = make(chan FromDriverToLight, ChannelBufferSize)
-		sharedLights   = make(chan [NFloors][NButtons]ButtonState, ChannelBufferSize)
+		elevatorLights = make(chan FromDriverToLight, ChannelBufferSize)
+		orderLights    = make(chan [NFloors][NButtons]ButtonState, ChannelBufferSize)
 	)
 
 	go assigner.Assigner(
@@ -32,14 +31,14 @@ func main() {
 		driverEvents,
 		worldview,
 		stateBroadcast,
-		sharedLights,
+		orderLights,
 		nodeID,
 	)
 
-	go driver.Driver(
+	go elevatorDriver.ElevatorDriver(
 		newOrders,
 		driverEvents,
-		localLights,
+		elevatorLights,
 	)
 
 	go network.Network(
@@ -49,15 +48,15 @@ func main() {
 	)
 
 	go lights.Lights(
-		sharedLights,
-		localLights,
+		orderLights,
+		elevatorLights,
 	)
 	select {}
 }
 
-func parseArgs() string {
+func parseArgs() int {
 	var nodeID int
 	flag.IntVar(&nodeID, "id", 0, "Node ID")
 	flag.Parse()
-	return strconv.Itoa(nodeID)
+	return nodeID
 }

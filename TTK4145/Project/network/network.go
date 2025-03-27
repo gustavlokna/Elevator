@@ -5,73 +5,68 @@ import (
 	. "Project/dataenums"
 	"Project/network/broadcast"
 	"reflect"
-	"strconv"
 	"time"
 )
 
 func Network(worldview <-chan FromAssignerToNetwork,
 	stateBroadcast chan<- FromNetworkToAssigner,
-	nodeID string) {
-
-	nodeIDInt, _ := strconv.Atoi(nodeID)
-
-	nodeRegistryChannel := make(chan NetworkNodeRegistry)
-	broadcastTransmissionChannel := make(chan Message)
-	broadcastReceiverChannel := make(chan Message)
-	go broadcast.Sender(MessagePort, broadcastTransmissionChannel)
-	go broadcast.Receiver(MessagePort, nodeID, broadcastReceiverChannel, nodeRegistryChannel)
+	nodeID int) {
 
 	var (
-		elevatorList  = initializeElevatorList()
-		hallOrderList [NElevators][NFloors][NButtons]ButtonState
-		aliveList     [NElevators]bool
-		ackMap        [NElevators]bool
-		online        bool
-		init          bool
+		nodeRegistryChannel          = make(chan NetworkNodeRegistry)
+		broadcastTransmissionChannel = make(chan Message)
+		broadcastReceiverChannel     = make(chan Message)
+		elevatorList                 = initElevatorList()
+		hallOrderList                [NElevators][NFloors][NButtons]ButtonState
+		aliveList                    [NElevators]bool
+		ackMap                       [NElevators]bool
+		online                       bool
+		init                         bool
 	)
+
+	go broadcast.Sender(MessagePort, broadcastTransmissionChannel)
+	go broadcast.Receiver(MessagePort, nodeID, broadcastReceiverChannel, nodeRegistryChannel)
 
 	for {
 		select {
 		case reg := <-nodeRegistryChannel:
 			for _, lostNode := range reg.Lost {
-				lostNodeInt, _ := strconv.Atoi(lostNode)
 				switch {
-				case lostNodeInt == nodeIDInt:
+				case lostNode == nodeID:
 					online = false
 				default:
-					aliveList[lostNodeInt] = false
-					hallOrderList[lostNodeInt] = resetHallCalls()
+					aliveList[lostNode] = false
+					hallOrderList[lostNode] = resetHallCalls()
 				}
 			}
+
 			for _, connectedNode := range reg.New {
-				activeNodeInt, _ := strconv.Atoi(connectedNode)
 				switch {
-				case activeNodeInt == nodeIDInt:
+				case connectedNode == nodeID:
 					online = true
-					aliveList[activeNodeInt] = true
-					hallOrderList[activeNodeInt] = resetHallCalls()
+					aliveList[connectedNode] = true
+					hallOrderList[connectedNode] = resetHallCalls()
 				default:
-					aliveList[activeNodeInt] = true
+					aliveList[connectedNode] = true
 				}
 			}
 
 		case msg := <-broadcastReceiverChannel:
-			senderId, _ := strconv.Atoi(msg.SenderId)
-			ackMap[senderId] = reflect.DeepEqual(elevatorList, msg.ElevatorList) && reflect.DeepEqual(hallOrderList, msg.HallOrderList)
+			ackMap[msg.SenderId] = reflect.DeepEqual(elevatorList, msg.ElevatorList) && reflect.DeepEqual(hallOrderList, msg.HallOrderList)
 
 			if !init {
-				elevatorList[nodeIDInt] = msg.ElevatorList[nodeIDInt]
+				elevatorList[nodeID] = msg.ElevatorList[nodeID]
 				init = true
 			}
 
-			aliveList[senderId] = msg.OnlineStatus
-			elevatorList[senderId] = msg.ElevatorList[senderId]
-			hallOrderList[senderId] = msg.HallOrderList[senderId]
-			hallOrderList = cyclicCounter(hallOrderList, nodeIDInt)
+			aliveList[msg.SenderId] = msg.OnlineStatus
+			elevatorList[msg.SenderId] = msg.ElevatorList[msg.SenderId]
+			hallOrderList[msg.SenderId] = msg.HallOrderList[msg.SenderId]
+			hallOrderList = cyclicCounter(hallOrderList, nodeID)
 
-			if allAcknowledged(ackMap, aliveList, nodeIDInt) {
+			if allAcknowledged(ackMap, aliveList, nodeID) {
 				for elevator := 0; elevator < NElevators; elevator++ {
-					if elevator != nodeIDInt {
+					if elevator != nodeID {
 						ackMap[elevator] = false
 					}
 				}
@@ -83,22 +78,22 @@ func Network(worldview <-chan FromAssignerToNetwork,
 			}
 
 		case payload := <-worldview:
-			hallOrderList[nodeIDInt] = payload.HallRequests
-			aliveList[nodeIDInt] = payload.ActiveStatus
-			elevatorList[nodeIDInt] = payload.States[nodeID]
+			hallOrderList[nodeID] = payload.HallRequests
+			aliveList[nodeID] = payload.ActiveStatus
+			elevatorList[nodeID] = payload.States[nodeID]
 
 		case <-time.After(BroadcastRate):
 			broadcastTransmissionChannel <- Message{
 				SenderId:      nodeID,
 				ElevatorList:  elevatorList,
 				HallOrderList: hallOrderList,
-				OnlineStatus:  aliveList[nodeIDInt],
+				OnlineStatus:  aliveList[nodeID],
 				AliveList:     aliveList,
 			}
 
 			if !online {
 				newAliveList := [NElevators]bool{}
-				newAliveList[nodeIDInt] = aliveList[nodeIDInt]
+				newAliveList[nodeID] = aliveList[nodeID]
 				stateBroadcast <- FromNetworkToAssigner{
 					AliveList:     newAliveList,
 					ElevatorList:  elevatorList,
