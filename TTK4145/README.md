@@ -12,8 +12,6 @@ Lights: Handles all button, floor and door lights based on input from the Assign
 
 Network: Maintains the state of all elevators, propagates the cyclic counter, and transmits the local elevator state across the network. 
 
-![Demo Image](Images/classDiagram.jpg)
-
 ### Pre-requisites
 * [hall_request_assigner (HRA)](https://github.com/TTK4145/Project-resources/releases/tag/v1.1.1) (v1.1.1) by [@klasbo](https://github.com/klasbo)
 
